@@ -58,9 +58,18 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
     val viewState: MainViewState by mainViewModel.viewState.collectAsState()
 
     //if (viewState.genres.isNotEmpty() && viewState.movies.isEmpty())
-      //  mainViewModel.getMovies(viewState.genres[0])
+    //  mainViewModel.getMovies(viewState.genres[0])
 
-    MainScreenContent(viewState.movies, viewState.genres,mainViewModel.markFilmAs, mainViewModel::getMovies,mainViewModel::getCustomList, mainViewModel::saveSharedList, mainViewModel::saveName, mainViewModel::readName)
+    MainScreenContent(
+        viewState.movies,
+        viewState.genres,
+        mainViewModel.markFilmAs,
+        mainViewModel::getMovies,
+        mainViewModel::getCustomList,
+        mainViewModel::saveSharedList,
+        mainViewModel::saveName,
+        mainViewModel::readName
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -68,12 +77,12 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
 fun MainScreenContent(
     movies: Map<String, List<MovieInfo>>,
     genres: List<Genre>,
-    additionalGenres:List<String>,
+    additionalGenres: List<String>,
     getMovies: (Genre) -> Unit,
     getCustomList: (String) -> Unit,
     saveSeen: (String, Int, Int) -> Unit,
-    saveName:(String)->Unit,
-    readName:()->String
+    saveName: (String) -> Unit,
+    readName: () -> String
 ) {
     if (genres.isNotEmpty()) {
         Scaffold(
@@ -96,27 +105,28 @@ fun MainScreenContent(
                     .padding(innerPadding)
             ) {
 
-                val selectedGenre = genreDropdown(genres, getMovies, additionalGenres, getCustomList)
-                    if(selectedGenre=="") {
-                        Spacer(modifier = Modifier.size(100.dp))
-                        Text(
-                            text = "Wähle ein Genre aus",
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-                    }
+                val selectedGenre =
+                    genreDropdown(genres, getMovies, additionalGenres, getCustomList)
+                if (selectedGenre == "") {
+                    Spacer(modifier = Modifier.size(100.dp))
+                    Text(
+                        text = "Wähle ein Genre aus",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
 
-                    LazyColumn {
-                        item {
-                            movies[selectedGenre]?.forEach {
-                                MoviePosition(it, selectedGenre, saveSeen)
-                                Divider()
-                            }
+                LazyColumn {
+                    item {
+                        movies[selectedGenre]?.forEach {
+                            MoviePosition(it, selectedGenre, saveSeen)
+                            Divider()
                         }
                     }
+                }
 
 
                 var hide by remember { mutableStateOf(false) }
-                if (readName() == "" || hide){
+                if (readName() == "" || hide) {
                     var newTodoText by remember { mutableStateOf("") }
                     val keyboardController = LocalSoftwareKeyboardController.current
                     Row(
@@ -146,7 +156,7 @@ fun MainScreenContent(
                             onClick = {
                                 saveName(newTodoText)
                                 keyboardController?.hide()
-                                hide =true
+                                hide = true
                             },
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = Color.Black,

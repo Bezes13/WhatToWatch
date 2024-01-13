@@ -18,7 +18,12 @@ import com.example.whattowatch.Data.Genre
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalItems: List<String>, getCustomList:(String) -> Unit):String {
+fun genreDropdown(
+    items: List<Genre>,
+    getMovies: (Genre) -> Unit,
+    additionalItems: List<String>,
+    getCustomList: (String) -> Unit
+): String {
     var isExpanded by remember {
         mutableStateOf(false)
     }
@@ -42,8 +47,11 @@ fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalIte
                 Text(text = "Select Genre")
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier.menuAnchor().fillMaxWidth()
-        ) }
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+    }
     DropdownMenu(
         expanded = isExpanded,
         onDismissRequest = {
@@ -51,7 +59,7 @@ fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalIte
         },
         modifier = Modifier.fillMaxWidth()
     ) {
-        items.forEach{
+        items.forEach {
             DropdownMenuItem(
                 text = {
                     Text(text = it.name)
@@ -64,7 +72,7 @@ fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalIte
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        additionalItems.forEach{
+        additionalItems.forEach {
             DropdownMenuItem(
                 text = {
                     Text(text = it)
@@ -80,5 +88,5 @@ fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalIte
 
     }
 
-return genre
+    return genre
 }

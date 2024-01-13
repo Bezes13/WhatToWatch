@@ -82,8 +82,9 @@ class MainViewModel(
             }
         }.invokeOnCompletion {
             _viewState.value.movies[genre.name]?.forEach {
-            getProvider(genre = genre.name, it.id)
-        } }
+                getProvider(genre = genre.name, it.id)
+            }
+        }
 
 
     }
@@ -110,7 +111,8 @@ class MainViewModel(
             val provider = apiRepository.getProviders(movieID)
             val updatedMovies = _viewState.value.movies[genre]?.map { movie ->
                 if (movie.id == movieID) {
-                    val logoPaths = provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
+                    val logoPaths =
+                        provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
                     movie.copy(provider_name = logoPaths)
                 } else {
                     movie
@@ -144,54 +146,55 @@ class MainViewModel(
             })
         }
         //sharedPreferencesManager.context.deviceId.toString()
-            val myRef = database.getReference(
-                readName() + sharedPreferencesManager.context.getString(
-                    listID
-                )
+        val myRef = database.getReference(
+            readName() + sharedPreferencesManager.context.getString(
+                listID
             )
-            val myList = list + newItem
-            when (listID) {
-                R.string.seen -> _viewState.update { _viewState.value.copy(seenMovies = myList) }
+        )
+        val myList = list + newItem
+        when (listID) {
+            R.string.seen -> _viewState.update { _viewState.value.copy(seenMovies = myList) }
 
-                R.string.later -> _viewState.update { _viewState.value.copy(watchLaterMovies = myList) }
+            R.string.later -> _viewState.update { _viewState.value.copy(watchLaterMovies = myList) }
 
-                R.string.no -> _viewState.update { _viewState.value.copy(notInterestedMovies = myList) }
+            R.string.no -> _viewState.update { _viewState.value.copy(notInterestedMovies = myList) }
 
-                else -> {}
-            }
-            val gson = Gson()
-            val json = gson.toJson(myList)
-            myRef.setValue(json)
+            else -> {}
+        }
+        val gson = Gson()
+        val json = gson.toJson(myList)
+        myRef.setValue(json)
 
     }
 
-    fun saveName(name: String){
+    fun saveName(name: String) {
         sharedPreferencesManager.saveName(name)
     }
 
-    fun readName(): String{
+    fun readName(): String {
         return sharedPreferencesManager.readName()
     }
 
     private fun readSharedList(key: Int) {
         val type = object : TypeToken<List<Int>>() {}.type
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            database.getReference(readName() + sharedPreferencesManager.context.getString(key)
-            ).get().addOnSuccessListener { data ->
-                if (data.value != null) {
-                    val result: List<Int> = Gson().fromJson(data.value.toString(), type)
-                    when (key) {
-                        R.string.seen -> _viewState.update { _viewState.value.copy(seenMovies = result) }
 
-                        R.string.later -> _viewState.update { _viewState.value.copy(watchLaterMovies = result) }
+        database.getReference(
+            readName() + sharedPreferencesManager.context.getString(key)
+        ).get().addOnSuccessListener { data ->
+            if (data.value != null) {
+                val result: List<Int> = Gson().fromJson(data.value.toString(), type)
+                when (key) {
+                    R.string.seen -> _viewState.update { _viewState.value.copy(seenMovies = result) }
 
-                        R.string.no -> _viewState.update { _viewState.value.copy(notInterestedMovies = result) }
+                    R.string.later -> _viewState.update { _viewState.value.copy(watchLaterMovies = result) }
 
-                        else -> {}
-                    }
+                    R.string.no -> _viewState.update { _viewState.value.copy(notInterestedMovies = result) }
+
+                    else -> {}
                 }
             }
         }
+
     }
 
     fun getCustomList(customList: String) {
@@ -213,9 +216,11 @@ class MainViewModel(
                     this[customList] = newList
                 })
             }
-        }.invokeOnCompletion { _viewState.value.movies[customList]?.forEach {
-            getProvider(genre = customList, it.id)
-        } }
+        }.invokeOnCompletion {
+            _viewState.value.movies[customList]?.forEach {
+                getProvider(genre = customList, it.id)
+            }
+        }
 
     }
 }
