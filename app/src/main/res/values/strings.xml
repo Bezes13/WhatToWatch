@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">WhatToWatch</string>
+    <string name="test">test</string>
+    <string name="not_available">Not Available</string>
+    <string name="image_path">https://image.tmdb.org/t/p/w300%1$s</string>
+    <string name="image_path_or">https://image.tmdb.org/t/p/original%1$s</string>
+    <string name="seen">SeenMovies</string>
+</resources>
