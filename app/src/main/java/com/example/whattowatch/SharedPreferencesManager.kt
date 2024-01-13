@@ -9,6 +9,15 @@ class SharedPreferencesManager(val context: Context) {
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
+    fun saveName(name: String){
+        val editor = sharedPreferences.edit()
+        editor.putString(context.getString(R.string.user_name), name)
+        editor.apply()
+    }
+
+    fun readName():String{
+        return sharedPreferences.getString(context.getString(R.string.user_name), "")?:""
+    }
     fun saveList(key: String, list: List<String>) {
         val editor = sharedPreferences.edit()
         val gson = Gson()

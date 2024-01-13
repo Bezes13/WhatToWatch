@@ -4,5 +4,8 @@
     <string name="not_available">Not Available</string>
     <string name="image_path">https://image.tmdb.org/t/p/w300%1$s</string>
     <string name="image_path_or">https://image.tmdb.org/t/p/original%1$s</string>
-    <string name="seen">SeenMovies</string>
+    <string name="seen">Gesehen</string>
+    <string name="later">Später Ansehen</string>
+    <string name="no">Nicht Interessiert</string>
+    <string name="user_name">userName</string>
 </resources>

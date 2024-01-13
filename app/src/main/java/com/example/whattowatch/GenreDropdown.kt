@@ -1,5 +1,6 @@
 package com.example.whattowatch
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +28,8 @@ fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalIte
         expanded = isExpanded,
         onExpandedChange = { newValue ->
             isExpanded = newValue
-        }
+        },
+        modifier = Modifier.fillMaxWidth()
     ) {
         TextField(
             value = genre,
@@ -40,13 +42,14 @@ fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalIte
                 Text(text = "Select Genre")
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier.menuAnchor()
+            modifier = Modifier.menuAnchor().fillMaxWidth()
         ) }
     DropdownMenu(
         expanded = isExpanded,
         onDismissRequest = {
             isExpanded = false
-        }
+        },
+        modifier = Modifier.fillMaxWidth()
     ) {
         items.forEach{
             DropdownMenuItem(
@@ -57,7 +60,8 @@ fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalIte
                     genre = it.name
                     isExpanded = false
                     getMovies(items.first { it.name == genre })
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
         }
         additionalItems.forEach{
@@ -69,7 +73,8 @@ fun genreDropdown( items: List<Genre>, getMovies: (Genre) -> Unit, additionalIte
                     genre = it
                     isExpanded = false
                     getCustomList(it)
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
         }
 

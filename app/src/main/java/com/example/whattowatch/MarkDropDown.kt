@@ -1,5 +1,6 @@
 package com.example.whattowatch
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +42,7 @@ fun MarkDropDown(items: List<String>, onUpdate: (String) -> Unit, movieId: Int) 
                 Text(text = "Mark Film")
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier.menuAnchor()
+            modifier = Modifier.menuAnchor().fillMaxWidth()
         ) }
     DropdownMenu(
         expanded = isExpanded,
@@ -57,7 +58,8 @@ fun MarkDropDown(items: List<String>, onUpdate: (String) -> Unit, movieId: Int) 
                 onClick = {
                     type = it
                     isExpanded = false
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
         }
 

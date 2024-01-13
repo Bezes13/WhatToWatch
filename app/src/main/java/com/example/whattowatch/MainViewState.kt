@@ -10,5 +10,6 @@ data class MainViewState (
     val companies: List<CompanyInfo> = listOf(),
     val genres: List<Genre> = listOf(),
     val seenMovies: List<Int> = listOf(),
-    val watchLaterMovies: List<Int> = listOf()
+    val watchLaterMovies: List<Int> = listOf(),
+    val notInterestedMovies: List<Int> = listOf()
 )

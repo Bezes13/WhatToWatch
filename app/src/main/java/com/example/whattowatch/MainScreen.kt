@@ -1,18 +1,30 @@
 package com.example.whattowatch
 
+import android.content.res.Resources.Theme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -23,10 +35,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,10 +60,10 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
     //if (viewState.genres.isNotEmpty() && viewState.movies.isEmpty())
       //  mainViewModel.getMovies(viewState.genres[0])
 
-    MainScreenContent(viewState.movies, viewState.genres,mainViewModel.markFilmAs, mainViewModel::getMovies,mainViewModel::getCustomList, mainViewModel::getProvider, mainViewModel::saveSharedList)
+    MainScreenContent(viewState.movies, viewState.genres,mainViewModel.markFilmAs, mainViewModel::getMovies,mainViewModel::getCustomList, mainViewModel::saveSharedList, mainViewModel::saveName, mainViewModel::readName)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreenContent(
     movies: Map<String, List<MovieInfo>>,
@@ -54,11 +71,11 @@ fun MainScreenContent(
     additionalGenres:List<String>,
     getMovies: (Genre) -> Unit,
     getCustomList: (String) -> Unit,
-    getProvider: (String, Int) -> Unit,
-    saveSeen: (String, Int, Int) -> Unit
+    saveSeen: (String, Int, Int) -> Unit,
+    saveName:(String)->Unit,
+    readName:()->String
 ) {
     if (genres.isNotEmpty()) {
-
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -80,56 +97,71 @@ fun MainScreenContent(
             ) {
 
                 val selectedGenre = genreDropdown(genres, getMovies, additionalGenres, getCustomList)
+                    if(selectedGenre=="") {
+                        Spacer(modifier = Modifier.size(100.dp))
+                        Text(
+                            text = "Wähle ein Genre aus",
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
 
-                LazyColumn {
-                    item {
-                        movies[selectedGenre]?.forEach {
-                            //getProvider(selectedGenre, it.id)
-                            Row {
-                                Column(modifier = Modifier
-                                    .weight(1f)
-                                    .align(Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(text = it.title, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                                    Text(text = it.release_date.getJustYear(), textAlign = TextAlign.Center)
-                                    Row {
-                                        if(it.provider_name != null){
-                                            it.provider_name.forEach{
-                                                AsyncImage(
-                                                    model = stringResource(R.string.image_path_or, it),
-                                                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                                                    error = painterResource(id = R.drawable.ic_launcher_foreground),
-                                                    contentDescription = "Provider",
-                                                )
-                                            }
-                                            if(it.provider_name.isEmpty()){
-                                                Image(
-                                                    modifier = Modifier.size(50.dp),
-                                                    painter = painterResource(id = R.drawable.na),
-                                                    contentDescription = stringResource(id = R.string.not_available)
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                AsyncImage(
-                                    modifier = Modifier.clickable(onClick = {saveSeen(selectedGenre,it.id, R.string.seen)}),
-                                    model = stringResource(R.string.image_path, it.poster_path),
-                                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                                    error = painterResource(id = R.drawable.ic_launcher_foreground),
-                                    contentDescription = it.title,
-                                )
+                    LazyColumn {
+                        item {
+                            movies[selectedGenre]?.forEach {
+                                MoviePosition(it, selectedGenre, saveSeen)
+                                Divider()
                             }
-                            Divider()
+                        }
+                    }
+
+
+                var hide by remember { mutableStateOf(false) }
+                if (readName() == "" || hide){
+                    var newTodoText by remember { mutableStateOf("") }
+                    val keyboardController = LocalSoftwareKeyboardController.current
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newTodoText,
+                            onValueChange = { newTodoText = it },
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(
+                                onDone = { keyboardController?.hide() }),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp)
+                                .align(Alignment.CenterVertically),
+                            textStyle = TextStyle(
+                                color = Color.Black
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                            )
+                        )
+                        SmallFloatingActionButton(
+                            onClick = {
+                                saveName(newTodoText)
+                                keyboardController?.hide()
+                                hide =true
+                            },
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.Black,
+                            modifier = Modifier
+                                .size(50.dp)
+                                .align(Alignment.CenterVertically)
+                        ) {
+                            Icon(Icons.Filled.Create, "Save Name")
                         }
                     }
                 }
+
             }
         }
     }
-}
-
-private fun String.getJustYear(): String {
-    return this.substring(0,4)
 }
 
 @Composable
