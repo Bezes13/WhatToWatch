@@ -1,4 +1,4 @@
-package com.example.whattowatch
+package com.example.whattowatch.Managers
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -9,14 +9,14 @@ class SharedPreferencesManager(val context: Context) {
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
-    fun saveName(name: String){
+    fun saveName(name: String,saveId: Int){
         val editor = sharedPreferences.edit()
-        editor.putString(context.getString(R.string.user_name), name)
+        editor.putString(context.getString(saveId), name)
         editor.apply()
     }
 
-    fun readName():String{
-        return sharedPreferences.getString(context.getString(R.string.user_name), "")?:""
+    fun readName(saveId: Int):String{
+        return sharedPreferences.getString(context.getString(saveId), "")?:""
     }
     fun saveList(key: String, list: List<String>) {
         val editor = sharedPreferences.edit()

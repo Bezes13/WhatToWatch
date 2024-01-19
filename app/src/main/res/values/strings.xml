@@ -8,4 +8,5 @@
     <string name="later">Später Ansehen</string>
     <string name="no">Nicht Interessiert</string>
     <string name="user_name">userName</string>
+    <string name="friend_name">friend name</string>
 </resources>

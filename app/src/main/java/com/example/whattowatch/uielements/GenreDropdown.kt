@@ -1,4 +1,4 @@
-package com.example.whattowatch
+package com.example.whattowatch.uielements
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenu

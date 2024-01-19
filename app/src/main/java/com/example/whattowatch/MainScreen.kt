@@ -1,9 +1,5 @@
 package com.example.whattowatch
 
-import android.content.res.Resources.Theme
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,9 +13,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -39,26 +37,21 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.example.whattowatch.Data.Genre
 import com.example.whattowatch.Data.MovieInfo
+import com.example.whattowatch.uielements.MoviePosition
+import com.example.whattowatch.uielements.ShareFriendDialog
+import com.example.whattowatch.uielements.genreDropdown
 
 
 @Composable
 fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
     val viewState: MainViewState by mainViewModel.viewState.collectAsState()
-
-    //if (viewState.genres.isNotEmpty() && viewState.movies.isEmpty())
-    //  mainViewModel.getMovies(viewState.genres[0])
 
     MainScreenContent(
         viewState.movies,
@@ -68,7 +61,9 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         mainViewModel::getCustomList,
         mainViewModel::saveSharedList,
         mainViewModel::saveName,
-        mainViewModel::readName
+        mainViewModel::readName,
+        viewState.dialog,
+        mainViewModel::sendEvent
     )
 }
 
@@ -81,8 +76,10 @@ fun MainScreenContent(
     getMovies: (Genre) -> Unit,
     getCustomList: (String) -> Unit,
     saveSeen: (String, Int, Int) -> Unit,
-    saveName: (String) -> Unit,
-    readName: () -> String
+    saveName: (String, Int) -> Unit,
+    readName: (Int) -> String,
+    dialog: MainViewDialog,
+    eventListener: (MainviewEvent) -> Unit
 ) {
     if (genres.isNotEmpty()) {
         Scaffold(
@@ -94,10 +91,27 @@ fun MainScreenContent(
                     ),
                     title = {
                         Text("What to watch")
-                    }
+                    },
+                    actions = {
+                        IconButton(onClick = { eventListener(MainviewEvent.SetDialog(MainViewDialog.ShareWithFriend))}) {
+                            Icon(
+                                imageVector = Icons.Filled.Share,
+                                contentDescription = "Share with a Friend"
+                            )
+                        }
+                    },
                 )
             },
         ) { innerPadding ->
+            
+            when(dialog){
+                is MainViewDialog.ShareWithFriend -> ShareFriendDialog(
+                    onDismissRequest = { eventListener(MainviewEvent.SetDialog(MainViewDialog.None))},
+                    saveName = saveName,
+
+                )
+                else -> {}
+            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -126,7 +140,7 @@ fun MainScreenContent(
 
 
                 var hide by remember { mutableStateOf(false) }
-                if (readName() == "" || hide) {
+                if (readName(R.string.user_name) == "" || hide) {
                     var newTodoText by remember { mutableStateOf("") }
                     val keyboardController = LocalSoftwareKeyboardController.current
                     Row(
@@ -154,7 +168,7 @@ fun MainScreenContent(
                         )
                         SmallFloatingActionButton(
                             onClick = {
-                                saveName(newTodoText)
+                                saveName(newTodoText, R.string.user_name)
                                 keyboardController?.hide()
                                 hide = true
                             },
@@ -174,6 +188,10 @@ fun MainScreenContent(
     }
 }
 
+sealed class MainViewDialog(){
+    data object None:MainViewDialog()
+    data object ShareWithFriend:MainViewDialog()
+}
 @Composable
 @Preview
 fun PreviewMainScreen() {

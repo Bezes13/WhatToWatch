@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.whattowatch.Managers.MainViewModelFactory
+import com.example.whattowatch.Managers.SharedPreferencesManager
 import com.example.whattowatch.Repository.ApiRepository
 import com.example.whattowatch.ui.theme.WhatToWatchTheme
 import com.google.firebase.FirebaseApp
+import kotlinx.coroutines.Dispatchers
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,8 +21,9 @@ class MainActivity : ComponentActivity() {
         FirebaseApp.initializeApp(this)
         val sharedPreferencesManager = SharedPreferencesManager(this)
         val apiRepository = ApiRepository(this)
+        val ioDispatcher = Dispatchers.IO
         val mainViewModel: MainViewModel by viewModels {
-            MainViewModelFactory(apiRepository, sharedPreferencesManager)
+            MainViewModelFactory(apiRepository, sharedPreferencesManager, ioDispatcher)
         }
         setContent {
             WhatToWatchTheme {

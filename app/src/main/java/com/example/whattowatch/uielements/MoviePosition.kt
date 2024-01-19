@@ -1,4 +1,4 @@
-package com.example.whattowatch
+package com.example.whattowatch.uielements
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -20,6 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.whattowatch.Data.MovieInfo
+import com.example.whattowatch.R
+import com.example.whattowatch.extension.getJustYear
 
 @Composable
 fun MoviePosition(movieInfo: MovieInfo, selectedGenre: String, saveSeen: (String, Int, Int) -> Unit) {
@@ -27,6 +29,7 @@ fun MoviePosition(movieInfo: MovieInfo, selectedGenre: String, saveSeen: (String
         Column(modifier = Modifier
             .weight(1f)
             .align(Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = movieInfo.user, textAlign = TextAlign.Center)
             Text(text = movieInfo.title, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
             Text(text = movieInfo.release_date.getJustYear(), textAlign = TextAlign.Center)
             Row {

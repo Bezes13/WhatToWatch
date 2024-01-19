@@ -1,16 +1,19 @@
-package com.example.whattowatch
+package com.example.whattowatch.Managers
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.whattowatch.MainViewModel
 import com.example.whattowatch.Repository.ApiRepository
+import kotlinx.coroutines.CoroutineDispatcher
 
 class MainViewModelFactory(
     private val apiRepository: ApiRepository,
     private val sharedPreferencesManager: SharedPreferencesManager,
+    private val ioDispatcher: CoroutineDispatcher
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            return MainViewModel(sharedPreferencesManager, apiRepository) as T
+            return MainViewModel(sharedPreferencesManager, apiRepository, ioDispatcher) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
