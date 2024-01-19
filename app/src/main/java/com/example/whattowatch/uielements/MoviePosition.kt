@@ -24,17 +24,27 @@ import com.example.whattowatch.R
 import com.example.whattowatch.extension.getJustYear
 
 @Composable
-fun MoviePosition(movieInfo: MovieInfo, selectedGenre: String, saveSeen: (String, Int, Int) -> Unit) {
+fun MoviePosition(
+    movieInfo: MovieInfo,
+    selectedGenre: String,
+    saveSeen: (String, Int, Int) -> Unit
+) {
     Row {
-        Column(modifier = Modifier
-            .weight(1f)
-            .align(Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = movieInfo.user, textAlign = TextAlign.Center)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .align(Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (movieInfo.user != null) {
+                Text(text = movieInfo.user?: "",
+                    textAlign = TextAlign.Center)
+            }
             Text(text = movieInfo.title, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
             Text(text = movieInfo.release_date.getJustYear(), textAlign = TextAlign.Center)
             Row {
-                if(movieInfo.provider_name != null){
-                    movieInfo.provider_name.forEach{
+                if (movieInfo.provider_name != null) {
+                    movieInfo.provider_name.forEach {
                         AsyncImage(
                             model = stringResource(R.string.image_path_or, it),
                             placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
@@ -42,7 +52,7 @@ fun MoviePosition(movieInfo: MovieInfo, selectedGenre: String, saveSeen: (String
                             contentDescription = "Provider",
                         )
                     }
-                    if(movieInfo.provider_name.isEmpty()){
+                    if (movieInfo.provider_name.isEmpty()) {
                         Image(
                             modifier = Modifier.size(50.dp),
                             painter = painterResource(id = R.drawable.na),
@@ -52,14 +62,18 @@ fun MoviePosition(movieInfo: MovieInfo, selectedGenre: String, saveSeen: (String
                 }
             }
         }
-        Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly, horizontalAlignment = Alignment.End){
-            Button(onClick = { saveSeen(selectedGenre,movieInfo.id, R.string.seen) }) {
+        Column(
+            Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.End
+        ) {
+            Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.seen) }) {
                 Text("Gesehen")
             }
-            Button(onClick = { saveSeen(selectedGenre,movieInfo.id, R.string.later) }) {
+            Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.later) }) {
                 Text("Später")
             }
-            Button(onClick = { saveSeen(selectedGenre,movieInfo.id, R.string.no) }) {
+            Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.no) }) {
                 Text("Nein")
             }
         }
@@ -75,6 +89,9 @@ fun MoviePosition(movieInfo: MovieInfo, selectedGenre: String, saveSeen: (String
 
 @Preview
 @Composable
-fun PreviewPosition(){
-    MoviePosition(movieInfo = MovieInfo(1,"","",3,",",",",",",3,3), selectedGenre = "", saveSeen = { _, _, _->})
+fun PreviewPosition() {
+    MoviePosition(
+        movieInfo = MovieInfo(1, "", "", 3, ",", ",", ",", 3, 3),
+        selectedGenre = "",
+        saveSeen = { _, _, _ -> })
 }

@@ -9,4 +9,5 @@
     <string name="no">Nicht Interessiert</string>
     <string name="user_name">userName</string>
     <string name="friend_name">friend name</string>
+    <string name="load_more_movies">Mehr Laden</string>
 </resources>

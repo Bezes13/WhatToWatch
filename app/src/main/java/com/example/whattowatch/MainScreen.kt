@@ -1,19 +1,25 @@
 package com.example.whattowatch
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,6 +43,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,6 +61,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
     val viewState: MainViewState by mainViewModel.viewState.collectAsState()
 
     MainScreenContent(
+        viewState.isLoading,
         viewState.movies,
         viewState.genres,
         mainViewModel.markFilmAs,
@@ -63,6 +71,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         mainViewModel::saveName,
         mainViewModel::readName,
         viewState.dialog,
+        mainViewModel::changeLoadedMovies,
         mainViewModel::sendEvent
     )
 }
@@ -70,6 +79,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreenContent(
+    isLoading: Boolean,
     movies: Map<String, List<MovieInfo>>,
     genres: List<Genre>,
     additionalGenres: List<String>,
@@ -79,7 +89,8 @@ fun MainScreenContent(
     saveName: (String, Int) -> Unit,
     readName: (Int) -> String,
     dialog: MainViewDialog,
-    eventListener: (MainviewEvent) -> Unit
+    changeLoadedMovies: (String) -> Unit,
+    eventListener: (MainViewEvent) -> Unit
 ) {
     if (genres.isNotEmpty()) {
         Scaffold(
@@ -93,7 +104,7 @@ fun MainScreenContent(
                         Text("What to watch")
                     },
                     actions = {
-                        IconButton(onClick = { eventListener(MainviewEvent.SetDialog(MainViewDialog.ShareWithFriend))}) {
+                        IconButton(onClick = { eventListener(MainViewEvent.SetDialog(MainViewDialog.ShareWithFriend)) }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
                                 contentDescription = "Share with a Friend"
@@ -103,13 +114,14 @@ fun MainScreenContent(
                 )
             },
         ) { innerPadding ->
-            
-            when(dialog){
+
+            when (dialog) {
                 is MainViewDialog.ShareWithFriend -> ShareFriendDialog(
-                    onDismissRequest = { eventListener(MainviewEvent.SetDialog(MainViewDialog.None))},
+                    onDismissRequest = { eventListener(MainViewEvent.SetDialog(MainViewDialog.None)) },
                     saveName = saveName,
 
-                )
+                    )
+
                 else -> {}
             }
             Column(
@@ -129,11 +141,49 @@ fun MainScreenContent(
                     )
                 }
 
-                LazyColumn {
-                    item {
-                        movies[selectedGenre]?.forEach {
-                            MoviePosition(it, selectedGenre, saveSeen)
-                            Divider()
+
+                if (movies[selectedGenre] != null && (movies[selectedGenre]
+                        ?: listOf()).isNotEmpty()
+                ) {
+                    LazyColumn {
+                        item {
+                            movies[selectedGenre]?.forEach {
+                                MoviePosition(it, selectedGenre, saveSeen)
+                                Divider()
+                            }
+                        }
+
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                if (isLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.width(64.dp),
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    )
+                                } else {
+                                    Button(
+                                        onClick = { changeLoadedMovies(selectedGenre) },
+                                    ) {
+                                        Text(text = stringResource(id = R.string.load_more_movies))
+                                    }
+                                }
+                            }
+
+                        }
+
+                    }
+                } else {
+                    if (isLoading) {
+                        Box(modifier = Modifier.fillMaxSize().align(Alignment.CenterHorizontally)){
+                            CircularProgressIndicator(
+                                modifier = Modifier.width(64.dp).align(Alignment.Center),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            )
                         }
                     }
                 }
@@ -152,8 +202,7 @@ fun MainScreenContent(
                             value = newTodoText,
                             onValueChange = { newTodoText = it },
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(
-                                onDone = { keyboardController?.hide() }),
+                            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
                             modifier = Modifier
                                 .weight(1f)
                                 .height(50.dp)
@@ -188,10 +237,11 @@ fun MainScreenContent(
     }
 }
 
-sealed class MainViewDialog(){
-    data object None:MainViewDialog()
-    data object ShareWithFriend:MainViewDialog()
+sealed class MainViewDialog() {
+    data object None : MainViewDialog()
+    data object ShareWithFriend : MainViewDialog()
 }
+
 @Composable
 @Preview
 fun PreviewMainScreen() {

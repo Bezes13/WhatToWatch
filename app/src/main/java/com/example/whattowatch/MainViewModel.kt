@@ -25,7 +25,7 @@ class MainViewModel(
     private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
     private val database = Firebase.database
-    private val _event = MutableSharedFlow<MainviewEvent>()
+    private val _event = MutableSharedFlow<MainViewEvent>()
     private val _viewState = MutableStateFlow(MainViewState())
     val viewState = _viewState.asStateFlow()
 
@@ -39,11 +39,14 @@ class MainViewModel(
         listOf("Netflix", "Disney Plus", "Amazon Prime Video", "WOW", "Crunchyroll")
 
     init {
+        _viewState.update { it.copy(isLoading = true) }
         initViewModel()
         listenToEvent()
+        _viewState.update { it.copy(isLoading = false) }
     }
 
     private fun initViewModel() {
+
         viewModelScope.launch {
             getCompanies()
             getGenres()
@@ -57,44 +60,69 @@ class MainViewModel(
         readSharedList(R.string.no)
     }
 
-    fun sendEvent(event: MainviewEvent){
+    fun sendEvent(event: MainViewEvent) {
         viewModelScope.launch(ioDispatcher) {
             _event.emit(event)
         }
     }
 
-    private fun listenToEvent() = viewModelScope.launch (ioDispatcher){
-        _event.collect{event ->
-            when(event){
-                is MainviewEvent.SetDialog -> updateDialog(event.dialog)
+    private fun listenToEvent() = viewModelScope.launch(ioDispatcher) {
+        _event.collect { event ->
+            when (event) {
+                is MainViewEvent.SetDialog -> updateDialog(event.dialog)
             }
         }
     }
 
     private fun updateDialog(dialog: MainViewDialog) {
-        _viewState.update { it.copy(dialog= dialog) }
+        _viewState.update { it.copy(dialog = dialog) }
+    }
+
+    fun changeLoadedMovies(genre: String) {
+        val foundGenre = _viewState.value.genres.firstOrNull { g -> g.name == genre }
+        if (foundGenre != null) {
+            getMovies(foundGenre, extend = true)
+        } else {
+            getCustomList(genre, true)
+        }
+
     }
 
     fun getMovies(genre: Genre, page: Int = 1, extend: Boolean = false) {
+        if (!extend && !_viewState.value.movies[genre.name].isNullOrEmpty()) {
+            println("NullOrEmpty")
+            return
+        }
+        _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
             val movieDTO = apiRepository.getMovies(page, genre, _viewState.value.companies)
-            val filtered = movieDTO.results.filter {
-                !_viewState.value.seenMovies.any{userMovie -> userMovie.movieId == it.id} &&
-                        !_viewState.value.watchLaterMovies.any{userMovie -> userMovie.movieId == it.id} &&
-                        !_viewState.value.notInterestedMovies.any{userMovie -> userMovie.movieId == it.id}
+            var filtered = movieDTO.results.filter {
+                !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == it.id } && !(_viewState.value.movies[genre.name]
+                    ?: listOf()).any { movie -> movie.id == it.id }
+            }
+            var refreshedCount = 0
+            while (filtered.count() <= 5) {
+                val newMovies = apiRepository.getMovies(
+                    page + refreshedCount, genre, _viewState.value.companies
+                )
+                refreshedCount++
+                filtered = filtered + newMovies.results.filter {
+                    !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == it.id } && !(_viewState.value.movies[genre.name]
+                        ?: listOf()).any { movie -> movie.id == it.id }
+                }
             }
             if (extend) {
                 val loadedMovies = (_viewState.value.movies[genre.name] ?: emptyList()) + filtered
                 _viewState.update { currentState ->
                     currentState.copy(movies = currentState.movies.toMutableMap().apply {
                         this[genre.name] = loadedMovies
-                    })
+                    }, isLoading = false)
                 }
             } else {
                 _viewState.update { currentState ->
                     currentState.copy(movies = currentState.movies.toMutableMap().apply {
                         this[genre.name] = filtered
-                    })
+                    }, isLoading = false)
                 }
             }
 
@@ -187,7 +215,6 @@ class MainViewModel(
         val gson = Gson()
         val json = gson.toJson(myList)
         myRef.setValue(json)
-
     }
 
     fun saveName(name: String, saveId: Int) {
@@ -225,11 +252,11 @@ class MainViewModel(
                 val userMovies = result.map { id -> UserMovie(id, readName(R.string.friend_name)) }
 
                 when (key) {
-                    R.string.seen -> _viewState.update { it.copy(seenMovies = it.seenMovies+userMovies) }
+                    R.string.seen -> _viewState.update { it.copy(seenMovies = it.seenMovies + userMovies) }
 
-                    R.string.later -> _viewState.update { it.copy(watchLaterMovies = it.watchLaterMovies+userMovies) }
+                    R.string.later -> _viewState.update { it.copy(watchLaterMovies = it.watchLaterMovies + userMovies) }
 
-                    R.string.no -> _viewState.update { it.copy(notInterestedMovies = it.notInterestedMovies+userMovies) }
+                    R.string.no -> _viewState.update { it.copy(notInterestedMovies = it.notInterestedMovies + userMovies) }
 
                     else -> {}
                 }
@@ -237,26 +264,36 @@ class MainViewModel(
         }
     }
 
-    fun getCustomList(customList: String) {
+    fun getCustomList(customList: String, extend: Boolean = false) {
         val list = when (customList) {
             sharedPreferencesManager.context.getString(R.string.seen) -> _viewState.value.seenMovies
             sharedPreferencesManager.context.getString(R.string.later) -> _viewState.value.watchLaterMovies
             sharedPreferencesManager.context.getString(R.string.no) -> _viewState.value.notInterestedMovies
             else -> listOf()
         }
+
         val newList: ArrayList<MovieInfo> = arrayListOf()
-
+        _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
-
-            list.forEach {
-                val movie = apiRepository.getMovieDetails(it.movieId)
-                movie.user = it.name
-                newList.add(movie)
+            if (extend) {
+                newList.addAll((viewState.value.movies[customList] ?: listOf()))
             }
+            var loadedMovies = 0
+            list.forEach {
+                if (loadedMovies <= 10 && (!extend || !(viewState.value.movies[customList]
+                        ?: listOf()).any { m -> m.id == it.movieId })
+                ) {
+                    val movie = apiRepository.getMovieDetails(it.movieId)
+                    movie.user = it.name
+                    newList.add(movie)
+                    loadedMovies++
+                }
+            }
+
             _viewState.update { currentState ->
                 currentState.copy(movies = currentState.movies.toMutableMap().apply {
                     this[customList] = newList
-                })
+                }, isLoading = false)
             }
         }.invokeOnCompletion {
             _viewState.value.movies[customList]?.forEach {
@@ -265,6 +302,7 @@ class MainViewModel(
         }
     }
 }
-sealed class MainviewEvent{
-    data class SetDialog(val dialog: MainViewDialog) : MainviewEvent()
+
+sealed class MainViewEvent {
+    data class SetDialog(val dialog: MainViewDialog) : MainViewEvent()
 }
