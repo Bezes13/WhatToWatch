@@ -2,7 +2,7 @@ package com.example.whattowatch.dataObjects
 
 import com.example.whattowatch.dto.CastDTO
 
-data class MovieInfo (
+data class MovieInfo(
     val id: Int,
     val originalLanguage: String,
     val overview: String,

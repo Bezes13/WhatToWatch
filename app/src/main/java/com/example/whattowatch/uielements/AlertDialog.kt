@@ -13,11 +13,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.whattowatch.R
 
 @Composable
-fun ShareFriendDialog(
+fun TextFieldDialog(
+    title: String,
+    text: String,
+    saveID: Int,
     onDismissRequest: () -> Unit,
     saveName: (String, Int) -> Unit,
 
@@ -29,11 +33,11 @@ fun ShareFriendDialog(
             Icon(Icons.Filled.Face, contentDescription = "Icon")
         },
         title = {
-            Text(text = "Sharing is Caring")
+            Text(text = title)
         },
         text = {
             Column {
-                Text(text = "Enter the name of your friend")
+                Text(text = text)
                 TextField(value = name, onValueChange = { name = it })
             }
         },
@@ -43,11 +47,11 @@ fun ShareFriendDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    saveName(name, R.string.friend_name)
+                    saveName(name, saveID)
                     onDismissRequest()
                 }
             ) {
-                Text("Confirm")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
@@ -56,7 +60,7 @@ fun ShareFriendDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text(stringResource(R.string.dismiss))
             }
         }
     )
@@ -64,6 +68,11 @@ fun ShareFriendDialog(
 
 @Preview
 @Composable
-fun AlertDialogPreview(){
-ShareFriendDialog(onDismissRequest = { /*TODO*/ }, saveName = {_,_->})
+fun AlertDialogPreview() {
+    TextFieldDialog(
+        "Title",
+        "Please enter some Text",
+        213,
+        onDismissRequest = { },
+        saveName = { _, _ -> })
 }

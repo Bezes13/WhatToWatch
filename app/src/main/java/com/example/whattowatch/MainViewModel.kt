@@ -182,7 +182,6 @@ class MainViewModel(
     }
 
     private fun getProvider(genre: String, movieID: Int) {
-        //if(_viewState.value.movies[genre]?.first{ movieInfo -> movieID == movieInfo.id }?.provider_name?.isNotEmpty() == false){
         viewModelScope.launch(Dispatchers.IO) {
             val provider = apiRepository.getProviders(movieID)
             val updatedMovies = _viewState.value.movies[genre]?.map { movie ->
@@ -218,7 +217,6 @@ class MainViewModel(
                 this[selectedGenre] = updatedMovies.orEmpty()
             })
         }
-        //sharedPreferencesManager.context.deviceId.toString()
         val myRef = database.getReference(
             readName(R.string.user_name) + sharedPreferencesManager.context.getString(
                 listID
@@ -323,10 +321,6 @@ class MainViewModel(
                 getProvider(genre = customList, it.id)
             }
         }
-    }
-
-    fun checkFilm(genre: String, movieId: Int): Boolean {
-        return !(_viewState.value.movies[genre]?: listOf()).any{info-> info.id == movieId}
     }
 }
 

@@ -19,13 +19,13 @@ import com.example.whattowatch.MainViewEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun genreDropdown(
+fun GenreDropdown(
     items: List<SingleGenreDTO>,
     getMovies: (SingleGenreDTO) -> Unit,
     additionalItems: List<String>,
     getCustomList: (String) -> Unit,
     eventListener: (MainViewEvent) -> Unit
-): String {
+) {
     var isExpanded by remember {
         mutableStateOf(false)
     }
@@ -42,12 +42,8 @@ fun genreDropdown(
             value = genre,
             onValueChange = {},
             readOnly = true,
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-            },
-            placeholder = {
-                Text(text = "Select Genre")
-            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+            placeholder = { Text(text = "Select Genre") },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
             modifier = Modifier
                 .menuAnchor()
@@ -55,24 +51,19 @@ fun genreDropdown(
         )
     }
     DropdownMenu(
-        expanded = isExpanded,
-        onDismissRequest = {
+        expanded = isExpanded, onDismissRequest = {
             isExpanded = false
-        },
-        modifier = Modifier.fillMaxWidth()
+        }, modifier = Modifier.fillMaxWidth()
     ) {
         items.forEach {
-            DropdownMenuItem(
-                text = {
-                    Text(text = it.name)
-                },
-                onClick = {
-                    genre = it.name
-                    isExpanded = false
-                    getMovies(items.first { it.name == genre })
-                    eventListener(MainViewEvent.SetGenre(genre))
-                },
-                modifier = Modifier.fillMaxWidth()
+            DropdownMenuItem(text = {
+                Text(text = it.name)
+            }, onClick = {
+                genre = it.name
+                isExpanded = false
+                getMovies(items.first { it.name == genre })
+                eventListener(MainViewEvent.SetGenre(genre))
+            }, modifier = Modifier.fillMaxWidth()
             )
         }
         additionalItems.forEach {
@@ -89,8 +80,5 @@ fun genreDropdown(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-
     }
-
-    return genre
 }
