@@ -14,14 +14,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.whattowatch.Data.Genre
+import com.example.whattowatch.dto.SingleGenreDTO
 import com.example.whattowatch.MainViewEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun genreDropdown(
-    items: List<Genre>,
-    getMovies: (Genre) -> Unit,
+    items: List<SingleGenreDTO>,
+    getMovies: (SingleGenreDTO) -> Unit,
     additionalItems: List<String>,
     getCustomList: (String) -> Unit,
     eventListener: (MainViewEvent) -> Unit

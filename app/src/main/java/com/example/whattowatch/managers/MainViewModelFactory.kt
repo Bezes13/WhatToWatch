@@ -1,9 +1,9 @@
-package com.example.whattowatch.Managers
+package com.example.whattowatch.managers
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.whattowatch.MainViewModel
-import com.example.whattowatch.Repository.ApiRepository
+import com.example.whattowatch.repository.ApiRepository
 import kotlinx.coroutines.CoroutineDispatcher
 
 class MainViewModelFactory(

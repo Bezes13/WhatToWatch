@@ -49,8 +49,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.whattowatch.Data.Genre
-import com.example.whattowatch.Data.MovieInfo
+import com.example.whattowatch.dataObjects.MovieInfo
+import com.example.whattowatch.dto.SingleGenreDTO
 import com.example.whattowatch.uielements.MovieDetailsDialog
 import com.example.whattowatch.uielements.MoviePosition
 import com.example.whattowatch.uielements.ShareFriendDialog
@@ -86,9 +86,9 @@ fun MainScreenContent(
     isLoading: Boolean,
     selectedGenre: String,
     movies: Map<String, List<MovieInfo>>,
-    genres: List<Genre>,
+    genres: List<SingleGenreDTO>,
     additionalGenres: List<String>,
-    getMovies: (Genre) -> Unit,
+    getMovies: (SingleGenreDTO) -> Unit,
     getCustomList: (String) -> Unit,
     saveSeen: (String, Int, Int) -> Unit,
     saveName: (String, Int) -> Unit,
@@ -271,7 +271,7 @@ fun PreviewMainScreen() {
             MovieInfo(231, "Englsich", "Toller Film", 12, "pasdl", "22.02.2022", "Marsianer", 123,123,
                 listOf("Netflix")),
             ))),
-        genres = listOf(Genre(3, "mappa")),
+        genres = listOf(SingleGenreDTO(3, "mappa")),
         additionalGenres = listOf("Gesehen"),
         getMovies = {},
         getCustomList = {},

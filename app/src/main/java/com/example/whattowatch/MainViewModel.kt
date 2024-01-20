@@ -2,11 +2,11 @@ package com.example.whattowatch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.whattowatch.Data.Genre
-import com.example.whattowatch.Data.MovieInfo
-import com.example.whattowatch.Data.UserMovie
-import com.example.whattowatch.Managers.SharedPreferencesManager
-import com.example.whattowatch.Repository.ApiRepository
+import com.example.whattowatch.managers.SharedPreferencesManager
+import com.example.whattowatch.repository.ApiRepository
+import com.example.whattowatch.dataObjects.MovieInfo
+import com.example.whattowatch.dataObjects.UserMovie
+import com.example.whattowatch.dto.SingleGenreDTO
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
@@ -93,15 +93,15 @@ class MainViewModel(
 
     }
 
-    fun getMovies(genre: Genre, page: Int = 1, extend: Boolean = false) {
+    fun getMovies(genre: SingleGenreDTO, page: Int = 1, extend: Boolean = false) {
         if (!extend && !_viewState.value.movies[genre.name].isNullOrEmpty()) {
             println("NullOrEmpty")
             return
         }
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
-            val movieDTO = apiRepository.getMovies(page, genre, _viewState.value.companies)
-            var filtered = movieDTO.results.filter {
+            val movies = apiRepository.getMovies(page, genre, _viewState.value.companies)
+            var filtered = movies.filter {
                 !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == it.id } && !(_viewState.value.movies[genre.name]
                     ?: listOf()).any { movie -> movie.id == it.id }
             }
@@ -111,7 +111,7 @@ class MainViewModel(
                     page + refreshedCount, genre, _viewState.value.companies
                 )
                 refreshedCount++
-                filtered = filtered + newMovies.results.filter {
+                filtered = filtered + newMovies.filter {
                     !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == it.id } && !(_viewState.value.movies[genre.name]
                         ?: listOf()).any { movie -> movie.id == it.id }
                 }
@@ -189,7 +189,7 @@ class MainViewModel(
                 if (movie.id == movieID) {
                     val logoPaths =
                         provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
-                    movie.copy(provider_name = logoPaths)
+                    movie.copy(providerName = logoPaths)
                 } else {
                     movie
                 }

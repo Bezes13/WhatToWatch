@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,11 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,10 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.whattowatch.Data.MovieInfo
-import com.example.whattowatch.MainViewDialog
 import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.R
+import com.example.whattowatch.dataObjects.MovieInfo
 import com.example.whattowatch.extension.getJustYear
 
 @Composable
@@ -71,7 +64,7 @@ fun MoviePosition(
                 })
                 .align(Alignment.CenterVertically)
                 .weight(0.5F),
-            model = stringResource(R.string.image_path, movieInfo.poster_path),
+            model = stringResource(R.string.image_path, movieInfo.posterPath),
             placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
             error = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = movieInfo.title,
@@ -146,11 +139,11 @@ fun RowScope.BasicInfo(movieInfo: MovieInfo) {
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
             )
-            Text(text = movieInfo.release_date.getJustYear(), textAlign = TextAlign.Center)
+            Text(text = movieInfo.releaseDate.getJustYear(), textAlign = TextAlign.Center)
 
                         Row {
-                            if (movieInfo.provider_name != null) {
-                                movieInfo.provider_name.forEach {
+                            if (movieInfo.providerName != null) {
+                                movieInfo.providerName.forEach {
                                     AsyncImage(
                                         model = stringResource(R.string.image_path_or, it),
                                         placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
@@ -158,7 +151,7 @@ fun RowScope.BasicInfo(movieInfo: MovieInfo) {
                                         contentDescription = "Provider",
                                     )
                                 }
-                                if (movieInfo.provider_name.isEmpty()) {
+                                if (movieInfo.providerName.isEmpty()) {
                                     Image(
                                         modifier = Modifier.size(50.dp),
                                         painter = painterResource(id = R.drawable.na),

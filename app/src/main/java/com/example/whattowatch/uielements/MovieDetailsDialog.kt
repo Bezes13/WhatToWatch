@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
-import com.example.whattowatch.Data.MovieInfo
 import com.example.whattowatch.R
+import com.example.whattowatch.dataObjects.MovieInfo
 import com.example.whattowatch.extension.getJustYear
 
 @Composable
@@ -70,7 +70,7 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit) {
                                     fontSize = 10.sp
                                 )
                             ) { // AnnotatedString.Builder
-                                append(info.release_date.getJustYear())
+                                append(info.releaseDate.getJustYear())
                             }
                         }
                     )
@@ -88,7 +88,7 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit) {
                     ) {
                         Row {
                             Icon(imageVector = Icons.Filled.Star, contentDescription = "Bewertung")
-                            Text(text = "${info.vote_average} by ${info.vote_count}")
+                            Text(text = "${info.voteAverage} by ${info.voteCount}")
                         }
                         Card(border = BorderStroke(1.dp, Color.Black)) {
                             LazyColumn {
@@ -108,7 +108,7 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit) {
                     ) {
                         item {
                             AsyncImage(
-                                model = stringResource(R.string.image_path, info.poster_path),
+                                model = stringResource(R.string.image_path, info.posterPath),
                                 placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                                 error = painterResource(id = R.drawable.ic_launcher_foreground),
                                 contentDescription = info.title,

@@ -1,4 +1,4 @@
-package com.example.whattowatch.Data
+package com.example.whattowatch.dto
 
 data class MovieAvailability(
     val id: Int,
