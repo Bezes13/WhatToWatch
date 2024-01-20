@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.whattowatch.Data.MovieInfo
+import com.example.whattowatch.MainViewDialog
+import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.R
 import com.example.whattowatch.extension.getJustYear
 
@@ -30,14 +32,15 @@ fun MoviePosition(
     movieInfo: MovieInfo,
     selectedGenre: String,
     saveSeen: (String, Int, Int) -> Unit,
-    checkFilm: (String, Int) -> Boolean
+    checkFilm: (String, Int) -> Boolean,
+    eventListener: (MainViewEvent) -> Unit,
 ) {
-    Row {
+    Row{
         BasicInfo(movieInfo)
         MarkFilmButtons(movieInfo, selectedGenre, saveSeen, checkFilm)
         AsyncImage(
             modifier = Modifier
-                .clickable(onClick = {})
+                .clickable(onClick = {eventListener(MainViewEvent.SetDialog(MainViewDialog.DetailsDialog(movieInfo)))})
                 .align(Alignment.CenterVertically)
                 .weight(1F),
             model = stringResource(R.string.image_path, movieInfo.poster_path),
@@ -77,7 +80,7 @@ fun RowScope.MarkFilmButtons(
 fun RowScope.BasicInfo(movieInfo: MovieInfo) {
     Column(
         modifier = Modifier
-            .weight(1f),
+            .weight(1f).fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceAround
     ) {
         if (movieInfo.user != null) {
@@ -130,5 +133,6 @@ fun PreviewPosition() {
         movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = "Anna"),
         selectedGenre = "",
         saveSeen = { _, _, _ -> },
-        checkFilm = {_,_-> true})
+        checkFilm = {_,_-> true},
+        {})
 }

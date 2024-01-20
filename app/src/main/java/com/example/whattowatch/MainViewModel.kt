@@ -211,7 +211,7 @@ class MainViewModel(
             else -> {}
         }
         val gson = Gson()
-        val json = gson.toJson(myList)
+        val json = gson.toJson(myList.filter { movie -> movie.name == readName(R.string.user_name) }.map { userMovie -> userMovie.movieId })
         myRef.setValue(json)
     }
 

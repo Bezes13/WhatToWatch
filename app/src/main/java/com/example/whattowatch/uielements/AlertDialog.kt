@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.whattowatch.R
 
 @Composable
@@ -33,7 +34,7 @@ fun ShareFriendDialog(
         text = {
             Column {
                 Text(text = "Enter the name of your friend")
-TextField(value = name, onValueChange = {name=it})
+                TextField(value = name, onValueChange = { name = it })
             }
         },
         onDismissRequest = {
@@ -59,4 +60,10 @@ TextField(value = name, onValueChange = {name=it})
             }
         }
     )
+}
+
+@Preview
+@Composable
+fun AlertDialogPreview(){
+ShareFriendDialog(onDismissRequest = { /*TODO*/ }, saveName = {_,_->})
 }

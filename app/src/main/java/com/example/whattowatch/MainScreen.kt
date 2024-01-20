@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.whattowatch.Data.Genre
 import com.example.whattowatch.Data.MovieInfo
+import com.example.whattowatch.uielements.MovieDetailsDialog
 import com.example.whattowatch.uielements.MoviePosition
 import com.example.whattowatch.uielements.ShareFriendDialog
 import com.example.whattowatch.uielements.genreDropdown
@@ -123,6 +124,11 @@ fun MainScreenContent(
                     saveName = saveName,
 
                     )
+                is MainViewDialog.DetailsDialog -> MovieDetailsDialog(dialog.info) {
+                    eventListener(
+                        MainViewEvent.SetDialog(MainViewDialog.None)
+                    )
+                }
 
                 else -> {}
             }
@@ -150,7 +156,7 @@ fun MainScreenContent(
                     LazyColumn {
                         item {
                             movies[selectedGenre]?.forEach {
-                                MoviePosition(it, selectedGenre, saveSeen, checkFilm)
+                                MoviePosition(it, selectedGenre, saveSeen, checkFilm, eventListener)
                                 Divider()
                             }
                         }
@@ -240,6 +246,7 @@ fun MainScreenContent(
 }
 
 sealed class MainViewDialog() {
+    data class DetailsDialog(val info: MovieInfo) : MainViewDialog()
     data object None : MainViewDialog()
     data object ShareWithFriend : MainViewDialog()
 }
