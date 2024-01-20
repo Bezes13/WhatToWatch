@@ -186,10 +186,7 @@ class MainViewModel(
             R.string.no -> _viewState.value.notInterestedMovies
             else -> listOf()
         }
-        if (list.any { userMovie -> userMovie.movieId == newItem }) {
-            return
-        }
-        // filter the seen Movie out of the shown ones
+
         val updatedMovies = _viewState.value.movies[selectedGenre]?.filter { it.id != newItem }
         _viewState.update { currentState ->
             currentState.copy(movies = currentState.movies.toMutableMap().apply {
@@ -202,7 +199,8 @@ class MainViewModel(
                 listID
             )
         )
-        val myList = list + UserMovie(newItem, readName(R.string.friend_name))
+        val myList = if (list.any { userMovie -> userMovie.movieId == newItem }) list - UserMovie(newItem, readName(R.string.user_name)) else list + UserMovie(newItem, readName(R.string.user_name))
+
         when (listID) {
             R.string.seen -> _viewState.update { _viewState.value.copy(seenMovies = myList) }
 
@@ -300,6 +298,10 @@ class MainViewModel(
                 getProvider(genre = customList, it.id)
             }
         }
+    }
+
+    fun checkFilm(genre: String, movieId: Int): Boolean {
+        return !(_viewState.value.movies[genre]?: listOf()).any{info-> info.id == movieId}
     }
 }
 

@@ -72,7 +72,8 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         mainViewModel::readName,
         viewState.dialog,
         mainViewModel::changeLoadedMovies,
-        mainViewModel::sendEvent
+        mainViewModel::sendEvent,
+        mainViewModel::checkFilm
     )
 }
 
@@ -90,7 +91,8 @@ fun MainScreenContent(
     readName: (Int) -> String,
     dialog: MainViewDialog,
     changeLoadedMovies: (String) -> Unit,
-    eventListener: (MainViewEvent) -> Unit
+    eventListener: (MainViewEvent) -> Unit,
+    checkFilm: (String, Int) -> Boolean
 ) {
     if (genres.isNotEmpty()) {
         Scaffold(
@@ -148,7 +150,7 @@ fun MainScreenContent(
                     LazyColumn {
                         item {
                             movies[selectedGenre]?.forEach {
-                                MoviePosition(it, selectedGenre, saveSeen)
+                                MoviePosition(it, selectedGenre, saveSeen, checkFilm)
                                 Divider()
                             }
                         }

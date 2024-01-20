@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -27,20 +29,76 @@ import com.example.whattowatch.extension.getJustYear
 fun MoviePosition(
     movieInfo: MovieInfo,
     selectedGenre: String,
-    saveSeen: (String, Int, Int) -> Unit
+    saveSeen: (String, Int, Int) -> Unit,
+    checkFilm: (String, Int) -> Boolean
 ) {
     Row {
+        BasicInfo(movieInfo)
+        MarkFilmButtons(movieInfo, selectedGenre, saveSeen, checkFilm)
+        AsyncImage(
+            modifier = Modifier
+                .clickable(onClick = {})
+                .align(Alignment.CenterVertically)
+                .weight(1F),
+            model = stringResource(R.string.image_path, movieInfo.poster_path),
+            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+            error = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = movieInfo.title,
+        )
+
+    }
+}
+
+@Composable
+fun RowScope.MarkFilmButtons(
+    movieInfo: MovieInfo,
+    selectedGenre: String,
+    saveSeen: (String, Int, Int) -> Unit,
+    checkFilm: (String, Int) -> Boolean
+) {
+    Column(
+        Modifier.fillMaxHeight().weight(1F),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.End
+    ) {
+        Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.seen) }, modifier = Modifier.fillMaxWidth()) {
+            Text(if(checkFilm(selectedGenre,movieInfo.id))"Gesehen" else "Ungesehen")
+        }
+        Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.later) }, modifier = Modifier.fillMaxWidth()) {
+            Text(if(checkFilm(selectedGenre,movieInfo.id))"Später" else "UnSpäter")
+        }
+        Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.no) }, modifier = Modifier.fillMaxWidth()) {
+            Text(if(checkFilm(selectedGenre,movieInfo.id))"Nein" else "Doch")
+        }
+    }
+}
+
+@Composable
+fun RowScope.BasicInfo(movieInfo: MovieInfo) {
+    Column(
+        modifier = Modifier
+            .weight(1f),
+        verticalArrangement = Arrangement.SpaceAround
+    ) {
+        if (movieInfo.user != null) {
+            Text(
+                text = movieInfo.user ?: "",
+                textAlign = TextAlign.Start,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Column(
             modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceAround,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (movieInfo.user != null) {
-                Text(text = movieInfo.user?: "",
-                    textAlign = TextAlign.Center)
-            }
-            Text(text = movieInfo.title, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+            Text(
+                text = movieInfo.title,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+            )
             Text(text = movieInfo.release_date.getJustYear(), textAlign = TextAlign.Center)
             Row {
                 if (movieInfo.provider_name != null) {
@@ -62,28 +120,6 @@ fun MoviePosition(
                 }
             }
         }
-        Column(
-            Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.End
-        ) {
-            Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.seen) }) {
-                Text("Gesehen")
-            }
-            Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.later) }) {
-                Text("Später")
-            }
-            Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.no) }) {
-                Text("Nein")
-            }
-        }
-        AsyncImage(
-            modifier = Modifier.clickable(onClick = {}),
-            model = stringResource(R.string.image_path, movieInfo.poster_path),
-            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-            error = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = movieInfo.title,
-        )
     }
 }
 
@@ -91,7 +127,8 @@ fun MoviePosition(
 @Composable
 fun PreviewPosition() {
     MoviePosition(
-        movieInfo = MovieInfo(1, "", "", 3, ",", ",", ",", 3, 3),
+        movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = "Anna"),
         selectedGenre = "",
-        saveSeen = { _, _, _ -> })
+        saveSeen = { _, _, _ -> },
+        checkFilm = {_,_-> true})
 }
