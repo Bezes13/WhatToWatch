@@ -4,16 +4,35 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,22 +53,31 @@ fun MoviePosition(
     saveSeen: (String, Int, Int) -> Unit,
     checkFilm: (String, Int) -> Boolean,
     eventListener: (MainViewEvent) -> Unit,
+    getCast: (String, MovieInfo) -> Unit
 ) {
-    Row{
+    Row(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalAlignment = Alignment.Top
+    ) {
         BasicInfo(movieInfo)
+        Spacer(modifier = Modifier.width(8.dp))
         MarkFilmButtons(movieInfo, selectedGenre, saveSeen, checkFilm)
+        Spacer(modifier = Modifier.width(8.dp))
         AsyncImage(
             modifier = Modifier
-                .clickable(onClick = {eventListener(MainViewEvent.SetDialog(MainViewDialog.DetailsDialog(movieInfo)))})
+                .clickable(onClick = {
+                    getCast(selectedGenre, movieInfo)
+                })
                 .align(Alignment.CenterVertically)
-                .weight(1F),
+                .weight(0.5F),
             model = stringResource(R.string.image_path, movieInfo.poster_path),
             placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
             error = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = movieInfo.title,
         )
-
     }
+
 }
 
 @Composable
@@ -60,18 +88,29 @@ fun RowScope.MarkFilmButtons(
     checkFilm: (String, Int) -> Boolean
 ) {
     Column(
-        Modifier.fillMaxHeight().weight(1F),
+        modifier = Modifier
+            .fillMaxHeight()
+            .weight(0.5F),
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.End
     ) {
-        Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.seen) }, modifier = Modifier.fillMaxWidth()) {
-            Text(if(checkFilm(selectedGenre,movieInfo.id))"Gesehen" else "Ungesehen")
+        IconButton(
+            onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.seen) },
+
+        ) {
+            Icon(imageVector = Icons.Filled.Favorite, contentDescription ="" )
         }
-        Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.later) }, modifier = Modifier.fillMaxWidth()) {
-            Text(if(checkFilm(selectedGenre,movieInfo.id))"Später" else "UnSpäter")
+        IconButton(
+            onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.later) },
+
+        ) {
+            Icon(imageVector = Icons.Filled.Send, contentDescription ="" )
         }
-        Button(onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.no) }, modifier = Modifier.fillMaxWidth()) {
-            Text(if(checkFilm(selectedGenre,movieInfo.id))"Nein" else "Doch")
+        IconButton(
+            onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.no) },
+
+        ) {
+            Icon(imageVector = Icons.Filled.Close, contentDescription ="" )
         }
     }
 }
@@ -80,16 +119,21 @@ fun RowScope.MarkFilmButtons(
 fun RowScope.BasicInfo(movieInfo: MovieInfo) {
     Column(
         modifier = Modifier
-            .weight(1f).fillMaxHeight(),
-        verticalArrangement = Arrangement.SpaceAround
+            .fillMaxSize()
+            .weight(1F)
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start
     ) {
         if (movieInfo.user != null) {
-            Text(
-                text = movieInfo.user ?: "",
-                textAlign = TextAlign.Start,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Card(colors = CardDefaults.cardColors(Color.Green)) {
+                Text(
+                    text = movieInfo.user ?: "",
+                    textAlign = TextAlign.Start,
+                )
+            }
         }
+        Spacer(modifier = Modifier.height(8.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -103,36 +147,58 @@ fun RowScope.BasicInfo(movieInfo: MovieInfo) {
                 fontWeight = FontWeight.Bold,
             )
             Text(text = movieInfo.release_date.getJustYear(), textAlign = TextAlign.Center)
-            Row {
-                if (movieInfo.provider_name != null) {
-                    movieInfo.provider_name.forEach {
-                        AsyncImage(
-                            model = stringResource(R.string.image_path_or, it),
-                            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                            error = painterResource(id = R.drawable.ic_launcher_foreground),
-                            contentDescription = "Provider",
-                        )
-                    }
-                    if (movieInfo.provider_name.isEmpty()) {
-                        Image(
-                            modifier = Modifier.size(50.dp),
-                            painter = painterResource(id = R.drawable.na),
-                            contentDescription = stringResource(id = R.string.not_available)
-                        )
-                    }
-                }
-            }
+
+                        Row {
+                            if (movieInfo.provider_name != null) {
+                                movieInfo.provider_name.forEach {
+                                    AsyncImage(
+                                        model = stringResource(R.string.image_path_or, it),
+                                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                                        contentDescription = "Provider",
+                                    )
+                                }
+                                if (movieInfo.provider_name.isEmpty()) {
+                                    Image(
+                                        modifier = Modifier.size(50.dp),
+                                        painter = painterResource(id = R.drawable.na),
+                                        contentDescription = stringResource(id = R.string.not_available)
+                                    )
+                                }
+                            }
+                        }
         }
     }
 }
 
+
 @Preview
 @Composable
 fun PreviewPosition() {
-    MoviePosition(
-        movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = "Anna"),
-        selectedGenre = "",
-        saveSeen = { _, _, _ -> },
-        checkFilm = {_,_-> true},
-        {})
+    LazyColumn() {
+        item {
+            MoviePosition(
+                movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = "Anna"),
+                selectedGenre = "",
+                saveSeen = { _, _, _ -> },
+                checkFilm = { _, _ -> true },
+                eventListener = {},
+                getCast = {_,_->})
+            MoviePosition(
+                movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = "Anna"),
+                selectedGenre = "",
+                saveSeen = { _, _, _ -> },
+                checkFilm = { _, _ -> true },
+                eventListener = {},
+                getCast = {_,_->})
+            MoviePosition(
+                movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = "Anna"),
+                selectedGenre = "",
+                saveSeen = { _, _, _ -> },
+                checkFilm = { _, _ -> true },
+                eventListener = {},
+                getCast = {_,_->})
+        }
+    }
+
 }

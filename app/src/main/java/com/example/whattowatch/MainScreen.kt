@@ -63,6 +63,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
 
     MainScreenContent(
         viewState.isLoading,
+        viewState.selectedGenre,
         viewState.movies,
         viewState.genres,
         mainViewModel.markFilmAs,
@@ -74,7 +75,8 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         viewState.dialog,
         mainViewModel::changeLoadedMovies,
         mainViewModel::sendEvent,
-        mainViewModel::checkFilm
+        mainViewModel::checkFilm,
+        mainViewModel::getCast
     )
 }
 
@@ -82,6 +84,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
 @Composable
 fun MainScreenContent(
     isLoading: Boolean,
+    selectedGenre: String,
     movies: Map<String, List<MovieInfo>>,
     genres: List<Genre>,
     additionalGenres: List<String>,
@@ -93,7 +96,8 @@ fun MainScreenContent(
     dialog: MainViewDialog,
     changeLoadedMovies: (String) -> Unit,
     eventListener: (MainViewEvent) -> Unit,
-    checkFilm: (String, Int) -> Boolean
+    checkFilm: (String, Int) -> Boolean,
+    getCast: (String, MovieInfo) -> Unit,
 ) {
     if (genres.isNotEmpty()) {
         Scaffold(
@@ -139,8 +143,7 @@ fun MainScreenContent(
                     .padding(innerPadding)
             ) {
 
-                val selectedGenre =
-                    genreDropdown(genres, getMovies, additionalGenres, getCustomList)
+                genreDropdown(genres, getMovies, additionalGenres, getCustomList, eventListener)
                 if (selectedGenre == "") {
                     Spacer(modifier = Modifier.size(100.dp))
                     Text(
@@ -156,7 +159,7 @@ fun MainScreenContent(
                     LazyColumn {
                         item {
                             movies[selectedGenre]?.forEach {
-                                MoviePosition(it, selectedGenre, saveSeen, checkFilm, eventListener)
+                                MoviePosition(it, selectedGenre, saveSeen, checkFilm, eventListener, getCast)
                                 Divider()
                             }
                         }
@@ -186,16 +189,19 @@ fun MainScreenContent(
                     }
                 } else {
                     if (isLoading) {
-                        Box(modifier = Modifier.fillMaxSize().align(Alignment.CenterHorizontally)){
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.CenterHorizontally)){
                             CircularProgressIndicator(
-                                modifier = Modifier.width(64.dp).align(Alignment.Center),
+                                modifier = Modifier
+                                    .width(64.dp)
+                                    .align(Alignment.Center),
                                 color = MaterialTheme.colorScheme.secondary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
                             )
                         }
                     }
                 }
-
 
                 var hide by remember { mutableStateOf(false) }
                 if (readName(R.string.user_name) == "" || hide) {
@@ -254,5 +260,28 @@ sealed class MainViewDialog() {
 @Composable
 @Preview
 fun PreviewMainScreen() {
-    MainScreen()
+    MainScreenContent(
+        isLoading = false,
+        selectedGenre = "mappa",
+        movies = mapOf (Pair("mappa", listOf(
+            MovieInfo(231, "Englsich", "Toller Film", 12, "pasdl", "22.02.2022", "Marsianer", 123,123,
+                listOf("Netflix"), "Abba"),
+            MovieInfo(231, "Englsich", "Toller Film", 12, "pasdl", "22.02.2022", "Marsianer", 123,123,
+                listOf("Netflix")),
+            MovieInfo(231, "Englsich", "Toller Film", 12, "pasdl", "22.02.2022", "Marsianer", 123,123,
+                listOf("Netflix")),
+            ))),
+        genres = listOf(Genre(3, "mappa")),
+        additionalGenres = listOf("Gesehen"),
+        getMovies = {},
+        getCustomList = {},
+        saveSeen = {_,_,_->},
+        saveName = {_,_->},
+        readName = {_-> "Emulator"},
+        dialog = MainViewDialog.None,
+        changeLoadedMovies = {},
+        eventListener = {},
+        checkFilm = {_,_-> false},
+        getCast = {_,_-> },
+    )
 }

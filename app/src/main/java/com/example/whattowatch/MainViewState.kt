@@ -7,6 +7,7 @@ import com.example.whattowatch.Data.UserMovie
 
 data class MainViewState (
     val isLoading: Boolean= false,
+    val selectedGenre: String = "",
     val movies: Map<String, List<MovieInfo>> = mapOf(),
     val moviesToLoad: Int = 15,
     val companies: List<CompanyInfo> = listOf(),

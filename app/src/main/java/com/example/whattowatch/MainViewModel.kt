@@ -70,8 +70,13 @@ class MainViewModel(
         _event.collect { event ->
             when (event) {
                 is MainViewEvent.SetDialog -> updateDialog(event.dialog)
+                is MainViewEvent.SetGenre -> updateGenre(event.genre)
             }
         }
+    }
+
+    private fun updateGenre(genre: String) {
+        _viewState.update { it.copy(selectedGenre = genre) }
     }
 
     private fun updateDialog(dialog: MainViewDialog) {
@@ -148,6 +153,25 @@ class MainViewModel(
                     companyInfo.provider_name
                 )
             })
+        }
+    }
+
+    fun getCast(genre: String, movieInfo: MovieInfo) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val cast = apiRepository.getCast(movieInfo.id)
+            val updatedMovies = _viewState.value.movies[genre]?.map { movie ->
+                if (movie.id == movieInfo.id) {
+                    movie.copy(cast = cast)
+                } else {
+                    movie
+                }
+            }
+
+            _viewState.update { currentState ->
+                currentState.copy(movies = currentState.movies.toMutableMap().apply {
+                    this[genre] = updatedMovies.orEmpty()
+                }, dialog = MainViewDialog.DetailsDialog(movieInfo))
+            }
         }
     }
 
@@ -307,4 +331,5 @@ class MainViewModel(
 
 sealed class MainViewEvent {
     data class SetDialog(val dialog: MainViewDialog) : MainViewEvent()
+    data class SetGenre(val genre: String) : MainViewEvent()
 }

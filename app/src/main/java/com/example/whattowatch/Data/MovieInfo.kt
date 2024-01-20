@@ -13,5 +13,6 @@ data class MovieInfo(
     val vote_average: Number,
     val vote_count: Int,
     val provider_name: List<String>? = listOf(),
-    var user: String? = ""
+    var user: String? = "",
+    val cast: List<String>? = listOf()
 )

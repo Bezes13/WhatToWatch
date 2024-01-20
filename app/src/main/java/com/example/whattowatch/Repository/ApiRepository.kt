@@ -3,6 +3,7 @@ package com.example.whattowatch.Repository
 import android.content.Context
 import com.example.whattowatch.Data.Company
 import com.example.whattowatch.Data.CompanyInfo
+import com.example.whattowatch.Data.Credits
 import com.example.whattowatch.Data.Genre
 import com.example.whattowatch.Data.GenreDTO
 import com.example.whattowatch.Data.MovieAvailability
@@ -21,15 +22,22 @@ class ApiRepository(private val context: Context) {
     private val client = OkHttpClient()
 
     suspend fun getMovies(page: Int, genre: Genre, companies: List<CompanyInfo>): MovieDTO {
-        val result = apiCall("https://api.themoviedb.org/3/discover/movie?include_adult=true&include_video=false&language=en-US&page=$page&sort_by=popularity.desc&watch_region=DE&with_genres=${genre.id}&with_watch_providers=${
-            companies.joinToString("|") { it.provider_id.toString() }
-        }")
+        val result =
+            apiCall("https://api.themoviedb.org/3/discover/movie?include_adult=true&include_video=false&language=en-US&page=$page&sort_by=popularity.desc&watch_region=DE&with_genres=${genre.id}&with_watch_providers=${
+                companies.joinToString("|") { it.provider_id.toString() }
+            }")
         return Gson().fromJson(result, MovieDTO::class.java)
     }
 
     suspend fun getMovieDetails(movieId: Int): MovieInfo {
         val result = apiCall("https://api.themoviedb.org/3/movie/$movieId?language=en-US")
         return Gson().fromJson(result, MovieInfo::class.java)
+    }
+
+    suspend fun getCast(movieId: Int): List<String> {
+        val result = apiCall("https://api.themoviedb.org/3/movie/$movieId/credits?language=en-US")
+        val credits = Gson().fromJson(result, Credits::class.java)
+        return credits.cast.map { member -> member.name }.filterIndexed { index, _ -> index < 5 }
     }
 
     suspend fun getProviders(movieId: Int): MovieAvailability {
@@ -44,7 +52,8 @@ class ApiRepository(private val context: Context) {
     }
 
     suspend fun getCompanies(): Company {
-        val result = apiCall("https://api.themoviedb.org/3/watch/providers/movie?language=en-US&watch_region=DE")
+        val result =
+            apiCall("https://api.themoviedb.org/3/watch/providers/movie?language=en-US&watch_region=DE")
         return Gson().fromJson(result, Company::class.java)
 
     }

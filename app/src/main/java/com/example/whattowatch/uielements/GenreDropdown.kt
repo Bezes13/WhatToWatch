@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.whattowatch.Data.Genre
+import com.example.whattowatch.MainViewEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,7 +23,8 @@ fun genreDropdown(
     items: List<Genre>,
     getMovies: (Genre) -> Unit,
     additionalItems: List<String>,
-    getCustomList: (String) -> Unit
+    getCustomList: (String) -> Unit,
+    eventListener: (MainViewEvent) -> Unit
 ): String {
     var isExpanded by remember {
         mutableStateOf(false)
@@ -68,6 +70,7 @@ fun genreDropdown(
                     genre = it.name
                     isExpanded = false
                     getMovies(items.first { it.name == genre })
+                    eventListener(MainViewEvent.SetGenre(genre))
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -81,6 +84,7 @@ fun genreDropdown(
                     genre = it
                     isExpanded = false
                     getCustomList(it)
+                    eventListener(MainViewEvent.SetGenre(genre))
                 },
                 modifier = Modifier.fillMaxWidth()
             )
