@@ -5,15 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -28,8 +28,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,7 +41,6 @@ import com.example.whattowatch.extension.getJustYear
 
 @Composable
 fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit) {
-
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -54,7 +51,8 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit) {
         ) {
             Column(
                 modifier = Modifier
-                    .padding(10.dp), verticalArrangement = Arrangement.SpaceEvenly
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 Row {
                     Text(
@@ -69,7 +67,7 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit) {
                             }
                             withStyle(
                                 style = SpanStyle(
-                                     fontSize = 10.sp
+                                    fontSize = 10.sp
                                 )
                             ) { // AnnotatedString.Builder
                                 append(info.release_date.getJustYear())
@@ -78,51 +76,78 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit) {
                     )
                 }
                 Divider()
-                Row {
-                    Column(Modifier.weight(1F)) {
-
+                Row(
+                    modifier = Modifier
+                        .fillMaxHeight(0.8f)
+                        .wrapContentHeight()
+                ) {
+                    Column(
+                        Modifier
+                            .weight(1F)
+                            .fillMaxHeight()
+                    ) {
                         Row {
                             Icon(imageVector = Icons.Filled.Star, contentDescription = "Bewertung")
                             Text(text = "${info.vote_average} by ${info.vote_count}")
                         }
                         Card(border = BorderStroke(1.dp, Color.Black)) {
-                            LazyColumn{
-                                item {  Text(text = info.overview, modifier = Modifier.padding(5.dp))
-                            }}
-                        }
-
-                    }
-                    Column(modifier = Modifier
-                        .weight(1F).padding(horizontal = 5.dp)) {
-                        AsyncImage(
-
-                            model = stringResource(R.string.image_path, info.poster_path),
-                            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                            error = painterResource(id = R.drawable.ic_launcher_foreground),
-                            contentDescription = info.title,
-                        )
-                        if (info.cast != null){
-                            info.cast.forEach{
-                                Text(text = "$it,")
+                            LazyColumn {
+                                item {
+                                    Text(text = info.overview, modifier = Modifier.padding(5.dp))
+                                }
                             }
                         }
                     }
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1F)
+                            .padding(horizontal = 5.dp)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
+                            AsyncImage(
+                                model = stringResource(R.string.image_path, info.poster_path),
+                                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                                contentDescription = info.title,
+                            )
+                        }
+                        if (info.cast != null) {
+                            info.cast.forEach {
+                                item {
+                                    Text(text = it.name)
+                                    AsyncImage(
+                                        model = stringResource(
+                                            R.string.image_path,
+                                            it.profile_path
+                                        ),
+                                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                                        contentDescription = it.name,
+                                        modifier = Modifier.size(80.dp)
+                                    )
+                                }
 
+                            }
+                        }
+                    }
                 }
                 TextButton(
                     onClick = {
                         onDismissRequest()
-                    }, modifier = Modifier.fillMaxWidth().height(40.dp),
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp),
                     colors = ButtonDefaults.buttonColors()
                 ) {
                     Text("Close")
                 }
             }
-
         }
     }
-
-
 }
 
 @Preview
@@ -140,7 +165,7 @@ fun MovieDialogPreview() {
             8.3,
             6891,
             listOf("Netflix"),
-            cast = listOf("Emil", "Alex","Anna")
+            cast = listOf()
         ), {}
     )
 }

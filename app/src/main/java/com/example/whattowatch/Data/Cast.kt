@@ -7,5 +7,5 @@ data class Credits (
 
 data class Cast (
     val name: String,
-    val original_name: String
+    val profile_path: String
 )

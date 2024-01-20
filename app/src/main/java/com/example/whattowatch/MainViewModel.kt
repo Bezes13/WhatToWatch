@@ -170,8 +170,9 @@ class MainViewModel(
             _viewState.update { currentState ->
                 currentState.copy(movies = currentState.movies.toMutableMap().apply {
                     this[genre] = updatedMovies.orEmpty()
-                }, dialog = MainViewDialog.DetailsDialog(movieInfo))
+                }, dialog = MainViewDialog.DetailsDialog(movieInfo.copy(cast = cast)))
             }
+
         }
     }
 

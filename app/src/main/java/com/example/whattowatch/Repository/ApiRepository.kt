@@ -1,6 +1,7 @@
 package com.example.whattowatch.Repository
 
 import android.content.Context
+import com.example.whattowatch.Data.Cast
 import com.example.whattowatch.Data.Company
 import com.example.whattowatch.Data.CompanyInfo
 import com.example.whattowatch.Data.Credits
@@ -34,10 +35,10 @@ class ApiRepository(private val context: Context) {
         return Gson().fromJson(result, MovieInfo::class.java)
     }
 
-    suspend fun getCast(movieId: Int): List<String> {
+    suspend fun getCast(movieId: Int): List<Cast> {
         val result = apiCall("https://api.themoviedb.org/3/movie/$movieId/credits?language=en-US")
         val credits = Gson().fromJson(result, Credits::class.java)
-        return credits.cast.map { member -> member.name }.filterIndexed { index, _ -> index < 5 }
+        return credits.cast.filterIndexed { index, _ -> index < 5 }
     }
 
     suspend fun getProviders(movieId: Int): MovieAvailability {
