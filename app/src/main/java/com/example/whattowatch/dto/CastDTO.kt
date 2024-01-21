@@ -1,6 +1,6 @@
 package com.example.whattowatch.dto
 
-import com.example.whattowatch.datas.MovieInfo
+import com.example.whattowatch.data.MovieInfo
 
 data class CastDTO (
     val name: String,

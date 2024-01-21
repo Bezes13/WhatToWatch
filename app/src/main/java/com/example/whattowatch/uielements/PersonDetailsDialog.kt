@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
-import com.example.whattowatch.datas.MovieInfo
+import com.example.whattowatch.data.MovieInfo
 import com.example.whattowatch.dto.CastDTO
 
 @Composable

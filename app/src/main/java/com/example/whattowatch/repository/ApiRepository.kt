@@ -11,7 +11,7 @@ import com.example.whattowatch.dto.MovieAvailability
 import com.example.whattowatch.dto.MovieDTO
 import com.example.whattowatch.dto.MovieInfoDTO
 import com.example.whattowatch.R
-import com.example.whattowatch.datas.MovieInfo
+import com.example.whattowatch.data.MovieInfo
 import com.example.whattowatch.dto.MovieCreditsDTO
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers

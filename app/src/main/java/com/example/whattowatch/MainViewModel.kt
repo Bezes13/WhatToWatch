@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattowatch.manager.SharedPreferencesManager
 import com.example.whattowatch.repository.ApiRepository
-import com.example.whattowatch.datas.MovieInfo
-import com.example.whattowatch.datas.UserMovie
+import com.example.whattowatch.data.MovieInfo
+import com.example.whattowatch.data.UserMovie
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.SingleGenreDTO
 import com.google.firebase.database.ktx.database
