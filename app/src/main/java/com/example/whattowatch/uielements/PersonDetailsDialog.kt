@@ -1,7 +1,6 @@
 package com.example.whattowatch.uielements
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,12 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,23 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
 import com.example.whattowatch.datas.MovieInfo
 import com.example.whattowatch.dto.CastDTO
-import com.example.whattowatch.extension.getJustYear
 
 @Composable
-fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits: (CastDTO) -> Unit,
-) {
+fun PersonDetailsDialog(info: CastDTO, onDismissRequest: () -> Unit) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -57,25 +46,14 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits
                     .padding(10.dp),
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                Row {
-                    Text(
-                        buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontSize = 30.sp,
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            ) {
-                                append(info.title)
-                            }
-                            withStyle(
-                                style = SpanStyle(
-                                    fontSize = 10.sp
-                                )
-                            ) { // AnnotatedString.Builder
-                                append(info.releaseDate.getJustYear())
-                            }
-                        }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = info.name, modifier = Modifier.weight(0.7f))
+                    AsyncImage(
+                        model = stringResource(R.string.image_path, info.profile_path),
+                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = info.name,
+                        modifier = Modifier.weight(0.3f)
                     )
                 }
                 Divider()
@@ -84,23 +62,6 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits
                         .fillMaxHeight(0.8f)
                         .wrapContentHeight()
                 ) {
-                    Column(
-                        Modifier
-                            .weight(1F)
-                            .fillMaxHeight()
-                    ) {
-                        Row {
-                            Icon(imageVector = Icons.Filled.Star, contentDescription = "Bewertung")
-                            Text(text = "${info.voteAverage} by ${info.voteCount}")
-                        }
-                        Card(border = BorderStroke(1.dp, Color.Black)) {
-                            LazyColumn {
-                                item {
-                                    Text(text = info.overview, modifier = Modifier.padding(5.dp))
-                                }
-                            }
-                        }
-                    }
                     LazyColumn(
                         modifier = Modifier
                             .weight(1F)
@@ -109,31 +70,25 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        item {
-                            AsyncImage(
-                                model = stringResource(R.string.image_path, info.posterPath),
-                                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                                error = painterResource(id = R.drawable.ic_launcher_foreground),
-                                contentDescription = info.title,
-                            )
-                        }
-                        if (info.cast != null) {
-                            info.cast.forEach {
-                                item {
-                                    Text(text = it.name)
+
+                        info.credits.forEach {
+                            item {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                    Text(text = it.title,modifier = Modifier.weight(0.7f))
                                     AsyncImage(
                                         model = stringResource(
                                             R.string.image_path,
-                                            it.profile_path
+                                            it.posterPath
                                         ),
                                         placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                                         error = painterResource(id = R.drawable.ic_launcher_foreground),
-                                        contentDescription = it.name,
-                                        modifier = Modifier.size(80.dp).clickable(onClick = {getCredits(it)})
+                                        contentDescription = it.title,
+                                        modifier = Modifier.size(80.dp).weight(0.3f)
                                     )
                                 }
 
                             }
+
                         }
                     }
                 }
@@ -155,9 +110,21 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits
 
 @Preview
 @Composable
-fun MovieDialogPreview() {
-    MovieDetailsDialog(
+fun PreviewPersonDetails(){
+    PersonDetailsDialog(info = CastDTO("Tom Johnson", "", 3, listOf(
         MovieInfo(
+        231,
+        "Englsich",
+        "Puss in Boots discovers that his passion for adventure has taken its toll: He has burned through eight of his nine lives, leaving him with only one life left. Puss sets out on an epic journey to find the mythical Last Wish and restore his nine lives.",
+        12,
+        "pasdl",
+        "2022",
+        "Puss in Boots: The Last Wish",
+        8.3,
+        6891,
+        listOf("Netflix"),
+        cast = listOf()
+    ),MovieInfo(
             231,
             "Englsich",
             "Puss in Boots discovers that his passion for adventure has taken its toll: He has burned through eight of his nine lives, leaving him with only one life left. Puss sets out on an epic journey to find the mythical Last Wish and restore his nine lives.",
@@ -169,6 +136,18 @@ fun MovieDialogPreview() {
             6891,
             listOf("Netflix"),
             cast = listOf()
-        ), {},{}
-    )
+        ),MovieInfo(
+            231,
+            "Englsich",
+            "Puss in Boots discovers that his passion for adventure has taken its toll: He has burned through eight of his nine lives, leaving him with only one life left. Puss sets out on an epic journey to find the mythical Last Wish and restore his nine lives.",
+            12,
+            "pasdl",
+            "2022",
+            "Puss in Boots: The Last Wish",
+            8.3,
+            6891,
+            listOf("Netflix"),
+            cast = listOf()
+        )
+    ))) {}
 }

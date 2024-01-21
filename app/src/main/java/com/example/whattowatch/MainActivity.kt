@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.whattowatch.managers.MainViewModelFactory
-import com.example.whattowatch.managers.SharedPreferencesManager
+import com.example.whattowatch.manager.MainViewModelFactory
+import com.example.whattowatch.manager.SharedPreferencesManager
 import com.example.whattowatch.repository.ApiRepository
 import com.example.whattowatch.ui.theme.WhatToWatchTheme
 import com.google.firebase.FirebaseApp

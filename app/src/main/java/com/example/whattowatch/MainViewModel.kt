@@ -2,10 +2,11 @@ package com.example.whattowatch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.whattowatch.managers.SharedPreferencesManager
+import com.example.whattowatch.manager.SharedPreferencesManager
 import com.example.whattowatch.repository.ApiRepository
-import com.example.whattowatch.data.MovieInfo
-import com.example.whattowatch.data.UserMovie
+import com.example.whattowatch.datas.MovieInfo
+import com.example.whattowatch.datas.UserMovie
+import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.SingleGenreDTO
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -173,6 +174,31 @@ class MainViewModel(
                 }, dialog = MainViewDialog.DetailsDialog(movieInfo.copy(cast = cast)))
             }
 
+        }
+    }
+
+    fun getCredits(castDTO: CastDTO){
+        viewModelScope.launch(Dispatchers.IO) {
+            val cast = apiRepository.getMovieCredits(castDTO.id)
+/*
+            val updatedMovies = _viewState.value.movies[genre]?.map { movie ->
+                if (movie.id == movieID) {
+                    movie.copy(cast = movie.cast?.map{person-> if(person.id == castDTO.id) person.copy(credits = cast) else person })
+                } else {
+                    movie
+                }
+            }
+
+            _viewState.update { currentState ->
+                currentState.copy(movies = currentState.movies.toMutableMap().apply {
+                    this[genre] = updatedMovies.orEmpty()
+                }, dialog = MainViewDialog.PersonDetails(castDTO.copy()))
+            }
+            */
+
+            _viewState.update { currentState ->
+                currentState.copy(dialog = MainViewDialog.PersonDetails(castDTO.copy(credits = cast)))
+            }
         }
     }
 

@@ -21,11 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.whattowatch.data.MovieInfo
+import com.example.whattowatch.datas.MovieInfo
+import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.SingleGenreDTO
 import com.example.whattowatch.uielements.GenreDropdown
 import com.example.whattowatch.uielements.MovieDetailsDialog
 import com.example.whattowatch.uielements.MovieListOverview
+import com.example.whattowatch.uielements.PersonDetailsDialog
 import com.example.whattowatch.uielements.TextFieldDialog
 import com.example.whattowatch.uielements.TopBar
 
@@ -49,7 +51,8 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         viewState.dialog,
         mainViewModel::changeLoadedMovies,
         mainViewModel::sendEvent,
-        mainViewModel::getCast
+        mainViewModel::getCast,
+        mainViewModel::getCredits
     )
 }
 
@@ -68,6 +71,7 @@ fun MainScreenContent(
     changeLoadedMovies: (String) -> Unit,
     eventListener: (MainViewEvent) -> Unit,
     getCast: (String, MovieInfo) -> Unit,
+    getCredits: (CastDTO) -> Unit,
 ) {
     if (genres.isNotEmpty()) {
         TopBar(eventListener) { innerPadding ->
@@ -89,7 +93,13 @@ fun MainScreenContent(
                     saveName = saveName
                 )
 
-                is MainViewDialog.DetailsDialog -> MovieDetailsDialog(dialog.info) {
+                is MainViewDialog.DetailsDialog -> MovieDetailsDialog(dialog.info, getCredits = getCredits, onDismissRequest = {
+                    eventListener(
+                        MainViewEvent.SetDialog(MainViewDialog.None)
+                    )})
+
+
+                is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
                     )
@@ -152,6 +162,7 @@ sealed class MainViewDialog() {
     data object None : MainViewDialog()
     data object ShareWithFriend : MainViewDialog()
     data object EnterName : MainViewDialog()
+    data class PersonDetails(val info: CastDTO): MainViewDialog()
 }
 
 @Composable
@@ -213,5 +224,6 @@ fun PreviewMainScreen() {
         changeLoadedMovies = {},
         eventListener = {},
         getCast = { _, _ -> },
+        {}
     )
 }

@@ -1,4 +1,4 @@
-package com.example.whattowatch.data
+package com.example.whattowatch.datas
 
 import com.example.whattowatch.dto.CastDTO
 

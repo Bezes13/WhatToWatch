@@ -11,7 +11,8 @@ import com.example.whattowatch.dto.MovieAvailability
 import com.example.whattowatch.dto.MovieDTO
 import com.example.whattowatch.dto.MovieInfoDTO
 import com.example.whattowatch.R
-import com.example.whattowatch.data.MovieInfo
+import com.example.whattowatch.datas.MovieInfo
+import com.example.whattowatch.dto.MovieCreditsDTO
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,23 +24,29 @@ class ApiRepository(private val context: Context) {
 
     private val client = OkHttpClient()
 
-    suspend fun getMovies(page: Int, genre: SingleGenreDTO, companies: List<CompanyInfoDTO>): List<MovieInfo> {
+    suspend fun getMovies(
+        page: Int,
+        genre: SingleGenreDTO,
+        companies: List<CompanyInfoDTO>
+    ): List<MovieInfo> {
         val result =
             apiCall("https://api.themoviedb.org/3/discover/movie?include_adult=true&include_video=false&language=en-US&page=$page&sort_by=popularity.desc&watch_region=DE&with_genres=${genre.id}&with_watch_providers=${
                 companies.joinToString("|") { it.provider_id.toString() }
             }")
         val movieDto = Gson().fromJson(result, MovieDTO::class.java)
-        return movieDto.results.map { dto -> MovieInfo(
-            id = dto.id,
-            originalLanguage = dto.original_language,
-            overview = dto.overview,
-            popularity = dto.popularity,
-            voteAverage = dto.vote_average,
-            voteCount = dto.vote_count,
-            posterPath = dto.poster_path,
-            title = dto.title,
-            releaseDate = dto.release_date
-        ) }
+        return movieDto.results.map { dto ->
+            MovieInfo(
+                id = dto.id,
+                originalLanguage = dto.original_language?:"",
+                overview = dto.overview?:"",
+                popularity = dto.popularity?:0,
+                voteAverage = dto.vote_average?:0,
+                voteCount = dto.vote_count?:0,
+                posterPath = dto.poster_path?:"",
+                title = dto.title?:"",
+                releaseDate = dto.release_date?:""
+            )
+        }
     }
 
     suspend fun getMovieDetails(movieId: Int): MovieInfo {
@@ -47,21 +54,21 @@ class ApiRepository(private val context: Context) {
         val dto = Gson().fromJson(result, MovieInfoDTO::class.java)
         return MovieInfo(
             id = dto.id,
-            originalLanguage = dto.original_language,
-            overview = dto.overview,
-            popularity = dto.popularity,
-            voteAverage = dto.vote_average,
-            voteCount = dto.vote_count,
-            posterPath = dto.poster_path,
-            title = dto.title,
-            releaseDate = dto.release_date
+            originalLanguage = dto.original_language?:"",
+            overview = dto.overview?:"",
+            popularity = dto.popularity?:0,
+            voteAverage = dto.vote_average?:0,
+            voteCount = dto.vote_count?:0,
+            posterPath = dto.poster_path?:"",
+            title = dto.title?:"",
+            releaseDate = dto.release_date?:""
         )
     }
 
     suspend fun getCast(movieId: Int): List<CastDTO> {
         val result = apiCall("https://api.themoviedb.org/3/movie/$movieId/credits?language=en-US")
         val credits = Gson().fromJson(result, CreditsDTO::class.java)
-        return credits.cast.filterIndexed { index, _ -> index < 5 }
+        return credits.cast.filterIndexed { index, _ -> index < 10 }
     }
 
     suspend fun getProviders(movieId: Int): MovieAvailability {
@@ -79,7 +86,26 @@ class ApiRepository(private val context: Context) {
         val result =
             apiCall("https://api.themoviedb.org/3/watch/providers/movie?language=en-US&watch_region=DE")
         return Gson().fromJson(result, CompanyDTO::class.java)
+    }
 
+    suspend fun getMovieCredits(personId: Int): List<MovieInfo> {
+        val movieCreditsJSON = apiCall("https://api.themoviedb.org/3/person/$personId/movie_credits?language=en-US")
+        val tvCreditsJSON = apiCall("https://api.themoviedb.org/3/person/$personId/tv_credits?language=en-US")
+        val movieCredits = Gson().fromJson(movieCreditsJSON, MovieCreditsDTO::class.java)
+        val tvCredits = Gson().fromJson(tvCreditsJSON, MovieCreditsDTO::class.java)
+        val allCredits = movieCredits.cast.filter { credit -> !credit.title.isNullOrBlank() && !credit.poster_path.isNullOrBlank() } + tvCredits.cast.filter { credit -> !credit.character.isNullOrBlank() &&!credit.character.contains("Self") && !credit.poster_path.isNullOrBlank() }
+        return allCredits.sorted().filterIndexed{ index, _ -> index < 20 }.map {  dto ->
+            MovieInfo(
+                id = dto.id,
+                originalLanguage = dto.original_language?:"",
+                overview = dto.overview?:"",
+                popularity = dto.popularity?:0,
+                voteAverage = dto.vote_average?:0,
+                voteCount = dto.vote_count?:0,
+                posterPath = dto.poster_path?:"",
+                title = dto.title?:dto.original_name?:"",
+                releaseDate = dto.release_date?:""
+            ) }
     }
 
     private suspend fun readApiKeyFromConfigFile(): String {

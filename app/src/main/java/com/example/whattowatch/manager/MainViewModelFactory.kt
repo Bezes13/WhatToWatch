@@ -1,4 +1,4 @@
-package com.example.whattowatch.managers
+package com.example.whattowatch.manager
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

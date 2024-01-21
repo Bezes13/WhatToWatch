@@ -1,4 +1,4 @@
-package com.example.whattowatch.managers
+package com.example.whattowatch.manager
 
 import android.content.Context
 import android.content.SharedPreferences
