@@ -1,9 +1,9 @@
 package com.example.whattowatch
 
-import com.example.whattowatch.dataObjects.MovieInfo
+import com.example.whattowatch.data.MovieInfo
 import com.example.whattowatch.dto.CompanyInfoDTO
 import com.example.whattowatch.dto.SingleGenreDTO
-import com.example.whattowatch.dataObjects.UserMovie
+import com.example.whattowatch.data.UserMovie
 
 data class MainViewState (
     val isLoading: Boolean= false,

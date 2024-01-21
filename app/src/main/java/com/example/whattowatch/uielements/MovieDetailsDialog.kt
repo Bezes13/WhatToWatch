@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
-import com.example.whattowatch.dataObjects.MovieInfo
+import com.example.whattowatch.data.MovieInfo
 import com.example.whattowatch.extension.getJustYear
 
 @Composable
