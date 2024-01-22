@@ -1,6 +1,7 @@
 package com.example.whattowatch.uielements
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,11 +29,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
-import com.example.whattowatch.data.MovieInfo
+import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dto.CastDTO
+import com.example.whattowatch.movie1
+import com.example.whattowatch.movie2
+import com.example.whattowatch.movie3
 
 @Composable
-fun PersonDetailsDialog(info: CastDTO, onDismissRequest: () -> Unit) {
+fun PersonDetailsDialog(info: CastDTO, getCast: (MovieInfo) -> Unit, onDismissRequest: () -> Unit) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -73,8 +77,11 @@ fun PersonDetailsDialog(info: CastDTO, onDismissRequest: () -> Unit) {
 
                         info.credits.forEach {
                             item {
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                                    Text(text = it.title,modifier = Modifier.weight(0.7f))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(text = it.title, modifier = Modifier.weight(0.7f))
                                     AsyncImage(
                                         model = stringResource(
                                             R.string.image_path,
@@ -83,12 +90,19 @@ fun PersonDetailsDialog(info: CastDTO, onDismissRequest: () -> Unit) {
                                         placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                                         error = painterResource(id = R.drawable.ic_launcher_foreground),
                                         contentDescription = it.title,
-                                        modifier = Modifier.size(80.dp).weight(0.3f)
+                                        modifier = Modifier
+                                            .size(80.dp)
+                                            .weight(0.3f)
+                                            .clickable {
+                                                if (it.releaseDate != "") {
+                                                    getCast(it)
+                                                } else {
+                                                }
+                                            }
                                     )
                                 }
-
+                                Divider(thickness = 3.dp)
                             }
-
                         }
                     }
                 }
@@ -110,44 +124,12 @@ fun PersonDetailsDialog(info: CastDTO, onDismissRequest: () -> Unit) {
 
 @Preview
 @Composable
-fun PreviewPersonDetails(){
-    PersonDetailsDialog(info = CastDTO("Tom Johnson", "", 3, listOf(
-        MovieInfo(
-        231,
-        "Englsich",
-        "Puss in Boots discovers that his passion for adventure has taken its toll: He has burned through eight of his nine lives, leaving him with only one life left. Puss sets out on an epic journey to find the mythical Last Wish and restore his nine lives.",
-        12,
-        "pasdl",
-        "2022",
-        "Puss in Boots: The Last Wish",
-        8.3,
-        6891,
-        listOf("Netflix"),
-        cast = listOf()
-    ),MovieInfo(
-            231,
-            "Englsich",
-            "Puss in Boots discovers that his passion for adventure has taken its toll: He has burned through eight of his nine lives, leaving him with only one life left. Puss sets out on an epic journey to find the mythical Last Wish and restore his nine lives.",
-            12,
-            "pasdl",
-            "2022",
-            "Puss in Boots: The Last Wish",
-            8.3,
-            6891,
-            listOf("Netflix"),
-            cast = listOf()
-        ),MovieInfo(
-            231,
-            "Englsich",
-            "Puss in Boots discovers that his passion for adventure has taken its toll: He has burned through eight of his nine lives, leaving him with only one life left. Puss sets out on an epic journey to find the mythical Last Wish and restore his nine lives.",
-            12,
-            "pasdl",
-            "2022",
-            "Puss in Boots: The Last Wish",
-            8.3,
-            6891,
-            listOf("Netflix"),
-            cast = listOf()
+fun PreviewPersonDetails() {
+    PersonDetailsDialog(
+        info = CastDTO(
+            "Tom Johnson", "", 3, listOf(
+                movie3, movie2, movie1
+            )
         )
-    ))) {}
+    , {}) {}
 }

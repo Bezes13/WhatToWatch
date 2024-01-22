@@ -37,12 +37,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
-import com.example.whattowatch.data.MovieInfo
+import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.extension.getJustYear
+import com.example.whattowatch.movie3
 
 @Composable
-fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits: (CastDTO) -> Unit,
+fun MovieDetailsDialog(
+    info: MovieInfo,
+    cast: List<CastDTO>,
+    onDismissRequest: () -> Unit,
+    getCredits: (CastDTO) -> Unit,
 ) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
@@ -106,7 +111,7 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits
                             .weight(1F)
                             .padding(horizontal = 5.dp)
                             .fillMaxHeight(),
-                        verticalArrangement = Arrangement.Center,
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         item {
@@ -117,24 +122,27 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits
                                 contentDescription = info.title,
                             )
                         }
-                        if (info.cast != null) {
-                            info.cast.forEach {
-                                item {
-                                    Text(text = it.name)
-                                    AsyncImage(
-                                        model = stringResource(
-                                            R.string.image_path,
-                                            it.profile_path
-                                        ),
-                                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                                        error = painterResource(id = R.drawable.ic_launcher_foreground),
-                                        contentDescription = it.name,
-                                        modifier = Modifier.size(80.dp).clickable(onClick = {getCredits(it)})
-                                    )
-                                }
 
+                        cast.forEach {
+                            item {
+                                AsyncImage(
+                                    model = stringResource(
+                                        R.string.image_path,
+                                        it.profile_path
+                                    ),
+                                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                                    contentDescription = it.name,
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .clickable(onClick = { getCredits(it) })
+                                )
+                                Text(text = it.name)
+                                Divider(thickness = 3.dp)
                             }
+
                         }
+
                     }
                 }
                 TextButton(
@@ -157,18 +165,6 @@ fun MovieDetailsDialog(info: MovieInfo, onDismissRequest: () -> Unit, getCredits
 @Composable
 fun MovieDialogPreview() {
     MovieDetailsDialog(
-        MovieInfo(
-            231,
-            "Englsich",
-            "Puss in Boots discovers that his passion for adventure has taken its toll: He has burned through eight of his nine lives, leaving him with only one life left. Puss sets out on an epic journey to find the mythical Last Wish and restore his nine lives.",
-            12,
-            "pasdl",
-            "2022",
-            "Puss in Boots: The Last Wish",
-            8.3,
-            6891,
-            listOf("Netflix"),
-            cast = listOf()
-        ), {},{}
+        movie3, listOf(), {}, {}
     )
 }

@@ -1,5 +1,8 @@
 package com.example.whattowatch.extension
 
 fun String.getJustYear(): String {
-    return this.substring(0,4)
+    if (this.length>=4){
+        return this.substring(0,4)
+    }
+    return this
 }

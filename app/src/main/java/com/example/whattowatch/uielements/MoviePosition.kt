@@ -36,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
-import com.example.whattowatch.data.MovieInfo
+import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.extension.getJustYear
 
 @Composable
@@ -44,7 +44,7 @@ fun MoviePosition(
     movieInfo: MovieInfo,
     selectedGenre: String,
     saveSeen: (String, Int, Int) -> Unit,
-    getCast: (String, MovieInfo) -> Unit
+    getCast: (MovieInfo) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -58,7 +58,7 @@ fun MoviePosition(
         AsyncImage(
             modifier = Modifier
                 .clickable(onClick = {
-                    getCast(selectedGenre, movieInfo)
+                    getCast(movieInfo)
                 })
                 .align(Alignment.CenterVertically)
                 .weight(0.5F),
@@ -173,17 +173,17 @@ fun PreviewPosition() {
                 movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = null),
                 selectedGenre = "",
                 saveSeen = { _, _, _ -> },
-                getCast = { _, _ -> })
+                getCast = {  })
             MoviePosition(
                 movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = ""),
                 selectedGenre = "",
                 saveSeen = { _, _, _ -> },
-                getCast = { _, _ -> })
+                getCast = {  })
             MoviePosition(
                 movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = "Anna"),
                 selectedGenre = "",
                 saveSeen = { _, _, _ -> },
-                getCast = { _, _ -> })
+                getCast = {  })
         }
     }
 

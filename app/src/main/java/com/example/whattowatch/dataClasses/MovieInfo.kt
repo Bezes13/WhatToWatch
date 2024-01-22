@@ -1,6 +1,4 @@
-package com.example.whattowatch.data
-
-import com.example.whattowatch.dto.CastDTO
+package com.example.whattowatch.dataClasses
 
 data class MovieInfo(
     val id: Int,
@@ -14,5 +12,4 @@ data class MovieInfo(
     val voteCount: Int,
     val providerName: List<String>? = listOf(),
     var user: String? = "",
-    val cast: List<CastDTO>? = listOf()
 )

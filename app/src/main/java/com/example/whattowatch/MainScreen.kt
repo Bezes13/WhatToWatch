@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.whattowatch.data.MovieInfo
+import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.SingleGenreDTO
 import com.example.whattowatch.uielements.GenreDropdown
@@ -30,7 +30,6 @@ import com.example.whattowatch.uielements.MovieListOverview
 import com.example.whattowatch.uielements.PersonDetailsDialog
 import com.example.whattowatch.uielements.TextFieldDialog
 import com.example.whattowatch.uielements.TopBar
-
 
 @Composable
 fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
@@ -70,12 +69,12 @@ fun MainScreenContent(
     dialog: MainViewDialog,
     changeLoadedMovies: (String) -> Unit,
     eventListener: (MainViewEvent) -> Unit,
-    getCast: (String, MovieInfo) -> Unit,
+    getCast: (MovieInfo) -> Unit,
     getCredits: (CastDTO) -> Unit,
 ) {
     if (genres.isNotEmpty()) {
         TopBar(eventListener) { innerPadding ->
-            
+
             when (dialog) {
                 is MainViewDialog.ShareWithFriend -> TextFieldDialog(
                     title = stringResource(R.string.sharing_is_caring),
@@ -93,13 +92,19 @@ fun MainScreenContent(
                     saveName = saveName
                 )
 
-                is MainViewDialog.DetailsDialog -> MovieDetailsDialog(dialog.info, getCredits = getCredits, onDismissRequest = {
-                    eventListener(
-                        MainViewEvent.SetDialog(MainViewDialog.None)
-                    )})
+                is MainViewDialog.DetailsDialog -> MovieDetailsDialog(
+                    dialog.info,
+                    dialog.cast,
+                    getCredits = getCredits,
+                    onDismissRequest = {
+                        eventListener(
+                            MainViewEvent.SetDialog(MainViewDialog.None)
+                        )
+                    }
+                )
 
 
-                is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info) {
+                is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, getCast) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
                     )
@@ -115,7 +120,7 @@ fun MainScreenContent(
             ) {
 
                 GenreDropdown(genres, getMovies, additionalGenres, getCustomList, eventListener)
-                
+
                 if (selectedGenre == "") {
                     Spacer(modifier = Modifier.size(100.dp))
                     Text(
@@ -158,11 +163,11 @@ fun MainScreenContent(
 }
 
 sealed class MainViewDialog() {
-    data class DetailsDialog(val info: MovieInfo) : MainViewDialog()
+    data class DetailsDialog(val info: MovieInfo, val cast: List<CastDTO>) : MainViewDialog()
     data object None : MainViewDialog()
     data object ShareWithFriend : MainViewDialog()
     data object EnterName : MainViewDialog()
-    data class PersonDetails(val info: CastDTO): MainViewDialog()
+    data class PersonDetails(val info: CastDTO) : MainViewDialog()
 }
 
 @Composable
@@ -170,52 +175,18 @@ sealed class MainViewDialog() {
 fun PreviewMainScreen() {
     MainScreenContent(
         isLoading = false,
-        selectedGenre = "mappa",
+        selectedGenre = testGenre,
         movies = mapOf(
             Pair(
-                "mappa", listOf(
-                    MovieInfo(
-                        231,
-                        "Englsich",
-                        "Toller Film",
-                        12,
-                        "pasdl",
-                        "22.02.2022",
-                        "Marsianer",
-                        123,
-                        123,
-                        listOf("Netflix"),
-                        "Abba"
-                    ),
-                    MovieInfo(
-                        231,
-                        "Englsich",
-                        "Toller Film",
-                        12,
-                        "pasdl",
-                        "22.02.2022",
-                        "Marsianer",
-                        123,
-                        123,
-                        listOf("Netflix")
-                    ),
-                    MovieInfo(
-                        231,
-                        "Englsich",
-                        "Toller Film",
-                        12,
-                        "pasdl",
-                        "22.02.2022",
-                        "Marsianer",
-                        123,
-                        123,
-                        listOf("Netflix")
-                    ),
+                testGenre, listOf(
+                    movie1,
+                    movie1,
+                    movie2,
                 )
             )
         ),
-        genres = listOf(SingleGenreDTO(3, "mappa")),
-        additionalGenres = listOf("Gesehen"),
+        genres = listOf(SingleGenreDTO(3, testGenre)),
+        additionalGenres = listOf(testGenre),
         getMovies = {},
         getCustomList = {},
         saveSeen = { _, _, _ -> },
@@ -223,7 +194,7 @@ fun PreviewMainScreen() {
         dialog = MainViewDialog.None,
         changeLoadedMovies = {},
         eventListener = {},
-        getCast = { _, _ -> },
+        getCast = { },
         {}
     )
 }

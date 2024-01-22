@@ -10,7 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.whattowatch.manager.MainViewModelFactory
 import com.example.whattowatch.manager.SharedPreferencesManager
-import com.example.whattowatch.repository.ApiRepository
+import com.example.whattowatch.apiRepository.ApiRepository
 import com.example.whattowatch.ui.theme.WhatToWatchTheme
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.Dispatchers

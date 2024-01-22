@@ -3,9 +3,9 @@ package com.example.whattowatch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattowatch.manager.SharedPreferencesManager
-import com.example.whattowatch.repository.ApiRepository
-import com.example.whattowatch.data.MovieInfo
-import com.example.whattowatch.data.UserMovie
+import com.example.whattowatch.apiRepository.ApiRepository
+import com.example.whattowatch.dataClasses.MovieInfo
+import com.example.whattowatch.dataClasses.UserMovie
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.SingleGenreDTO
 import com.google.firebase.database.ktx.database
@@ -102,9 +102,9 @@ class MainViewModel(
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
             val movies = apiRepository.getMovies(page, genre, _viewState.value.companies)
-            var filtered = movies.filter {
-                !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == it.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == it.id } && !(_viewState.value.movies[genre.name]
-                    ?: listOf()).any { movie -> movie.id == it.id }
+            var filtered = movies.filter { movieInfo ->
+                !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !(_viewState.value.movies[genre.name]
+                    ?: listOf()).any { movie -> movie.id == movieInfo.id }
             }
             var refreshedCount = 0
             while (filtered.count() <= 5) {
@@ -157,44 +157,18 @@ class MainViewModel(
         }
     }
 
-    fun getCast(genre: String, movieInfo: MovieInfo) {
+    fun getCast(movieInfo: MovieInfo) {
         viewModelScope.launch(Dispatchers.IO) {
             val cast = apiRepository.getCast(movieInfo.id)
-            val updatedMovies = _viewState.value.movies[genre]?.map { movie ->
-                if (movie.id == movieInfo.id) {
-                    movie.copy(cast = cast)
-                } else {
-                    movie
-                }
-            }
-
             _viewState.update { currentState ->
-                currentState.copy(movies = currentState.movies.toMutableMap().apply {
-                    this[genre] = updatedMovies.orEmpty()
-                }, dialog = MainViewDialog.DetailsDialog(movieInfo.copy(cast = cast)))
+                currentState.copy(dialog = MainViewDialog.DetailsDialog(movieInfo, cast))
             }
-
         }
     }
 
     fun getCredits(castDTO: CastDTO){
         viewModelScope.launch(Dispatchers.IO) {
             val cast = apiRepository.getMovieCredits(castDTO.id)
-/*
-            val updatedMovies = _viewState.value.movies[genre]?.map { movie ->
-                if (movie.id == movieID) {
-                    movie.copy(cast = movie.cast?.map{person-> if(person.id == castDTO.id) person.copy(credits = cast) else person })
-                } else {
-                    movie
-                }
-            }
-
-            _viewState.update { currentState ->
-                currentState.copy(movies = currentState.movies.toMutableMap().apply {
-                    this[genre] = updatedMovies.orEmpty()
-                }, dialog = MainViewDialog.PersonDetails(castDTO.copy()))
-            }
-            */
 
             _viewState.update { currentState ->
                 currentState.copy(dialog = MainViewDialog.PersonDetails(castDTO.copy(credits = cast)))
