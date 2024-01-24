@@ -2,6 +2,7 @@ package com.example.whattowatch.dto
 
 data class MovieInfoDTO(
     val id: Int,
+    val name: String = "",
     val original_language: String? = "",
     val original_name: String? = "",
     val character: String? = "",
@@ -9,8 +10,10 @@ data class MovieInfoDTO(
     val popularity: Number?,
     val poster_path: String?,
     val release_date: String?,
+    val first_air_date: String?,
     val title: String?,
     val vote_average: Number?,
+    val video: Boolean?,
     val vote_count: Int?,
 ):Comparable<MovieInfoDTO> {
     override fun compareTo(other: MovieInfoDTO): Int {

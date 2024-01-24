@@ -37,14 +37,15 @@ class ApiRepository(private val context: Context) {
         return movieDto.results.map { dto ->
             MovieInfo(
                 id = dto.id,
-                originalLanguage = dto.original_language?:"",
-                overview = dto.overview?:"",
-                popularity = dto.popularity?:0,
-                voteAverage = dto.vote_average?:0,
-                voteCount = dto.vote_count?:0,
-                posterPath = dto.poster_path?:"",
-                title = dto.title?:"",
-                releaseDate = dto.release_date?:""
+                originalLanguage = dto.original_language ?: "",
+                overview = dto.overview ?: "",
+                popularity = dto.popularity ?: 0,
+                voteAverage = dto.vote_average ?: 0,
+                voteCount = dto.vote_count ?: 0,
+                posterPath = dto.poster_path ?: "",
+                title = dto.title ?: dto.name,
+                releaseDate = dto.release_date ?: dto.first_air_date ?: "",
+                isMovie = !dto.release_date.isNullOrBlank()
             )
         }
     }
@@ -54,19 +55,26 @@ class ApiRepository(private val context: Context) {
         val dto = Gson().fromJson(result, MovieInfoDTO::class.java)
         return MovieInfo(
             id = dto.id,
-            originalLanguage = dto.original_language?:"",
-            overview = dto.overview?:"",
-            popularity = dto.popularity?:0,
-            voteAverage = dto.vote_average?:0,
-            voteCount = dto.vote_count?:0,
-            posterPath = dto.poster_path?:"",
-            title = dto.title?:"",
-            releaseDate = dto.release_date?:""
+            originalLanguage = dto.original_language ?: "",
+            overview = dto.overview ?: "",
+            popularity = dto.popularity ?: 0,
+            voteAverage = dto.vote_average ?: 0,
+            voteCount = dto.vote_count ?: 0,
+            posterPath = dto.poster_path ?: "",
+            title = dto.title ?: dto.name,
+            releaseDate = dto.release_date ?: dto.first_air_date ?: "",
+            isMovie = !dto.release_date.isNullOrBlank()
         )
     }
 
-    suspend fun getCast(movieId: Int): List<CastDTO> {
-        val result = apiCall("https://api.themoviedb.org/3/movie/$movieId/credits?language=en-US")
+    suspend fun getCast(movieId: Int, isMovie: Boolean): List<CastDTO> {
+
+        val result =
+            if (isMovie) apiCall("https://api.themoviedb.org/3/movie/$movieId/credits?language=en-US")
+            else
+                apiCall("https://api.themoviedb.org/3/tv/$movieId/credits?language=en-US")
+
+
         val credits = Gson().fromJson(result, CreditsDTO::class.java)
         return credits.cast.filterIndexed { index, _ -> index < 10 }
     }
@@ -89,23 +97,30 @@ class ApiRepository(private val context: Context) {
     }
 
     suspend fun getMovieCredits(personId: Int): List<MovieInfo> {
-        val movieCreditsJSON = apiCall("https://api.themoviedb.org/3/person/$personId/movie_credits?language=en-US")
-        val tvCreditsJSON = apiCall("https://api.themoviedb.org/3/person/$personId/tv_credits?language=en-US")
+        val movieCreditsJSON =
+            apiCall("https://api.themoviedb.org/3/person/$personId/movie_credits?language=en-US")
+        val tvCreditsJSON =
+            apiCall("https://api.themoviedb.org/3/person/$personId/tv_credits?language=en-US")
         val movieCredits = Gson().fromJson(movieCreditsJSON, MovieCreditsDTO::class.java)
         val tvCredits = Gson().fromJson(tvCreditsJSON, MovieCreditsDTO::class.java)
-        val allCredits = movieCredits.cast.filter { credit -> !credit.title.isNullOrBlank() && !credit.poster_path.isNullOrBlank() } + tvCredits.cast.filter { credit -> !credit.character.isNullOrBlank() &&!credit.character.contains("Self") && !credit.poster_path.isNullOrBlank() }
-        return allCredits.sorted().filterIndexed{ index, _ -> index < 20 }.map {  dto ->
+        val allCredits =
+            movieCredits.cast.filter { credit -> !credit.title.isNullOrBlank() && !credit.poster_path.isNullOrBlank() } + tvCredits.cast.filter { credit ->
+                !credit.character.isNullOrBlank() && !credit.character.contains("Self") && !credit.poster_path.isNullOrBlank()
+            }
+        return allCredits.sorted().filterIndexed { index, _ -> index < 20 }.map { dto ->
             MovieInfo(
                 id = dto.id,
-                originalLanguage = dto.original_language?:"",
-                overview = dto.overview?:"",
-                popularity = dto.popularity?:0,
-                voteAverage = dto.vote_average?:0,
-                voteCount = dto.vote_count?:0,
-                posterPath = dto.poster_path?:"",
-                title = dto.title?:dto.original_name?:"",
-                releaseDate = dto.release_date?:""
-            ) }
+                originalLanguage = dto.original_language ?: "",
+                overview = dto.overview ?: "",
+                popularity = dto.popularity ?: 0,
+                voteAverage = dto.vote_average ?: 0,
+                voteCount = dto.vote_count ?: 0,
+                posterPath = dto.poster_path ?: "",
+                title = dto.title ?: dto.name,
+                releaseDate = dto.release_date ?: dto.first_air_date ?: "",
+                isMovie = !dto.release_date.isNullOrBlank()
+            )
+        }
     }
 
     private suspend fun readApiKeyFromConfigFile(): String {

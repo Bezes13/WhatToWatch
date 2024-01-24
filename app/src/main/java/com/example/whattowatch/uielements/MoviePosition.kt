@@ -38,6 +38,9 @@ import coil.compose.AsyncImage
 import com.example.whattowatch.R
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.extension.getJustYear
+import com.example.whattowatch.movie1
+import com.example.whattowatch.movie2
+import com.example.whattowatch.movie3
 
 @Composable
 fun MoviePosition(
@@ -170,17 +173,17 @@ fun PreviewPosition() {
     LazyColumn() {
         item {
             MoviePosition(
-                movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = null),
+                movieInfo = movie1,
                 selectedGenre = "",
                 saveSeen = { _, _, _ -> },
                 getCast = {  })
             MoviePosition(
-                movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = ""),
+                movieInfo = movie2,
                 selectedGenre = "",
                 saveSeen = { _, _, _ -> },
                 getCast = {  })
             MoviePosition(
-                movieInfo = MovieInfo(1, "", "", 3, ",", "24456", ",", 3, 3, user = "Anna"),
+                movieInfo = movie3,
                 selectedGenre = "",
                 saveSeen = { _, _, _ -> },
                 getCast = {  })

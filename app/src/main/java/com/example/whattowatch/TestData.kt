@@ -13,6 +13,8 @@ import com.example.whattowatch.dataClasses.MovieInfo
         123,
         123,
         listOf("Netflix"),
+
+        false,
         "Abba"
     )
 
@@ -26,7 +28,8 @@ val movie2 = MovieInfo(
     "Marsianer",
     123,
     123,
-    listOf("Netflix")
+    listOf("Netflix"),
+    false
 )
 
 val movie3 = MovieInfo(
@@ -40,6 +43,7 @@ val movie3 = MovieInfo(
     8.3,
     6891,
     listOf("Netflix"),
+    true
 )
 
-val testGenre = "mappa"
+const val testGenre = "mappa"
