@@ -2,12 +2,12 @@ package com.example.whattowatch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.whattowatch.manager.SharedPreferencesManager
 import com.example.whattowatch.apiRepository.ApiRepository
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dataClasses.UserMovie
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.SingleGenreDTO
+import com.example.whattowatch.manager.SharedPreferencesManager
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
@@ -36,9 +36,6 @@ class MainViewModel(
         sharedPreferencesManager.context.getString(R.string.later),
         sharedPreferencesManager.context.getString(R.string.no)
     )
-
-    private val companies =
-        listOf("Netflix", "Disney Plus", "Amazon Prime Video", "WOW", "Crunchyroll")
 
     init {
         _viewState.update { it.copy(isLoading = true) }
@@ -73,8 +70,35 @@ class MainViewModel(
                 is MainViewEvent.SetDialog -> updateDialog(event.dialog)
                 is MainViewEvent.SetGenre -> updateGenre(event.genre)
                 is MainViewEvent.ChangeIsMovie -> changeIsMovie(event.isMovie)
+                is MainViewEvent.UpdateProvider -> updateProvider(
+                    event.providerId,
+                    event.useProvider
+                )
             }
         }
+    }
+
+    private fun updateProvider(providerId: Int, useProvider: Boolean) {
+        _viewState.update { currentState ->
+            currentState.copy(companies = currentState.companies.toMutableList().map { provider ->
+                if (provider.providerId == providerId) provider.copy(show = useProvider) else provider
+            }, series = mapOf(), movies = mapOf())
+        }
+
+        if (_viewState.value.genres.any { it.name == _viewState.value.selectedGenre }) {
+            getMovies(_viewState.value.genres.first { it.name == _viewState.value.selectedGenre })
+        }
+
+        if (_viewState.value.seriesGenres.any { it.name == _viewState.value.selectedGenre }) {
+            getSeries(_viewState.value.seriesGenres.first { it.name == _viewState.value.selectedGenre })
+        } else {
+            getSeries(_viewState.value.seriesGenres.first())
+        }
+
+
+        sharedPreferencesManager.saveList(
+            R.string.provider,
+            _viewState.value.companies.filter { it.show }.map { it.providerId.toString() })
     }
 
     private fun changeIsMovie(isMovie: Boolean) {
@@ -214,14 +238,13 @@ class MainViewModel(
     }
 
     private suspend fun getCompanies() {
-        val company = apiRepository.getCompanies()
+        val company =
+            apiRepository.getCompanies(sharedPreferencesManager.getList(R.string.provider))
         _viewState.update { currentState ->
-            currentState.copy(companies = company.results.filter { companyInfo ->
-                companies.contains(
-                    companyInfo.provider_name
-                )
-            })
+            currentState.copy(companies = company.filter { provider -> provider.priority != 999 }
+                .sorted())
         }
+        println(_viewState.value.companies)
     }
 
     fun getCast(movieInfo: MovieInfo) {
@@ -339,7 +362,7 @@ class MainViewModel(
         }
         val gson = Gson()
         val json = gson.toJson(myList.filter { movie -> movie.name == readName(R.string.user_name) }
-            .map { userMovie -> if(userMovie.isMovie) userMovie.movieId else -userMovie.movieId })
+            .map { userMovie -> if (userMovie.isMovie) userMovie.movieId else -userMovie.movieId })
         myRef.setValue(json)
     }
 
@@ -358,7 +381,8 @@ class MainViewModel(
         ).get().addOnSuccessListener { data ->
             if (data.value != null) {
                 val result: List<Int> = Gson().fromJson(data.value.toString(), type)
-                val userMovies = result.map { id -> UserMovie(abs(id), readName(R.string.user_name), id > 0) }
+                val userMovies =
+                    result.map { id -> UserMovie(abs(id), readName(R.string.user_name), id > 0) }
                 when (key) {
                     R.string.seen -> _viewState.update { _viewState.value.copy(seenMovies = userMovies) }
 
@@ -375,7 +399,8 @@ class MainViewModel(
         ).get().addOnSuccessListener { data ->
             if (data.value != null) {
                 val result: List<Int> = Gson().fromJson(data.value.toString(), type)
-                val userMovies = result.map { id -> UserMovie(id, readName(R.string.friend_name), id > 0) }
+                val userMovies =
+                    result.map { id -> UserMovie(id, readName(R.string.friend_name), id > 0) }
 
                 when (key) {
                     R.string.seen -> _viewState.update { it.copy(seenMovies = it.seenMovies + userMovies) }
@@ -410,7 +435,8 @@ class MainViewModel(
                     if (loadedMovies <= 10 && (!extend || !(viewState.value.movies[customList]
                             ?: listOf()).any { m -> m.id == it.movieId })
                     ) {
-                        val movie = apiRepository.getMovieDetails(it.movieId, _viewState.value.showMovies)
+                        val movie =
+                            apiRepository.getMovieDetails(it.movieId, _viewState.value.showMovies)
                         movie.user = it.name
                         newList.add(movie)
                         loadedMovies++
@@ -466,4 +492,5 @@ sealed class MainViewEvent {
     data class SetDialog(val dialog: MainViewDialog) : MainViewEvent()
     data class SetGenre(val genre: String) : MainViewEvent()
     data class ChangeIsMovie(val isMovie: Boolean) : MainViewEvent()
+    data class UpdateProvider(val providerId: Int, val useProvider: Boolean) : MainViewEvent()
 }

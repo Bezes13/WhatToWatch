@@ -25,6 +25,7 @@ import com.example.whattowatch.TestData.movie1
 import com.example.whattowatch.TestData.movie2
 import com.example.whattowatch.TestData.testGenre
 import com.example.whattowatch.dataClasses.MovieInfo
+import com.example.whattowatch.dataClasses.Provider
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.SingleGenreDTO
 import com.example.whattowatch.dto.VideoInfoDTO
@@ -32,6 +33,7 @@ import com.example.whattowatch.uielements.GenreDropdown
 import com.example.whattowatch.uielements.MovieDetailsDialog
 import com.example.whattowatch.uielements.MovieListOverview
 import com.example.whattowatch.uielements.PersonDetailsDialog
+import com.example.whattowatch.uielements.ProviderListDialog
 import com.example.whattowatch.uielements.TextFieldDialog
 import com.example.whattowatch.uielements.TopBar
 
@@ -47,6 +49,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         if(viewState.showMovies) viewState.movies else viewState.series,
         if(viewState.showMovies) viewState.genres else viewState.seriesGenres,
         mainViewModel.markFilmAs,
+        viewState.companies,
         mainViewModel::getMovies,
         mainViewModel::getCustomList,
         mainViewModel::saveSharedList,
@@ -66,6 +69,7 @@ fun MainScreenContent(
     movies: Map<String, List<MovieInfo>>,
     genres: List<SingleGenreDTO>,
     additionalGenres: List<String>,
+    allProviders: List<Provider>,
     getMovies: (SingleGenreDTO) -> Unit,
     getCustomList: (String) -> Unit,
     saveSeen: (String, Int, Int) -> Unit,
@@ -108,8 +112,13 @@ fun MainScreenContent(
                     }
                 )
 
-
                 is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, getCast) {
+                    eventListener(
+                        MainViewEvent.SetDialog(MainViewDialog.None)
+                    )
+                }
+
+                is MainViewDialog.ShowProviderList -> ProviderListDialog(allProviders, eventListener) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
                     )
@@ -173,6 +182,7 @@ sealed class MainViewDialog() {
     data object ShareWithFriend : MainViewDialog()
     data object EnterName : MainViewDialog()
     data class PersonDetails(val info: CastDTO) : MainViewDialog()
+    data object ShowProviderList : MainViewDialog()
 }
 
 @Composable
@@ -192,6 +202,7 @@ fun PreviewMainScreen() {
         ),
         genres = listOf(SingleGenreDTO(3, testGenre)),
         additionalGenres = listOf(testGenre),
+        allProviders = listOf(),
         getMovies = {},
         getCustomList = {},
         saveSeen = { _, _, _ -> },

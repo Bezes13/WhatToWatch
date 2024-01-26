@@ -1,9 +1,9 @@
 package com.example.whattowatch
 
 import com.example.whattowatch.dataClasses.MovieInfo
-import com.example.whattowatch.dto.CompanyInfoDTO
-import com.example.whattowatch.dto.SingleGenreDTO
+import com.example.whattowatch.dataClasses.Provider
 import com.example.whattowatch.dataClasses.UserMovie
+import com.example.whattowatch.dto.SingleGenreDTO
 
 data class MainViewState (
     val isLoading: Boolean= false,
@@ -11,7 +11,7 @@ data class MainViewState (
     val movies: Map<String, List<MovieInfo>> = mapOf(),
     val series: Map<String, List<MovieInfo>> = mapOf(),
     val moviesToLoad: Int = 15,
-    val companies: List<CompanyInfoDTO> = listOf(),
+    val companies: List<Provider> = listOf(),
     val genres: List<SingleGenreDTO> = listOf(),
     val seriesGenres: List<SingleGenreDTO> = listOf(),
     val seenMovies: List<UserMovie> = listOf(),

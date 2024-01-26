@@ -3,9 +3,9 @@ package com.example.whattowatch.apiRepository
 import android.content.Context
 import com.example.whattowatch.R
 import com.example.whattowatch.dataClasses.MovieInfo
+import com.example.whattowatch.dataClasses.Provider
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.CompanyDTO
-import com.example.whattowatch.dto.CompanyInfoDTO
 import com.example.whattowatch.dto.CreditsDTO
 import com.example.whattowatch.dto.GenresDTO
 import com.example.whattowatch.dto.MovieAvailability
@@ -29,12 +29,12 @@ class ApiRepository(private val context: Context) {
     suspend fun getMovies(
         page: Int,
         genre: SingleGenreDTO,
-        companies: List<CompanyInfoDTO>,
+        companies: List<Provider>,
         getMovies: Boolean
     ): List<MovieInfo> {
         val result =
             apiCall("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=de-DE&page=$page&sort_by=popularity.desc&watch_region=DE&with_genres=${genre.id}&with_watch_providers=${
-                companies.joinToString("|") { it.provider_id.toString() }
+                companies.filter { it.show }.joinToString("|") { it.providerId.toString() }
             }")
         val movieDto = Gson().fromJson(result, MovieDTO::class.java)
         return movieDto.results.map { dto ->
@@ -91,10 +91,11 @@ class ApiRepository(private val context: Context) {
         return Gson().fromJson(result, GenresDTO::class.java)
     }
 
-    suspend fun getCompanies(): CompanyDTO {
+    suspend fun getCompanies(savedProviders: List<String>): List<Provider> {
         val result =
             apiCall("https://api.themoviedb.org/3/watch/providers/movie?language=de-DE&watch_region=DE")
-        return Gson().fromJson(result, CompanyDTO::class.java)
+        val companyDTO = Gson().fromJson(result, CompanyDTO::class.java)
+        return companyDTO.results.map {provider -> Provider(providerName = provider.provider_name, providerId = provider.provider_id, logoPath = provider.logo_path, priority = provider.display_priorities["DE"]?:999, savedProviders.contains(provider.provider_id.toString()) )}
     }
 
     suspend fun getMovieCredits(personId: Int): List<MovieInfo> {

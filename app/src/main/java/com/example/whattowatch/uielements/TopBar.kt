@@ -34,8 +34,8 @@ import kotlinx.coroutines.launch
 fun TopBar(eventListener: (MainViewEvent) -> Unit, content: @Composable (PaddingValues) -> Unit) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val isMovie = remember {
-        mutableStateOf(true)
+    val navigationItem = remember {
+        mutableStateOf(NavigationItem.MOVIES)
     }
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -45,9 +45,9 @@ fun TopBar(eventListener: (MainViewEvent) -> Unit, content: @Composable (Padding
                 Divider()
                 NavigationDrawerItem(
                     label = { Text(text = "Movies") },
-                    selected = isMovie.value,
+                    selected = navigationItem.value == NavigationItem.MOVIES,
                     onClick = {
-                        isMovie.apply { value = true }
+                        navigationItem.apply { value = NavigationItem.MOVIES }
                         scope.launch {
                             drawerState.apply {
                                 if (isClosed) open() else close()
@@ -59,14 +59,28 @@ fun TopBar(eventListener: (MainViewEvent) -> Unit, content: @Composable (Padding
                 Divider()
                 NavigationDrawerItem(
                     label = { Text(text = "Series") },
-                    selected = !isMovie.value,
+                    selected = navigationItem.value == NavigationItem.SERIES,
                     onClick = {
                         scope.launch {
-                            isMovie.apply { value = false }
+                            navigationItem.apply { value = NavigationItem.SERIES }
                             drawerState.apply {
                                 if (isClosed) open() else close()
                             }
                             eventListener(MainViewEvent.ChangeIsMovie(false))
+                        }
+                    }
+                )
+                Divider()
+                NavigationDrawerItem(
+                    label = { Text(text = "Stream Providers") },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+
+                            drawerState.apply {
+                                if (isClosed) open() else close()
+                            }
+                            eventListener(MainViewEvent.SetDialog(MainViewDialog.ShowProviderList))
                         }
                     }
                 )
@@ -114,4 +128,8 @@ fun TopBar(eventListener: (MainViewEvent) -> Unit, content: @Composable (Padding
             content(innerPadding)
         }
     }
+}
+
+enum class NavigationItem{
+    SERIES, MOVIES
 }

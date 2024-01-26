@@ -19,4 +19,7 @@
     <string name="choose_genre">Please choose a genre</string>
     <string name="close">Close</string>
     <string name="bewertung">Bewertung</string>
+    <string name="checked">Checked</string>
+    <string name="provider">providers</string>
+    <string name="provider_text">Bitte wähle deine Streaming Dienste aus, indem du auf die gewünschten Icons klickst</string>
 </resources>
