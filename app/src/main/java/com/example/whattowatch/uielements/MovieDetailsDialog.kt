@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,7 +54,20 @@ fun MovieDetailsDialog(
     onDismissRequest: () -> Unit,
     getCredits: (CastDTO) -> Unit,
 ) {
+    var isExpanded by remember {
+        mutableStateOf(false)
+    }
+
     Dialog(onDismissRequest = { onDismissRequest() }) {
+        if(isExpanded) {
+            AsyncImage(
+                model = stringResource(R.string.image_path, info.posterPath),
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = info.title,
+                modifier = Modifier.fillMaxSize().clickable(onClick = { isExpanded = false })
+            )
+        }else{
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,6 +138,7 @@ fun MovieDetailsDialog(
                                 placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                                 error = painterResource(id = R.drawable.ic_launcher_foreground),
                                 contentDescription = info.title,
+                                modifier = Modifier.clickable(onClick = { isExpanded = true })
                             )
                         }
 
@@ -156,7 +175,7 @@ fun MovieDetailsDialog(
                 ) {
                     Text("Close")
                 }
-            }
+            }}
         }
     }
 }
