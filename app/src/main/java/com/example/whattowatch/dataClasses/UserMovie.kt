@@ -1,3 +1,3 @@
 package com.example.whattowatch.dataClasses
 
-data class UserMovie (val movieId: Int, val name: String)
+data class UserMovie (val movieId: Int, val name: String, val isMovie: Boolean)

@@ -18,4 +18,5 @@
     <string name="enter_name_text">Please enter your Name.</string>
     <string name="choose_genre">Please choose a genre</string>
     <string name="close">Close</string>
+    <string name="bewertung">Bewertung</string>
 </resources>

@@ -91,7 +91,7 @@ fun MovieDetailsDialog(
                             .fillMaxHeight()
                     ) {
                         item {
-                            MovieOverview(info, isExpanded)
+                            MovieOverview(info) { isExpanded = true }
                             CastInfo(cast, getCredits)
                             if (video.isNotEmpty()){
                                 VideoPlayer(video[0].key)
@@ -176,14 +176,12 @@ private fun CastInfo(
 @Composable
 private fun MovieOverview(
     info: MovieInfo,
-    isExpanded: Boolean
+    onClick: ()-> Unit
 ) {
-    var isExpanded1 = isExpanded
-
     Row {
         Icon(
             imageVector = Icons.Filled.Star,
-            contentDescription = "Bewertung"
+            contentDescription = stringResource(R.string.bewertung)
         )
         Text(text = "${info.voteAverage} by ${info.voteCount}")
     }
@@ -199,9 +197,7 @@ private fun MovieOverview(
                 error = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = info.title,
                 modifier = Modifier
-                    .clickable(onClick = {
-                        isExpanded1 = true
-                    })
+                    .clickable(onClick = onClick)
                     .padding(10.dp)
             )
         })
@@ -224,7 +220,7 @@ private fun Header(info: MovieInfo) {
                 style = SpanStyle(
                     fontSize = 10.sp
                 )
-            ) { // AnnotatedString.Builder
+            ) {
                 append(info.releaseDate.getJustYear())
             }
         })
