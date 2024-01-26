@@ -29,11 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
+import com.example.whattowatch.TestData.movie1
+import com.example.whattowatch.TestData.movie2
+import com.example.whattowatch.TestData.movie3
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dto.CastDTO
-import com.example.whattowatch.movie1
-import com.example.whattowatch.movie2
-import com.example.whattowatch.movie3
 
 @Composable
 fun PersonDetailsDialog(info: CastDTO, getCast: (MovieInfo) -> Unit, onDismissRequest: () -> Unit) {

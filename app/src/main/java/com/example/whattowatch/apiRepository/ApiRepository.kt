@@ -13,6 +13,8 @@ import com.example.whattowatch.dto.MovieInfoDTO
 import com.example.whattowatch.R
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dto.MovieCreditsDTO
+import com.example.whattowatch.dto.VideoDTO
+import com.example.whattowatch.dto.VideoInfoDTO
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,7 +32,7 @@ class ApiRepository(private val context: Context) {
         companies: List<CompanyInfoDTO>
     ): List<MovieInfo> {
         val result =
-            apiCall("https://api.themoviedb.org/3/discover/movie?include_adult=true&include_video=false&language=en-US&page=$page&sort_by=popularity.desc&watch_region=DE&with_genres=${genre.id}&with_watch_providers=${
+            apiCall("https://api.themoviedb.org/3/discover/movie?include_adult=true&include_video=false&language=de-DE&page=$page&sort_by=popularity.desc&watch_region=DE&with_genres=${genre.id}&with_watch_providers=${
                 companies.joinToString("|") { it.provider_id.toString() }
             }")
         val movieDto = Gson().fromJson(result, MovieDTO::class.java)
@@ -51,7 +53,7 @@ class ApiRepository(private val context: Context) {
     }
 
     suspend fun getMovieDetails(movieId: Int): MovieInfo {
-        val result = apiCall("https://api.themoviedb.org/3/movie/$movieId?language=en-US")
+        val result = apiCall("https://api.themoviedb.org/3/movie/$movieId?language=de-DE")
         val dto = Gson().fromJson(result, MovieInfoDTO::class.java)
         return MovieInfo(
             id = dto.id,
@@ -70,9 +72,9 @@ class ApiRepository(private val context: Context) {
     suspend fun getCast(movieId: Int, isMovie: Boolean): List<CastDTO> {
 
         val result =
-            if (isMovie) apiCall("https://api.themoviedb.org/3/movie/$movieId/credits?language=en-US")
+            if (isMovie) apiCall("https://api.themoviedb.org/3/movie/$movieId/credits?language=de-DE")
             else
-                apiCall("https://api.themoviedb.org/3/tv/$movieId/credits?language=en-US")
+                apiCall("https://api.themoviedb.org/3/tv/$movieId/credits?language=de-DE")
 
 
         val credits = Gson().fromJson(result, CreditsDTO::class.java)
@@ -92,15 +94,15 @@ class ApiRepository(private val context: Context) {
 
     suspend fun getCompanies(): CompanyDTO {
         val result =
-            apiCall("https://api.themoviedb.org/3/watch/providers/movie?language=en-US&watch_region=DE")
+            apiCall("https://api.themoviedb.org/3/watch/providers/movie?language=de-DE&watch_region=DE")
         return Gson().fromJson(result, CompanyDTO::class.java)
     }
 
     suspend fun getMovieCredits(personId: Int): List<MovieInfo> {
         val movieCreditsJSON =
-            apiCall("https://api.themoviedb.org/3/person/$personId/movie_credits?language=en-US")
+            apiCall("https://api.themoviedb.org/3/person/$personId/movie_credits?language=de-DE")
         val tvCreditsJSON =
-            apiCall("https://api.themoviedb.org/3/person/$personId/tv_credits?language=en-US")
+            apiCall("https://api.themoviedb.org/3/person/$personId/tv_credits?language=de-DE")
         val movieCredits = Gson().fromJson(movieCreditsJSON, MovieCreditsDTO::class.java)
         val tvCredits = Gson().fromJson(tvCreditsJSON, MovieCreditsDTO::class.java)
         val allCredits =
@@ -121,6 +123,12 @@ class ApiRepository(private val context: Context) {
                 isMovie = !dto.release_date.isNullOrBlank()
             )
         }
+    }
+
+    suspend fun getVideo(movieInfo: MovieInfo): List<VideoInfoDTO>{
+        val videoJSON = apiCall("https://api.themoviedb.org/3/${if(movieInfo.isMovie) "movie" else "tv"}/${movieInfo.id}/videos?language=de-DE")
+        val video = Gson().fromJson(videoJSON, VideoDTO::class.java)
+        return video.results
     }
 
     private suspend fun readApiKeyFromConfigFile(): String {

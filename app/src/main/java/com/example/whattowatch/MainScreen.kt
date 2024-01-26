@@ -21,9 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.whattowatch.TestData.movie1
+import com.example.whattowatch.TestData.movie2
+import com.example.whattowatch.TestData.testGenre
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.SingleGenreDTO
+import com.example.whattowatch.dto.VideoInfoDTO
 import com.example.whattowatch.uielements.GenreDropdown
 import com.example.whattowatch.uielements.MovieDetailsDialog
 import com.example.whattowatch.uielements.MovieListOverview
@@ -95,6 +99,7 @@ fun MainScreenContent(
                 is MainViewDialog.DetailsDialog -> MovieDetailsDialog(
                     dialog.info,
                     dialog.cast,
+                    dialog.video,
                     getCredits = getCredits,
                     onDismissRequest = {
                         eventListener(
@@ -163,7 +168,7 @@ fun MainScreenContent(
 }
 
 sealed class MainViewDialog() {
-    data class DetailsDialog(val info: MovieInfo, val cast: List<CastDTO>) : MainViewDialog()
+    data class DetailsDialog(val info: MovieInfo, val cast: List<CastDTO>, val video: List<VideoInfoDTO>) : MainViewDialog()
     data object None : MainViewDialog()
     data object ShareWithFriend : MainViewDialog()
     data object EnterName : MainViewDialog()

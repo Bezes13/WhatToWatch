@@ -36,11 +36,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
+import com.example.whattowatch.TestData.movie1
+import com.example.whattowatch.TestData.movie2
+import com.example.whattowatch.TestData.movie3
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.extension.getJustYear
-import com.example.whattowatch.movie1
-import com.example.whattowatch.movie2
-import com.example.whattowatch.movie3
+
 
 @Composable
 fun MoviePosition(

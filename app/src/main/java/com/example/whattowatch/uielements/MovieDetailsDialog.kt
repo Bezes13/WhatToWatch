@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,15 +43,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.whattowatch.R
+import com.example.whattowatch.TestData.movie3
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dto.CastDTO
+import com.example.whattowatch.dto.VideoInfoDTO
 import com.example.whattowatch.extension.getJustYear
-import com.example.whattowatch.movie3
+import eu.wewox.textflow.TextFlow
+import eu.wewox.textflow.TextFlowObstacleAlignment
 
 @Composable
 fun MovieDetailsDialog(
     info: MovieInfo,
     cast: List<CastDTO>,
+    video: List<VideoInfoDTO>,
     onDismissRequest: () -> Unit,
     getCredits: (CastDTO) -> Unit,
 ) {
@@ -59,131 +64,176 @@ fun MovieDetailsDialog(
     }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
-        if(isExpanded) {
-            AsyncImage(
-                model = stringResource(R.string.image_path, info.posterPath),
-                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                error = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = info.title,
-                modifier = Modifier.fillMaxSize().clickable(onClick = { isExpanded = false })
-            )
-        }else{
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(1.dp),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, Color.Black)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Row {
-                    Text(
-                        buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontSize = 30.sp,
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            ) {
-                                append(info.title)
-                            }
-                            withStyle(
-                                style = SpanStyle(
-                                    fontSize = 10.sp
-                                )
-                            ) { // AnnotatedString.Builder
-                                append(info.releaseDate.getJustYear())
-                            }
-                        }
-                    )
-                }
-                Divider()
-                Row(
+            if (isExpanded) {
+                AsyncImage(
+                    model = stringResource(R.string.image_path, info.posterPath),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = info.title,
                     modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .wrapContentHeight()
+                        .fillMaxSize()
+                        .clickable(onClick = { isExpanded = false })
+                )
+            } else {
+                Column(
+                    modifier = Modifier.padding(10.dp),
+                    verticalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Column(
+                    Header(info)
+                    LazyColumn(
                         Modifier
                             .weight(1F)
                             .fillMaxHeight()
                     ) {
-                        Row {
-                            Icon(imageVector = Icons.Filled.Star, contentDescription = "Bewertung")
-                            Text(text = "${info.voteAverage} by ${info.voteCount}")
-                        }
-                        Card(border = BorderStroke(1.dp, Color.Black)) {
-                            LazyColumn {
-                                item {
-                                    Text(text = info.overview, modifier = Modifier.padding(5.dp))
-                                }
-                            }
-                        }
-                    }
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1F)
-                            .padding(horizontal = 5.dp)
-                            .fillMaxHeight(),
-                        verticalArrangement = Arrangement.spacedBy(5.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
                         item {
-                            AsyncImage(
-                                model = stringResource(R.string.image_path, info.posterPath),
-                                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                                error = painterResource(id = R.drawable.ic_launcher_foreground),
-                                contentDescription = info.title,
-                                modifier = Modifier.clickable(onClick = { isExpanded = true })
-                            )
-                        }
-
-                        cast.forEach {
-                            item {
-                                AsyncImage(
-                                    model = stringResource(
-                                        R.string.image_path,
-                                        it.profile_path
-                                    ),
-                                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                                    error = painterResource(id = R.drawable.ic_launcher_foreground),
-                                    contentDescription = it.name,
-                                    modifier = Modifier
-                                        .size(80.dp)
-                                        .clickable(onClick = { getCredits(it) })
-                                )
-                                Text(text = it.name)
-                                Divider(thickness = 3.dp)
+                            MovieOverview(info, isExpanded)
+                            CastInfo(cast, getCredits)
+                            if (video.isNotEmpty()){
+                                VideoPlayer(video[0].key)
                             }
-
                         }
-
+                    }
+                    TextButton(
+                        onClick = {
+                            onDismissRequest()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp),
+                        colors = ButtonDefaults.buttonColors()
+                    ) {
+                        Text(stringResource(R.string.close))
                     }
                 }
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp),
-                    colors = ButtonDefaults.buttonColors()
-                ) {
-                    Text("Close")
-                }
-            }}
+            }
         }
     }
+}
+
+@Composable
+private fun CastInfo(
+    cast: List<CastDTO>,
+    getCredits: (CastDTO) -> Unit
+) {
+    Row(
+        Modifier
+            .height(IntrinsicSize.Min)
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.weight(1F),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            cast.filterIndexed { index, _ -> index % 2 == 0 }.forEach {
+                AsyncImage(
+                    model = stringResource(
+                        R.string.image_path, it.profile_path
+                    ),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = it.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clickable(onClick = { getCredits(it) })
+                )
+                Text(text = it.name)
+                Divider()
+            }
+        }
+        Divider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+        )
+        Column(
+            modifier = Modifier.weight(1F),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            cast.filterIndexed { index, _ -> index % 2 == 1 }.forEach {
+                AsyncImage(
+                    model = stringResource(
+                        R.string.image_path, it.profile_path
+                    ),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = it.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clickable(onClick = { getCredits(it) })
+                )
+                Text(text = it.name)
+                Divider()
+            }
+        }
+    }
+}
+
+@Composable
+private fun MovieOverview(
+    info: MovieInfo,
+    isExpanded: Boolean
+) {
+    var isExpanded1 = isExpanded
+
+    Row {
+        Icon(
+            imageVector = Icons.Filled.Star,
+            contentDescription = "Bewertung"
+        )
+        Text(text = "${info.voteAverage} by ${info.voteCount}")
+    }
+
+    TextFlow(text = info.overview,
+        obstacleAlignment = TextFlowObstacleAlignment.TopStart,
+        obstacleContent = {
+            AsyncImage(
+                model = stringResource(
+                    R.string.image_path, info.posterPath
+                ),
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = info.title,
+                modifier = Modifier
+                    .clickable(onClick = {
+                        isExpanded1 = true
+                    })
+                    .padding(10.dp)
+            )
+        })
+
+}
+
+
+@Composable
+private fun Header(info: MovieInfo) {
+    Row {
+        Text(buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    fontSize = 30.sp, textDecoration = TextDecoration.Underline
+                )
+            ) {
+                append(info.title)
+            }
+            withStyle(
+                style = SpanStyle(
+                    fontSize = 10.sp
+                )
+            ) { // AnnotatedString.Builder
+                append(info.releaseDate.getJustYear())
+            }
+        })
+    }
+    Divider()
 }
 
 @Preview
 @Composable
 fun MovieDialogPreview() {
-    MovieDetailsDialog(
-        movie3, listOf(), {}, {}
-    )
+    MovieDetailsDialog(movie3, listOf(), listOf(), {}, {})
 }
