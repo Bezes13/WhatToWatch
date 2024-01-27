@@ -35,11 +35,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.R
 import com.example.whattowatch.TestData.movie1
 import com.example.whattowatch.TestData.movie2
 import com.example.whattowatch.TestData.movie3
 import com.example.whattowatch.dataClasses.MovieInfo
+import com.example.whattowatch.enums.UserMark
 import com.example.whattowatch.extension.getJustYear
 
 
@@ -47,7 +49,7 @@ import com.example.whattowatch.extension.getJustYear
 fun MoviePosition(
     movieInfo: MovieInfo,
     selectedGenre: String,
-    saveSeen: (String, Int, Int) -> Unit,
+    eventListener: (MainViewEvent) -> Unit,
     getCast: (MovieInfo) -> Unit
 ) {
     Row(
@@ -57,7 +59,7 @@ fun MoviePosition(
     ) {
         BasicInfo(movieInfo)
         Spacer(modifier = Modifier.width(8.dp))
-        MarkFilmButtons(movieInfo, selectedGenre, saveSeen)
+        MarkFilmButtons(movieInfo, selectedGenre, eventListener)
         Spacer(modifier = Modifier.width(8.dp))
         AsyncImage(
             modifier = Modifier
@@ -79,7 +81,7 @@ fun MoviePosition(
 fun RowScope.MarkFilmButtons(
     movieInfo: MovieInfo,
     selectedGenre: String,
-    saveSeen: (String, Int, Int) -> Unit
+    eventListener: (MainViewEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -89,19 +91,19 @@ fun RowScope.MarkFilmButtons(
         horizontalAlignment = Alignment.End
     ) {
         IconButton(
-            onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.seen) },
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.SEEN))},
 
             ) {
             Icon(imageVector = Icons.Filled.Favorite, contentDescription = "")
         }
         IconButton(
-            onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.later) },
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.LATER))},
 
             ) {
             Icon(imageVector = Icons.Filled.Send, contentDescription = "")
         }
         IconButton(
-            onClick = { saveSeen(selectedGenre, movieInfo.id, R.string.no) },
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.NO)) },
 
             ) {
             Icon(imageVector = Icons.Filled.Close, contentDescription = "")
@@ -176,17 +178,17 @@ fun PreviewPosition() {
             MoviePosition(
                 movieInfo = movie1,
                 selectedGenre = "",
-                saveSeen = { _, _, _ -> },
+                eventListener = {},
                 getCast = {  })
             MoviePosition(
                 movieInfo = movie2,
                 selectedGenre = "",
-                saveSeen = { _, _, _ -> },
+                eventListener = {},
                 getCast = {  })
             MoviePosition(
                 movieInfo = movie3,
                 selectedGenre = "",
-                saveSeen = { _, _, _ -> },
+                eventListener = {},
                 getCast = {  })
         }
     }

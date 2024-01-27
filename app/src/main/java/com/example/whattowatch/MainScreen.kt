@@ -31,10 +31,11 @@ import com.example.whattowatch.TestData.movie2
 import com.example.whattowatch.TestData.testGenre
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dataClasses.Provider
-import com.example.whattowatch.dataClasses.SortType
+import com.example.whattowatch.enums.SortType
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.dto.VideoInfoDTO
+import com.example.whattowatch.enums.UserMark
 import com.example.whattowatch.uielements.GenreDropdown
 import com.example.whattowatch.uielements.MovieDetailsDialog
 import com.example.whattowatch.uielements.MovieListOverview
@@ -55,12 +56,10 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         viewState.selectedGenre,
         if(viewState.showMovies) viewState.movies else viewState.series,
         if(viewState.showMovies) viewState.genres else viewState.seriesGenres,
-        mainViewModel.markFilmAs,
         viewState.providers,
         viewState.sorting,
         mainViewModel::getMovies,
         mainViewModel::getCustomList,
-        mainViewModel::saveSharedList,
         mainViewModel::saveName,
         viewState.dialog,
         mainViewModel::changeLoadedMovies,
@@ -76,12 +75,10 @@ fun MainScreenContent(
     selectedGenre: String,
     movies: Map<String, List<MovieInfo>>,
     genres: List<Genre>,
-    additionalGenres: List<String>,
     allProviders: List<Provider>,
     sortType: SortType,
     getMovies: (Genre) -> Unit,
-    getCustomList: (String) -> Unit,
-    saveSeen: (String, Int, Int) -> Unit,
+    getCustomList: (UserMark) -> Unit,
     saveName: (String, Int) -> Unit,
     dialog: MainViewDialog,
     changeLoadedMovies: (String) -> Unit,
@@ -152,7 +149,7 @@ fun MainScreenContent(
                         SortingChip(sortType, SortType.REVENUE, eventListener)
                     }
 
-                    GenreDropdown(genres, getMovies, additionalGenres, getCustomList, eventListener)
+                    GenreDropdown(genres, getMovies, getCustomList, eventListener)
                 }
 
                 if (selectedGenre == "") {
@@ -169,7 +166,7 @@ fun MainScreenContent(
                     MovieListOverview(
                         movies = movies,
                         selectedGenre = selectedGenre,
-                        saveSeen = saveSeen,
+                        eventListener = eventListener,
                         getCast = getCast,
                         isLoading = isLoading,
                         changeLoadedMovies = changeLoadedMovies
@@ -221,12 +218,10 @@ fun PreviewMainScreen() {
             )
         ),
         genres = listOf(Genre(3, testGenre)),
-        additionalGenres = listOf(testGenre),
         allProviders = listOf(),
         sortType = SortType.POPULARITY,
         getMovies = {},
         getCustomList = {},
-        saveSeen = { _, _, _ -> },
         saveName = { _, _ -> },
         dialog = MainViewDialog.None,
         changeLoadedMovies = {},

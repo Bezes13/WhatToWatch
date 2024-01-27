@@ -33,7 +33,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(eventListener: (MainViewEvent) -> Unit, showFilter: Boolean, changeFilter: ()-> Unit, content: @Composable (PaddingValues) -> Unit) {
+fun TopBar(
+    eventListener: (MainViewEvent) -> Unit,
+    showFilter: Boolean,
+    changeFilter: () -> Unit,
+    content: @Composable (PaddingValues) -> Unit
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navigationItem = remember {
@@ -110,7 +115,7 @@ fun TopBar(eventListener: (MainViewEvent) -> Unit, showFilter: Boolean, changeFi
                         }
                         IconButton(onClick = { changeFilter() }) {
                             Icon(
-                                imageVector = if(showFilter) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
+                                imageVector = if (showFilter) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
                                 contentDescription = "Filter"
                             )
                         }
@@ -125,9 +130,8 @@ fun TopBar(eventListener: (MainViewEvent) -> Unit, showFilter: Boolean, changeFi
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Menu,
-                                contentDescription = "Menu",
-
-                                )
+                                contentDescription = "Menu"
+                            )
                         }
                     }
                 )
@@ -138,6 +142,6 @@ fun TopBar(eventListener: (MainViewEvent) -> Unit, showFilter: Boolean, changeFi
     }
 }
 
-enum class NavigationItem{
+enum class NavigationItem {
     SERIES, MOVIES
 }

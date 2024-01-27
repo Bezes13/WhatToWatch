@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.R
 import com.example.whattowatch.dataClasses.MovieInfo
 
@@ -21,7 +22,7 @@ import com.example.whattowatch.dataClasses.MovieInfo
 fun MovieListOverview(
     movies: Map<String, List<MovieInfo>>,
     selectedGenre: String,
-    saveSeen: (String, Int, Int) -> Unit,
+    eventListener: (MainViewEvent) -> Unit,
     getCast: (MovieInfo) -> Unit,
     isLoading: Boolean,
     changeLoadedMovies: (String) -> Unit
@@ -32,7 +33,7 @@ fun MovieListOverview(
                 MoviePosition(
                     it,
                     selectedGenre,
-                    saveSeen,
+                    eventListener,
                     getCast
                 )
                 Divider()

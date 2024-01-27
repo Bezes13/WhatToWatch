@@ -4,7 +4,7 @@ import android.content.Context
 import com.example.whattowatch.R
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dataClasses.Provider
-import com.example.whattowatch.dataClasses.SortType
+import com.example.whattowatch.enums.SortType
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.CompanyDTO
 import com.example.whattowatch.dto.CreditsDTO

@@ -22,4 +22,8 @@
     <string name="checked">Checked</string>
     <string name="provider">providers</string>
     <string name="provider_text">Bitte wähle deine Streaming Dienste aus, indem du auf die gewünschten Icons klickst</string>
+    <string name="popular">Populär</string>
+    <string name="votes">Votes</string>
+    <string name="vote">Vote</string>
+    <string name="revenue">Umsatz</string>
 </resources>

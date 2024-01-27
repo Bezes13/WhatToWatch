@@ -15,17 +15,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.dataClasses.Genre
+import com.example.whattowatch.enums.UserMark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenreDropdown(
     items: List<Genre>,
     getMovies: (Genre) -> Unit,
-    additionalItems: List<String>,
-    getCustomList: (String) -> Unit,
+    getCustomList: (UserMark) -> Unit,
     eventListener: (MainViewEvent) -> Unit
 ) {
     var isExpanded by remember {
@@ -79,16 +80,17 @@ fun GenreDropdown(
             )
             Divider()
         }
-        additionalItems.forEach {
+        UserMark.entries.forEach {
+            val text = stringResource(id = it.textID)
             DropdownMenuItem(
                 text = {
-                    Text(text = it, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth() )
+                    Text(text = text, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth() )
                 },
                 onClick = {
-                    genre = it
+                    genre = text
                     isExpanded = false
                     getCustomList(it)
-                    eventListener(MainViewEvent.SetGenre(genre))
+                    eventListener(MainViewEvent.SetGenre(it.name))
                 },
                 modifier = Modifier.fillMaxWidth()
             )
