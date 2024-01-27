@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.whattowatch.R
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dataClasses.Provider
+import com.example.whattowatch.dataClasses.SortType
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dto.CompanyDTO
 import com.example.whattowatch.dto.CreditsDTO
@@ -12,7 +13,7 @@ import com.example.whattowatch.dto.MovieAvailability
 import com.example.whattowatch.dto.MovieCreditsDTO
 import com.example.whattowatch.dto.MovieDTO
 import com.example.whattowatch.dto.MovieInfoDTO
-import com.example.whattowatch.dto.SingleGenreDTO
+import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.dto.VideoDTO
 import com.example.whattowatch.dto.VideoInfoDTO
 import com.google.gson.Gson
@@ -28,12 +29,19 @@ class ApiRepository(private val context: Context) {
 
     suspend fun getMovies(
         page: Int,
-        genre: SingleGenreDTO,
+        genre: Genre,
         companies: List<Provider>,
-        getMovies: Boolean
+        getMovies: Boolean,
+        sortType: SortType
     ): List<MovieInfo> {
+        val sorting = when(sortType){
+            SortType.POPULARITY -> "popularity"
+            SortType.VOTE_COUNT -> "vote_count"
+            SortType.VOTE_AVERAGE -> "vote_average"
+            SortType.REVENUE -> "revenue"
+        }
         val result =
-            apiCall("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=de-DE&page=$page&sort_by=popularity.desc&watch_region=DE&with_genres=${genre.id}&with_watch_providers=${
+            apiCall("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=de-DE&page=$page&sort_by=$sorting.desc&watch_region=DE${if (genre.id != -1)"&with_genres=${genre.id}" else ""}&with_watch_providers=${
                 companies.filter { it.show }.joinToString("|") { it.providerId.toString() }
             }")
         val movieDto = Gson().fromJson(result, MovieDTO::class.java)

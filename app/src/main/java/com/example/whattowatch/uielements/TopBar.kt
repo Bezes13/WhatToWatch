@@ -2,6 +2,8 @@ package com.example.whattowatch.uielements
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Divider
@@ -31,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(eventListener: (MainViewEvent) -> Unit, content: @Composable (PaddingValues) -> Unit) {
+fun TopBar(eventListener: (MainViewEvent) -> Unit, showFilter: Boolean, changeFilter: ()-> Unit, content: @Composable (PaddingValues) -> Unit) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navigationItem = remember {
@@ -104,6 +106,12 @@ fun TopBar(eventListener: (MainViewEvent) -> Unit, content: @Composable (Padding
                             Icon(
                                 imageVector = Icons.Filled.Share,
                                 contentDescription = "Share with a Friend"
+                            )
+                        }
+                        IconButton(onClick = { changeFilter() }) {
+                            Icon(
+                                imageVector = if(showFilter) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
+                                contentDescription = "Filter"
                             )
                         }
                     },

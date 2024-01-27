@@ -1,6 +1,7 @@
 package com.example.whattowatch.uielements
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,14 +15,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.whattowatch.dto.SingleGenreDTO
+import androidx.compose.ui.text.style.TextAlign
 import com.example.whattowatch.MainViewEvent
+import com.example.whattowatch.dataClasses.Genre
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenreDropdown(
-    items: List<SingleGenreDTO>,
-    getMovies: (SingleGenreDTO) -> Unit,
+    items: List<Genre>,
+    getMovies: (Genre) -> Unit,
     additionalItems: List<String>,
     getCustomList: (String) -> Unit,
     eventListener: (MainViewEvent) -> Unit
@@ -29,7 +31,7 @@ fun GenreDropdown(
     var isExpanded by remember {
         mutableStateOf(false)
     }
-    var genre by remember { mutableStateOf("") }
+    var genre by remember { mutableStateOf("No Genre") }
 
     ExposedDropdownMenuBox(
         expanded = isExpanded,
@@ -55,9 +57,19 @@ fun GenreDropdown(
             isExpanded = false
         }, modifier = Modifier.fillMaxWidth()
     ) {
+        DropdownMenuItem(text = {
+            Text(text = "No Genre", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        }, onClick = {
+            genre = "No Genre"
+            isExpanded = false
+            getMovies(Genre(-1,"No Genre"))
+            eventListener(MainViewEvent.SetGenre(genre))
+        }, modifier = Modifier.fillMaxWidth()
+        )
+        Divider()
         items.forEach {
             DropdownMenuItem(text = {
-                Text(text = it.name)
+                Text(text = it.name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             }, onClick = {
                 genre = it.name
                 isExpanded = false
@@ -65,11 +77,12 @@ fun GenreDropdown(
                 eventListener(MainViewEvent.SetGenre(genre))
             }, modifier = Modifier.fillMaxWidth()
             )
+            Divider()
         }
         additionalItems.forEach {
             DropdownMenuItem(
                 text = {
-                    Text(text = it)
+                    Text(text = it, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth() )
                 },
                 onClick = {
                     genre = it
@@ -79,6 +92,7 @@ fun GenreDropdown(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+            Divider()
         }
     }
 }

@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattowatch.apiRepository.ApiRepository
 import com.example.whattowatch.dataClasses.MovieInfo
+import com.example.whattowatch.dataClasses.SortType
 import com.example.whattowatch.dataClasses.UserMovie
 import com.example.whattowatch.dto.CastDTO
-import com.example.whattowatch.dto.SingleGenreDTO
+import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.manager.SharedPreferencesManager
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -49,6 +50,7 @@ class MainViewModel(
             getCompanies()
             getGenres()
             readSeenMovieList()
+            getMovies(Genre(-1,"No Genre"))
         }
     }
 
@@ -74,7 +76,18 @@ class MainViewModel(
                     event.providerId,
                     event.useProvider
                 )
+                is MainViewEvent.ChangeSorting -> changeSorting(event.sortType)
             }
+        }
+    }
+
+    private fun changeSorting(sortType: SortType) {
+        if(_viewState.value.sorting == sortType){
+            return
+        }
+        _viewState.update { it.copy(sorting = sortType, series = mapOf(), movies = mapOf()) }
+        if(_viewState.value.showMovies){
+            getMovies(viewState.value.genres.firstOrNull() { it.name == _viewState.value.selectedGenre }?: Genre(-1, "No Genre"))
         }
     }
 
@@ -134,7 +147,7 @@ class MainViewModel(
         }
     }
 
-    fun getMovies(genre: SingleGenreDTO, page: Int = 1, extend: Boolean = false) {
+    fun getMovies(genre: Genre, page: Int = 1, extend: Boolean = false) {
         if (!_viewState.value.showMovies) {
             getSeries(genre, page, extend)
             return
@@ -144,7 +157,7 @@ class MainViewModel(
         }
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
-            val movies = apiRepository.getMovies(page, genre, _viewState.value.providers, true)
+            val movies = apiRepository.getMovies(page, genre, _viewState.value.providers, true, _viewState.value.sorting)
             var filtered = movies.filter { movieInfo ->
                 !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !(_viewState.value.movies[genre.name]
                     ?: listOf()).any { movie -> movie.id == movieInfo.id }
@@ -152,7 +165,7 @@ class MainViewModel(
             var refreshedCount = 0
             while (filtered.count() <= 5) {
                 val newMovies = apiRepository.getMovies(
-                    page + refreshedCount, genre, _viewState.value.providers, true
+                    page + refreshedCount, genre, _viewState.value.providers, true, _viewState.value.sorting
                 )
                 refreshedCount++
                 filtered = filtered + newMovies.filter {
@@ -187,13 +200,13 @@ class MainViewModel(
         }
     }
 
-    private fun getSeries(genre: SingleGenreDTO, page: Int = 1, extend: Boolean = false) {
+    private fun getSeries(genre: Genre, page: Int = 1, extend: Boolean = false) {
         if (!extend && !_viewState.value.series[genre.name].isNullOrEmpty()) {
             return
         }
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
-            val movies = apiRepository.getMovies(page, genre, _viewState.value.providers, false)
+            val movies = apiRepository.getMovies(page, genre, _viewState.value.providers, false, _viewState.value.sorting)
             var filtered = movies.filter { movieInfo ->
                 !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !(_viewState.value.series[genre.name]
                     ?: listOf()).any { movie -> movie.id == movieInfo.id }
@@ -201,7 +214,7 @@ class MainViewModel(
             var refreshedCount = 0
             while (filtered.count() <= 5) {
                 val newMovies = apiRepository.getMovies(
-                    page + refreshedCount, genre, _viewState.value.providers, false
+                    page + refreshedCount, genre, _viewState.value.providers, false, _viewState.value.sorting
                 )
                 refreshedCount++
                 filtered = filtered + newMovies.filter {
@@ -491,4 +504,5 @@ sealed class MainViewEvent {
     data class SetGenre(val genre: String) : MainViewEvent()
     data class ChangeIsMovie(val isMovie: Boolean) : MainViewEvent()
     data class UpdateProvider(val providerId: Int, val useProvider: Boolean) : MainViewEvent()
+    data class ChangeSorting(val sortType: SortType) : MainViewEvent()
 }
