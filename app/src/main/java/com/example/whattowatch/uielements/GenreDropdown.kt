@@ -32,7 +32,7 @@ fun GenreDropdown(
     var isExpanded by remember {
         mutableStateOf(false)
     }
-    var genre by remember { mutableStateOf("No Genre") }
+    var genre by remember { mutableStateOf(Genre().name) }
 
     ExposedDropdownMenuBox(
         expanded = isExpanded,
@@ -59,11 +59,11 @@ fun GenreDropdown(
         }, modifier = Modifier.fillMaxWidth()
     ) {
         DropdownMenuItem(text = {
-            Text(text = "No Genre", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            Text(text = Genre().name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         }, onClick = {
-            genre = "No Genre"
+            genre = Genre().name
             isExpanded = false
-            getMovies(Genre(-1,"No Genre"))
+            getMovies(Genre())
             eventListener(MainViewEvent.SetGenre(genre))
         }, modifier = Modifier.fillMaxWidth()
         )

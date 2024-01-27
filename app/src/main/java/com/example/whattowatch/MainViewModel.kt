@@ -45,7 +45,7 @@ class MainViewModel(
             getCompanies()
             getGenres()
             readSeenMovieList()
-            getMovies(Genre(-1,"No Genre"))
+            getMovies(Genre())
         }
     }
 
@@ -82,7 +82,7 @@ class MainViewModel(
             return
         }
         _viewState.update { state -> state.copy(sorting = sortType, series = state.series.filter { UserMark.entries.map { mark ->mark.name }.contains(it.key) }, movies = state.movies.filter { UserMark.entries.map { mark ->mark.name }.contains(it.key) }) }
-        getMovies(viewState.value.genres.firstOrNull{ it.name == _viewState.value.selectedGenre }?: Genre(-1, "No Genre"))
+        getMovies(viewState.value.genres.firstOrNull{ it.name == _viewState.value.selectedGenre }?: Genre())
     }
 
     private fun updateProvider(providerId: Int, useProvider: Boolean) {
@@ -92,7 +92,7 @@ class MainViewModel(
             }, series = currentState.series.filter { UserMark.entries.map { mark ->mark.name }.contains(it.key) }, movies = currentState.movies.filter { UserMark.entries.map { mark ->mark.name }.contains(it.key) })
         }
 
-        getMovies(viewState.value.genres.firstOrNull{ it.name == _viewState.value.selectedGenre }?: Genre(-1, "No Genre"))
+        getMovies(viewState.value.genres.firstOrNull{ it.name == _viewState.value.selectedGenre }?: Genre())
 
         sharedPreferencesManager.saveList(
             R.string.provider,
@@ -101,7 +101,7 @@ class MainViewModel(
 
     private fun changeIsMovie(isMovie: Boolean) {
         _viewState.update {state-> state.copy(showMovies = isMovie, series = state.series.filter { UserMark.entries.map { mark ->mark.name }.contains(it.key) }, movies = state.movies.filter { UserMark.entries.map { mark ->mark.name }.contains(it.key) }) }
-        getMovies(viewState.value.genres.firstOrNull{ it.name == _viewState.value.selectedGenre }?: Genre(-1, "No Genre"))
+        getMovies(viewState.value.genres.firstOrNull{ it.name == _viewState.value.selectedGenre }?: Genre())
     }
 
     private fun updateGenre(genre: String) {
