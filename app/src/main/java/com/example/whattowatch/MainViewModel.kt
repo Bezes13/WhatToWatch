@@ -80,25 +80,24 @@ class MainViewModel(
 
     private fun updateProvider(providerId: Int, useProvider: Boolean) {
         _viewState.update { currentState ->
-            currentState.copy(companies = currentState.companies.toMutableList().map { provider ->
+            currentState.copy(providers = currentState.providers.toMutableList().map { provider ->
                 if (provider.providerId == providerId) provider.copy(show = useProvider) else provider
             }, series = mapOf(), movies = mapOf())
         }
 
         if (_viewState.value.genres.any { it.name == _viewState.value.selectedGenre }) {
             getMovies(_viewState.value.genres.first { it.name == _viewState.value.selectedGenre })
-        }
-
-        if (_viewState.value.seriesGenres.any { it.name == _viewState.value.selectedGenre }) {
-            getSeries(_viewState.value.seriesGenres.first { it.name == _viewState.value.selectedGenre })
         } else {
-            getSeries(_viewState.value.seriesGenres.first())
+            if (_viewState.value.seriesGenres.any { it.name == _viewState.value.selectedGenre }) {
+                getSeries(_viewState.value.seriesGenres.first { it.name == _viewState.value.selectedGenre })
+            } else {
+                getCustomList(_viewState.value.selectedGenre)
+            }
         }
-
 
         sharedPreferencesManager.saveList(
             R.string.provider,
-            _viewState.value.companies.filter { it.show }.map { it.providerId.toString() })
+            _viewState.value.providers.filter { it.show }.map { it.providerId.toString() })
     }
 
     private fun changeIsMovie(isMovie: Boolean) {
@@ -107,13 +106,13 @@ class MainViewModel(
             if (_viewState.value.genres.any { it.name == _viewState.value.selectedGenre }) {
                 getMovies(_viewState.value.genres.first { it.name == _viewState.value.selectedGenre })
             } else {
-                getMovies(_viewState.value.genres.first())
+                getCustomList(_viewState.value.selectedGenre)
             }
         } else {
             if (_viewState.value.seriesGenres.any { it.name == _viewState.value.selectedGenre }) {
                 getSeries(_viewState.value.seriesGenres.first { it.name == _viewState.value.selectedGenre })
             } else {
-                getSeries(_viewState.value.seriesGenres.first())
+                getCustomList(_viewState.value.selectedGenre)
             }
         }
     }
@@ -145,7 +144,7 @@ class MainViewModel(
         }
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
-            val movies = apiRepository.getMovies(page, genre, _viewState.value.companies, true)
+            val movies = apiRepository.getMovies(page, genre, _viewState.value.providers, true)
             var filtered = movies.filter { movieInfo ->
                 !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !(_viewState.value.movies[genre.name]
                     ?: listOf()).any { movie -> movie.id == movieInfo.id }
@@ -153,7 +152,7 @@ class MainViewModel(
             var refreshedCount = 0
             while (filtered.count() <= 5) {
                 val newMovies = apiRepository.getMovies(
-                    page + refreshedCount, genre, _viewState.value.companies, true
+                    page + refreshedCount, genre, _viewState.value.providers, true
                 )
                 refreshedCount++
                 filtered = filtered + newMovies.filter {
@@ -194,7 +193,7 @@ class MainViewModel(
         }
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
-            val movies = apiRepository.getMovies(page, genre, _viewState.value.companies, false)
+            val movies = apiRepository.getMovies(page, genre, _viewState.value.providers, false)
             var filtered = movies.filter { movieInfo ->
                 !_viewState.value.seenMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.watchLaterMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !_viewState.value.notInterestedMovies.any { userMovie -> userMovie.movieId == movieInfo.id } && !(_viewState.value.series[genre.name]
                     ?: listOf()).any { movie -> movie.id == movieInfo.id }
@@ -202,7 +201,7 @@ class MainViewModel(
             var refreshedCount = 0
             while (filtered.count() <= 5) {
                 val newMovies = apiRepository.getMovies(
-                    page + refreshedCount, genre, _viewState.value.companies, false
+                    page + refreshedCount, genre, _viewState.value.providers, false
                 )
                 refreshedCount++
                 filtered = filtered + newMovies.filter {
@@ -241,10 +240,10 @@ class MainViewModel(
         val company =
             apiRepository.getCompanies(sharedPreferencesManager.getList(R.string.provider))
         _viewState.update { currentState ->
-            currentState.copy(companies = company.filter { provider -> provider.priority != 999 }
+            currentState.copy(providers = company.filter { provider -> provider.priority != 999 }
                 .sorted())
         }
-        println(_viewState.value.companies)
+        println(_viewState.value.providers)
     }
 
     fun getCast(movieInfo: MovieInfo) {
@@ -280,8 +279,7 @@ class MainViewModel(
             val provider = apiRepository.getProviders(movieID, _viewState.value.showMovies)
             val updatedMovies = _viewState.value.movies[genre]?.map { movie ->
                 if (movie.id == movieID) {
-                    val logoPaths =
-                        provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
+                    val logoPaths = provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
                     movie.copy(providerName = logoPaths)
                 } else {
                     movie

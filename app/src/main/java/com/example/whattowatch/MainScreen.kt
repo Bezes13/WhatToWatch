@@ -49,7 +49,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         if(viewState.showMovies) viewState.movies else viewState.series,
         if(viewState.showMovies) viewState.genres else viewState.seriesGenres,
         mainViewModel.markFilmAs,
-        viewState.companies,
+        viewState.providers,
         mainViewModel::getMovies,
         mainViewModel::getCustomList,
         mainViewModel::saveSharedList,

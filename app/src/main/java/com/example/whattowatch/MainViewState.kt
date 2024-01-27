@@ -11,7 +11,7 @@ data class MainViewState (
     val movies: Map<String, List<MovieInfo>> = mapOf(),
     val series: Map<String, List<MovieInfo>> = mapOf(),
     val moviesToLoad: Int = 15,
-    val companies: List<Provider> = listOf(),
+    val providers: List<Provider> = listOf(),
     val genres: List<SingleGenreDTO> = listOf(),
     val seriesGenres: List<SingleGenreDTO> = listOf(),
     val seenMovies: List<UserMovie> = listOf(),
