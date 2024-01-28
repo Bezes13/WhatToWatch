@@ -54,7 +54,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
     MainScreenContent(
         viewState.isLoading,
         viewState.selectedGenre,
-        if(viewState.showMovies) viewState.movies else viewState.series,
+        viewState.shows,
         if(viewState.showMovies) viewState.genres else viewState.seriesGenres,
         viewState.providers,
         viewState.sorting,

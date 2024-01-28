@@ -131,9 +131,7 @@ private fun CastInfo(
         ) {
             cast.filterIndexed { index, _ -> index % 2 == 0 }.forEach {
                 AsyncImage(
-                    model = stringResource(
-                        R.string.image_path, it.profile_path
-                    ),
+                    model = stringResource(R.string.image_path, it.profile_path),
                     placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                     error = painterResource(id = R.drawable.ic_launcher_foreground),
                     contentDescription = it.name,

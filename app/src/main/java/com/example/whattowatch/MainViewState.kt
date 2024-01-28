@@ -9,8 +9,7 @@ import com.example.whattowatch.dataClasses.Genre
 data class MainViewState (
     val isLoading: Boolean= false,
     val selectedGenre: String = Genre().name,
-    val movies: Map<String, List<MovieInfo>> = mapOf(),
-    val series: Map<String, List<MovieInfo>> = mapOf(),
+    val shows: Map<String, List<MovieInfo>> = mapOf(),
     val moviesToLoad: Int = 15,
     val providers: List<Provider> = listOf(),
     val genres: List<Genre> = listOf(),
