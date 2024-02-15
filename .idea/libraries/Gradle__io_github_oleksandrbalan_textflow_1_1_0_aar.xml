@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: io.github.oleksandrbalan:textflow:1.1.0@aar" external-system-id="GRADLE">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/29b79b7d020ea531cbfbd2b1e265adeb/transformed/textflow-1.1.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/29b79b7d020ea531cbfbd2b1e265adeb/transformed/textflow-1.1.0/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.oleksandrbalan/textflow/1.1.0/3b1045119ffac772f2fc49fd7e0b45cc8588f2f6/textflow-1.1.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.oleksandrbalan/textflow/1.1.0/dd9d79e4c1a8593fef8271a9b025d3f9b71b9226/textflow-1.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
