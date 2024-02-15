@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">WhatToWatch</string>
+    <string name="test">test</string>
+    <string name="not_available">Not Available</string>
+    <string name="image_path">https://image.tmdb.org/t/p/w300%1$s</string>
+    <string name="image_path_or">https://image.tmdb.org/t/p/original%1$s</string>
+    <string name="seen">Gesehen</string>
+    <string name="later">Später Ansehen</string>
+    <string name="no">Nicht Interessiert</string>
+    <string name="user_name">userName</string>
+    <string name="friend_name">friend name</string>
+    <string name="load_more_movies">Mehr Laden</string>
+    <string name="sharing_is_caring">Sharing is Caring</string>
+    <string name="enter_friend_name">Enter the name of your friend</string>
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="enter_name">Enter Name</string>
+    <string name="enter_name_text">Please enter your Name.</string>
+    <string name="choose_genre">Please choose a genre</string>
+    <string name="close">Close</string>
+    <string name="bewertung">Bewertung</string>
+    <string name="checked">Checked</string>
+    <string name="provider">providers</string>
+    <string name="provider_text">Bitte wähle deine Streaming Dienste aus, indem du auf die gewünschten Icons klickst</string>
+    <string name="popular">Populär</string>
+    <string name="votes">Votes</string>
+    <string name="vote">Vote</string>
+    <string name="revenue">Umsatz</string>
+</resources>
