@@ -132,7 +132,7 @@ fun RowScope.BasicInfo(movieInfo: MovieInfo) {
             )
             Text(text = movieInfo.releaseDate.getJustYear(), textAlign = TextAlign.Center)
 
-            Row {
+            Row (horizontalArrangement = Arrangement.spacedBy(5.dp)){
                 if (movieInfo.providerName != null) {
                     movieInfo.providerName.forEach {
                         AsyncImage(

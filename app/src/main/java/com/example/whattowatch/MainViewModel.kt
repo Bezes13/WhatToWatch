@@ -216,9 +216,10 @@ class MainViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val cast = apiRepository.getCast(movieInfo.id, movieInfo.isMovie)
             val video = apiRepository.getVideo(movieInfo)
-
+            val provider = apiRepository.getProviders(movieInfo.id, _viewState.value.showMovies)
+            val newInfo = movieInfo.copy(providerName =  provider.results["DE"]?.flatrate?.map { it.logo_path })
             _viewState.update { currentState ->
-                currentState.copy(dialog = MainViewDialog.DetailsDialog(movieInfo, cast, video))
+                currentState.copy(dialog = MainViewDialog.DetailsDialog(newInfo, cast, video))
             }
         }
     }

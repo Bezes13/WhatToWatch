@@ -1,6 +1,7 @@
 package com.example.whattowatch.uielements
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -88,13 +89,17 @@ fun MovieDetailsDialog(
                     LazyColumn(
                         Modifier
                             .weight(1F)
-                            .fillMaxHeight()
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         item {
                             MovieOverview(info) { isExpanded = true }
+                            Providers(info)
                             CastInfo(cast, getCredits)
-                            if (video.isNotEmpty()){
-                                VideoPlayer(video[0].key)
+                            if (video.isNotEmpty()) {
+                                video.filter { info -> info.site == "YouTube" }.forEach {
+                                    VideoPlayer(it.key)
+                                }
                             }
                         }
                     }
@@ -110,6 +115,29 @@ fun MovieDetailsDialog(
                         Text(stringResource(R.string.close))
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun Providers(movieInfo: MovieInfo) {
+    Row (horizontalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(5.dp)){
+        if (movieInfo.providerName != null) {
+            movieInfo.providerName.forEach {
+                AsyncImage(
+                    model = stringResource(R.string.image_path_or, it),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = "Provider",
+                )
+            }
+            if (movieInfo.providerName.isEmpty()) {
+                Image(
+                    modifier = Modifier.size(50.dp),
+                    painter = painterResource(id = R.drawable.na),
+                    contentDescription = stringResource(id = R.string.not_available)
+                )
             }
         }
     }
@@ -174,7 +202,7 @@ private fun CastInfo(
 @Composable
 private fun MovieOverview(
     info: MovieInfo,
-    onClick: ()-> Unit
+    onClick: () -> Unit
 ) {
     Row {
         Icon(
