@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -107,12 +106,6 @@ fun TopBar(
                         Text("What to watch")
                     },
                     actions = {
-                        IconButton(onClick = { eventListener(MainViewEvent.SetDialog(MainViewDialog.ShareWithFriend)) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Share,
-                                contentDescription = "Share with a Friend"
-                            )
-                        }
                         IconButton(onClick = { changeFilter() }) {
                             Icon(
                                 imageVector = if (showFilter) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,

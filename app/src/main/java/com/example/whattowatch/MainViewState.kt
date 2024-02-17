@@ -17,5 +17,6 @@ data class MainViewState (
     val markedShows: List<UserMovie> = listOf(),
     val dialog: MainViewDialog = MainViewDialog.None,
     val showMovies: Boolean = true,
-    val sorting: SortType = SortType.POPULARITY
+    val sorting: SortType = SortType.POPULARITY,
+    val loadMore: Boolean = true
 )

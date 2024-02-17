@@ -3,17 +3,13 @@ package com.example.whattowatch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattowatch.apiRepository.ApiRepository
+import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.dataClasses.MovieInfo
-import com.example.whattowatch.enums.SortType
 import com.example.whattowatch.dataClasses.UserMovie
 import com.example.whattowatch.dto.CastDTO
-import com.example.whattowatch.dataClasses.Genre
+import com.example.whattowatch.enums.SortType
 import com.example.whattowatch.enums.UserMark
 import com.example.whattowatch.manager.SharedPreferencesManager
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,7 +24,6 @@ class MainViewModel(
     private val apiRepository: ApiRepository,
     private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
-    private val database = Firebase.database
     private val _event = MutableSharedFlow<MainViewEvent>()
     private val _viewState = MutableStateFlow(MainViewState())
     val viewState = _viewState.asStateFlow()
@@ -120,7 +115,8 @@ class MainViewModel(
         _viewState.update { state ->
             state.copy(
                 showMovies = isMovie,
-                shows = mapOf())
+                shows = mapOf()
+            )
         }
         getMovies(viewState.value.genres.firstOrNull { it.name == _viewState.value.selectedGenre }
             ?: Genre())
@@ -157,6 +153,10 @@ class MainViewModel(
                 _viewState.value.showMovies,
                 _viewState.value.sorting
             )
+            if(movies.isEmpty()){
+                _viewState.update { it.copy(loadMore = false, isLoading = false) }
+                return@launch
+            }
             var filtered = movies.filter { movieInfo ->
                 !_viewState.value.markedShows.any { userMovie -> userMovie.movieId == movieInfo.id } && !(_viewState.value.shows[genre.name]
                     ?: listOf()).any { movie -> movie.id == movieInfo.id }
@@ -245,7 +245,8 @@ class MainViewModel(
             val provider = apiRepository.getProviders(movieID, _viewState.value.showMovies)
             val updatedMovies = _viewState.value.shows[genre]?.map { movie ->
                 if (movie.id == movieID) {
-                    val logoPaths = provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
+                    val logoPaths =
+                        provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
                     movie.copy(providerName = logoPaths)
                 } else {
                     movie
@@ -270,70 +271,31 @@ class MainViewModel(
         }
 
 
-        val myRef = database.getReference(
-            readName(R.string.user_name) + sharedPreferencesManager.context.getString(userMark.textID)
-        )
         val newUserMovie =
-            UserMovie(newItem, readName(R.string.user_name), _viewState.value.showMovies, userMark)
+            UserMovie(newItem, "User", _viewState.value.showMovies, userMark)
         if (_viewState.value.markedShows.any { userMovie -> userMovie.movieId == newItem && userMark == userMovie.userMark })
             _viewState.update { it.copy(markedShows = it.markedShows - newUserMovie) } else
             _viewState.update { it.copy(markedShows = it.markedShows + newUserMovie) }
 
-
-        val gson = Gson()
-        val json =
-            gson.toJson(_viewState.value.markedShows.filter { movie -> movie.name == readName(R.string.user_name) && movie.userMark == userMark }
-                .map { userMovie -> if (userMovie.isMovie) userMovie.movieId else -userMovie.movieId })
-        myRef.setValue(json)
-    }
-
-    fun saveName(name: String, saveId: Int) {
-        sharedPreferencesManager.saveName(name, saveId)
-    }
-
-    fun readName(saveId: Int): String {
-        return sharedPreferencesManager.readName(saveId)
+        val list =
+            _viewState.value.markedShows.filter { movie -> movie.name == "User" && movie.userMark == userMark }
+                .map { userMovie -> if (userMovie.isMovie) userMovie.movieId.toString() else (-userMovie.movieId).toString() }
+        sharedPreferencesManager.saveList(userMark.textID, list)
     }
 
     private fun readSharedList(userMark: UserMark) {
-        val type = object : TypeToken<List<Int>>() {}.type
-        database.getReference(
-            readName(R.string.user_name) + sharedPreferencesManager.context.getString(userMark.textID)
-        ).get().addOnSuccessListener { data ->
-            if (data.value != null) {
-                val result: List<Int> = Gson().fromJson(data.value.toString(), type)
-                val userMovies =
-                    result.map { id ->
-                        UserMovie(
-                            abs(id),
-                            readName(R.string.user_name),
-                            id > 0,
-                            userMark
-                        )
-                    }
-
-                _viewState.update { it.copy(markedShows = it.markedShows + userMovies) }
-            }
+        val list = sharedPreferencesManager.getList(userMark.textID).map { id ->
+            UserMovie(
+                abs(id.toInt()),
+                "user",
+                id.toInt() > 0,
+                userMark
+            )
         }
-        database.getReference(
-            readName(R.string.friend_name) + sharedPreferencesManager.context.getString(userMark.textID)
-        ).get().addOnSuccessListener { data ->
-            if (data.value != null) {
-                val result: List<Int> = Gson().fromJson(data.value.toString(), type)
-                val userMovies =
-                    result.map { id ->
-                        UserMovie(
-                            id,
-                            readName(R.string.friend_name),
-                            id > 0,
-                            userMark
-                        )
-                    }
 
-                _viewState.update { it.copy(markedShows = it.markedShows + userMovies) }
-            }
-        }
+        _viewState.update { it.copy(markedShows = it.markedShows + list) }
     }
+
 
     fun getCustomList(customList: UserMark, extend: Boolean = false) {
         val newList: ArrayList<MovieInfo> = arrayListOf()
@@ -344,21 +306,24 @@ class MainViewModel(
                 newList.addAll((viewState.value.shows[customList.toString()] ?: listOf()))
             }
             var loadedMovies = 0
-            _viewState.value.markedShows.filter { userMovie -> userMovie.isMovie && userMovie.userMark == customList }
-                .forEach {
+            var loadMore = true
+            val userList = _viewState.value.markedShows.filter { userMovie -> userMovie.isMovie && userMovie.userMark == customList }
+                userList.forEach { userMovie ->
                     if (loadedMovies <= 10 && (!extend || !(viewState.value.shows[customList.toString()]
-                            ?: listOf()).any { m -> m.id == it.movieId })
+                            ?: listOf()).any { m -> m.id == userMovie.movieId })
                     ) {
                         val movie =
                             apiRepository.getMovieDetails(
-                                it.movieId,
+                                userMovie.movieId,
                                 _viewState.value.showMovies
                             )
-                        movie.user = it.name
+                        movie.user = userMovie.name
                         newList.add(movie)
                         loadedMovies++
+                        loadMore =  userList.last() != userMovie
                     }
                 }
+            _viewState.update { state -> state.copy(loadMore = loadMore) }
 
             _viewState.update { currentState ->
                 currentState.copy(shows = currentState.shows.toMutableMap().apply {

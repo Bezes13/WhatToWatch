@@ -44,6 +44,9 @@ class ApiRepository(private val context: Context) {
             apiCall("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=de-DE&page=$page&sort_by=$sorting.desc&watch_region=DE${if (genre.id != -1)"&with_genres=${genre.id}" else ""}&with_watch_providers=${
                 companies.filter { it.show }.joinToString("|") { it.providerId.toString() }
             }")
+        println("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=de-DE&page=$page&sort_by=$sorting.desc&watch_region=DE${if (genre.id != -1)"&with_genres=${genre.id}" else ""}&with_watch_providers=${
+            companies.filter { it.show }.joinToString("|") { it.providerId.toString() }
+        }")
         val movieDto = Gson().fromJson(result, MovieDTO::class.java)
         return movieDto.results.map { dto ->
             MovieInfo(
