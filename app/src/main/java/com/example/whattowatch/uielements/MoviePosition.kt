@@ -45,8 +45,7 @@ import com.example.whattowatch.extension.getJustYear
 fun MoviePosition(
     movieInfo: MovieInfo,
     selectedGenre: String,
-    eventListener: (MainViewEvent) -> Unit,
-    getCast: (MovieInfo) -> Unit
+    eventListener: (MainViewEvent) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -60,7 +59,7 @@ fun MoviePosition(
         AsyncImage(
             modifier = Modifier
                 .clickable(onClick = {
-                    getCast(movieInfo)
+                    eventListener(MainViewEvent.FetchCast(movieInfo))
                 })
                 .align(Alignment.CenterVertically)
                 .weight(0.5F),
@@ -159,23 +158,20 @@ fun RowScope.BasicInfo(movieInfo: MovieInfo) {
 @Preview
 @Composable
 fun PreviewPosition() {
-    LazyColumn() {
+    LazyColumn {
         item {
             MoviePosition(
                 movieInfo = movie1,
                 selectedGenre = "",
-                eventListener = {},
-                getCast = {  })
+                eventListener = {})
             MoviePosition(
                 movieInfo = movie2,
                 selectedGenre = "",
-                eventListener = {},
-                getCast = {  })
+                eventListener = {})
             MoviePosition(
                 movieInfo = movie3,
                 selectedGenre = "",
-                eventListener = {},
-                getCast = {  })
+                eventListener = {})
         }
     }
 

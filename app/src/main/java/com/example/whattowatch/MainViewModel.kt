@@ -73,6 +73,12 @@ class MainViewModel(
                     event.newItem,
                     event.userMark
                 )
+
+                is MainViewEvent.FetchCast -> getCast(event.info)
+                is MainViewEvent.FetchCredits -> getCredits(event.cast)
+                is MainViewEvent.FetchCustomList -> getCustomList(event.mark)
+                is MainViewEvent.FetchMovies -> getMovies(event.genre)
+                is MainViewEvent.UpdateLoadedMovies -> changeLoadedMovies(event.genre)
             }
         }
     }
@@ -347,6 +353,10 @@ sealed class MainViewEvent {
     data class ChangeIsMovie(val isMovie: Boolean) : MainViewEvent()
     data class UpdateProvider(val providerId: Int, val useProvider: Boolean) : MainViewEvent()
     data class ChangeSorting(val sortType: SortType) : MainViewEvent()
-    data class MarkFilmAs(val selectedGenre: String, val newItem: Int, val userMark: UserMark) :
-        MainViewEvent()
+    data class MarkFilmAs(val selectedGenre: String, val newItem: Int, val userMark: UserMark) : MainViewEvent()
+    data class FetchMovies(val genre: Genre) : MainViewEvent()
+    data class FetchCustomList(val mark: UserMark) : MainViewEvent()
+    data class UpdateLoadedMovies(val genre: String) : MainViewEvent()
+    data class FetchCast(val info: MovieInfo) : MainViewEvent()
+    data class FetchCredits(val cast: CastDTO) : MainViewEvent()
 }

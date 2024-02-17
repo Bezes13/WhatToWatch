@@ -23,9 +23,7 @@ fun MovieListOverview(
     movies: Map<String, List<MovieInfo>>,
     selectedGenre: String,
     eventListener: (MainViewEvent) -> Unit,
-    getCast: (MovieInfo) -> Unit,
     isLoading: Boolean,
-    changeLoadedMovies: (String) -> Unit,
     loadMore: Boolean
 ) {
     LazyColumn {
@@ -34,8 +32,7 @@ fun MovieListOverview(
                 MoviePosition(
                     it,
                     selectedGenre,
-                    eventListener,
-                    getCast
+                    eventListener
                 )
                 Divider()
             }
@@ -53,9 +50,9 @@ fun MovieListOverview(
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
                 } else {
-                    if(loadMore){
+                    if (loadMore) {
                         Button(
-                            onClick = { changeLoadedMovies(selectedGenre) },
+                            onClick = { eventListener(MainViewEvent.UpdateLoadedMovies(selectedGenre)) },
                         ) {
                             Text(text = stringResource(id = R.string.load_more_movies))
                         }

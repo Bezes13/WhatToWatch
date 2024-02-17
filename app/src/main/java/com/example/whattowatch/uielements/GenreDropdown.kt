@@ -31,8 +31,6 @@ import com.example.whattowatch.enums.UserMark
 @Composable
 fun GenreDropdown(
     items: List<Genre>,
-    getMovies: (Genre) -> Unit,
-    getCustomList: (UserMark) -> Unit,
     eventListener: (MainViewEvent) -> Unit
 ) {
     var isExpanded by remember {
@@ -60,30 +58,53 @@ fun GenreDropdown(
         )
     }
     DropdownMenu(
-        expanded = isExpanded, onDismissRequest = {
+        expanded = isExpanded,
+        onDismissRequest = {
             isExpanded = false
-        }, modifier = Modifier.border(1.dp, Color.Black).fillMaxWidth(0.7f).background(MaterialTheme.colorScheme.secondaryContainer).fillMaxHeight(0.8f)
+        },
+        modifier = Modifier
+            .border(1.dp, Color.Black)
+            .fillMaxWidth(0.7f)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .fillMaxHeight(0.8f)
     ) {
-        DropdownMenuItem(text = {
-            Text(text = Genre().name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        }, onClick = {
-            genre = Genre().name
-            isExpanded = false
-            getMovies(Genre())
-            eventListener(MainViewEvent.SetGenre(genre))
-        }, modifier = Modifier.fillMaxWidth().background(if(genre!=Genre().name)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
+        DropdownMenuItem(
+            text = {
+                Text(
+                    text = Genre().name,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            onClick = {
+                genre = Genre().name
+                isExpanded = false
+                eventListener(MainViewEvent.FetchMovies(Genre()))
+                eventListener(MainViewEvent.SetGenre(genre))
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(if (genre != Genre().name) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
         )
         Divider()
         items.forEach {
             DropdownMenuItem(
                 text = {
-                Text(text = it.name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            }, onClick = {
-                genre = it.name
-                isExpanded = false
-                getMovies(items.first { it.name == genre })
-                eventListener(MainViewEvent.SetGenre(genre))
-            }, modifier = Modifier.fillMaxWidth().background(if(genre!=it.name)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
+                    Text(
+                        text = it.name,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                onClick = {
+                    genre = it.name
+                    isExpanded = false
+                    eventListener(MainViewEvent.FetchMovies(items.first { it.name == genre }))
+                    eventListener(MainViewEvent.SetGenre(genre))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(if (genre != it.name) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
             )
             Divider()
         }
@@ -91,15 +112,21 @@ fun GenreDropdown(
             val text = stringResource(id = it.textID)
             DropdownMenuItem(
                 text = {
-                    Text(text = text, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth() )
+                    Text(
+                        text = text,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 },
                 onClick = {
                     genre = text
                     isExpanded = false
-                    getCustomList(it)
+                    eventListener(MainViewEvent.FetchCustomList(it))
                     eventListener(MainViewEvent.SetGenre(it.name))
                 },
-                modifier = Modifier.fillMaxWidth().background(if(genre!=it.name)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(if (genre != it.name) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer)
             )
             Divider()
         }

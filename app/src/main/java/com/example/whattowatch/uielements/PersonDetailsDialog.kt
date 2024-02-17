@@ -28,15 +28,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
+import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.R
 import com.example.whattowatch.TestData.movie1
 import com.example.whattowatch.TestData.movie2
 import com.example.whattowatch.TestData.movie3
-import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dto.CastDTO
 
 @Composable
-fun PersonDetailsDialog(info: CastDTO, getCast: (MovieInfo) -> Unit, onDismissRequest: () -> Unit) {
+fun PersonDetailsDialog(info: CastDTO, eventListener: (MainViewEvent) -> Unit, onDismissRequest: () -> Unit) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -95,8 +95,7 @@ fun PersonDetailsDialog(info: CastDTO, getCast: (MovieInfo) -> Unit, onDismissRe
                                             .weight(0.3f)
                                             .clickable {
                                                 if (it.releaseDate != "") {
-                                                    getCast(it)
-                                                } else {
+                                                    eventListener(MainViewEvent.FetchCast(it))
                                                 }
                                             }
                                     )

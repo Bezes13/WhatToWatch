@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
+import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.R
 import com.example.whattowatch.TestData.movie3
 import com.example.whattowatch.dataClasses.MovieInfo
@@ -58,7 +59,7 @@ fun MovieDetailsDialog(
     cast: List<CastDTO>,
     video: List<VideoInfoDTO>,
     onDismissRequest: () -> Unit,
-    getCredits: (CastDTO) -> Unit,
+    eventListener: (MainViewEvent) -> Unit,
 ) {
     var isExpanded by remember {
         mutableStateOf(false)
@@ -95,7 +96,7 @@ fun MovieDetailsDialog(
                         item {
                             MovieOverview(info) { isExpanded = true }
                             Providers(info)
-                            CastInfo(cast, getCredits)
+                            CastInfo(cast, eventListener)
                             if (video.isNotEmpty()) {
                                 video.filter { info -> info.site == "YouTube" }.forEach {
                                     VideoPlayer(it.key)
@@ -122,7 +123,7 @@ fun MovieDetailsDialog(
 
 @Composable
 fun Providers(movieInfo: MovieInfo) {
-    Row (horizontalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(5.dp)){
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(5.dp)) {
         if (movieInfo.providerName != null) {
             movieInfo.providerName.forEach {
                 AsyncImage(
@@ -146,7 +147,7 @@ fun Providers(movieInfo: MovieInfo) {
 @Composable
 private fun CastInfo(
     cast: List<CastDTO>,
-    getCredits: (CastDTO) -> Unit
+    eventListener: (MainViewEvent) -> Unit
 ) {
     Row(
         Modifier
@@ -165,7 +166,7 @@ private fun CastInfo(
                     contentDescription = it.name,
                     modifier = Modifier
                         .size(80.dp)
-                        .clickable(onClick = { getCredits(it) })
+                        .clickable(onClick = { eventListener(MainViewEvent.FetchCredits(it)) })
                 )
                 Text(text = it.name)
                 Divider()
@@ -190,7 +191,7 @@ private fun CastInfo(
                     contentDescription = it.name,
                     modifier = Modifier
                         .size(80.dp)
-                        .clickable(onClick = { getCredits(it) })
+                        .clickable(onClick = { eventListener(MainViewEvent.FetchCredits(it)) })
                 )
                 Text(text = it.name)
                 Divider()

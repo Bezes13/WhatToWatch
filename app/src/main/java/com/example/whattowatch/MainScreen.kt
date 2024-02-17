@@ -55,16 +55,11 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
         viewState.isLoading,
         viewState.selectedGenre,
         viewState.shows,
-        if(viewState.showMovies) viewState.genres else viewState.seriesGenres,
+        if (viewState.showMovies) viewState.genres else viewState.seriesGenres,
         viewState.providers,
         viewState.sorting,
-        mainViewModel::getMovies,
-        mainViewModel::getCustomList,
         viewState.dialog,
-        mainViewModel::changeLoadedMovies,
         mainViewModel::sendEvent,
-        mainViewModel::getCast,
-        mainViewModel::getCredits,
         viewState.loadMore
     )
 }
@@ -77,24 +72,19 @@ fun MainScreenContent(
     genres: List<Genre>,
     allProviders: List<Provider>,
     sortType: SortType,
-    getMovies: (Genre) -> Unit,
-    getCustomList: (UserMark) -> Unit,
     dialog: MainViewDialog,
-    changeLoadedMovies: (String) -> Unit,
     eventListener: (MainViewEvent) -> Unit,
-    getCast: (MovieInfo) -> Unit,
-    getCredits: (CastDTO) -> Unit,
     loadMore: Boolean
 ) {
     if (genres.isNotEmpty()) {
         var showFilter by remember { mutableStateOf(true) }
-        TopBar(eventListener, showFilter, { showFilter = !showFilter } ) { innerPadding ->
+        TopBar(eventListener, showFilter, { showFilter = !showFilter }) { innerPadding ->
             when (dialog) {
                 is MainViewDialog.DetailsDialog -> MovieDetailsDialog(
                     dialog.info,
                     dialog.cast,
                     dialog.video,
-                    getCredits = getCredits,
+                    eventListener = eventListener,
                     onDismissRequest = {
                         eventListener(
                             MainViewEvent.SetDialog(MainViewDialog.None)
@@ -102,13 +92,16 @@ fun MainScreenContent(
                     }
                 )
 
-                is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, getCast) {
+                is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, eventListener) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
                     )
                 }
 
-                is MainViewDialog.ShowProviderList -> ProviderListDialog(allProviders, eventListener) {
+                is MainViewDialog.ShowProviderList -> ProviderListDialog(
+                    allProviders,
+                    eventListener
+                ) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
                     )
@@ -116,8 +109,11 @@ fun MainScreenContent(
 
                 else -> {}
             }
-            if (isLoading){
-                Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+            if (isLoading) {
+                Dialog(
+                    onDismissRequest = {},
+                    properties = DialogProperties(usePlatformDefaultWidth = false)
+                ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -140,19 +136,21 @@ fun MainScreenContent(
                     .padding(innerPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if(!showFilter){
-                    if(!UserMark.entries.map{ it.name}.contains(selectedGenre)){
-                        Row (modifier = Modifier
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly){
+                if (!showFilter) {
+                    if (!UserMark.entries.map { it.name }.contains(selectedGenre)) {
+                        Row(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.primaryContainer)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
                             SortingChip(sortType, SortType.POPULARITY, eventListener)
                             SortingChip(sortType, SortType.VOTE_AVERAGE, eventListener)
                             SortingChip(sortType, SortType.VOTE_COUNT, eventListener)
                             SortingChip(sortType, SortType.REVENUE, eventListener)
                         }
                     }
-                    GenreDropdown(genres, getMovies, getCustomList, eventListener)
+                    GenreDropdown(genres, eventListener)
                 }
 
                 if (selectedGenre == "") {
@@ -170,9 +168,7 @@ fun MainScreenContent(
                         movies = movies,
                         selectedGenre = selectedGenre,
                         eventListener = eventListener,
-                        getCast = getCast,
                         isLoading = isLoading,
-                        changeLoadedMovies = changeLoadedMovies,
                         loadMore = loadMore
                     )
                 } else {
@@ -198,7 +194,12 @@ fun MainScreenContent(
 }
 
 sealed class MainViewDialog {
-    data class DetailsDialog(val info: MovieInfo, val cast: List<CastDTO>, val video: List<VideoInfoDTO>) : MainViewDialog()
+    data class DetailsDialog(
+        val info: MovieInfo,
+        val cast: List<CastDTO>,
+        val video: List<VideoInfoDTO>
+    ) : MainViewDialog()
+
     data object None : MainViewDialog()
     data class PersonDetails(val info: CastDTO) : MainViewDialog()
     data object ShowProviderList : MainViewDialog()
@@ -222,13 +223,8 @@ fun PreviewMainScreen() {
         genres = listOf(Genre(3, testGenre)),
         allProviders = listOf(),
         sortType = SortType.POPULARITY,
-        getMovies = {},
-        getCustomList = {},
         dialog = MainViewDialog.None,
-        changeLoadedMovies = {},
         eventListener = {},
-        getCast = { },
-        getCredits = {},
         true
     )
 }
