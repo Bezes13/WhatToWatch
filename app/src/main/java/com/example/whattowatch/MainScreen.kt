@@ -1,6 +1,7 @@
 package com.example.whattowatch
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -120,7 +121,7 @@ fun MainScreenContent(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(150,150,150,120))
+                            .background(Color(150, 150, 150, 120))
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier
@@ -140,15 +141,17 @@ fun MainScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if(!showFilter){
-                    Row (modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .fillMaxWidth()){
-                        SortingChip(sortType, SortType.POPULARITY, eventListener)
-                        SortingChip(sortType, SortType.VOTE_AVERAGE, eventListener)
-                        SortingChip(sortType, SortType.VOTE_COUNT, eventListener)
-                        SortingChip(sortType, SortType.REVENUE, eventListener)
+                    if(!UserMark.entries.map{ it.name}.contains(selectedGenre)){
+                        Row (modifier = Modifier
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly){
+                            SortingChip(sortType, SortType.POPULARITY, eventListener)
+                            SortingChip(sortType, SortType.VOTE_AVERAGE, eventListener)
+                            SortingChip(sortType, SortType.VOTE_COUNT, eventListener)
+                            SortingChip(sortType, SortType.REVENUE, eventListener)
+                        }
                     }
-
                     GenreDropdown(genres, getMovies, getCustomList, eventListener)
                 }
 

@@ -1,5 +1,8 @@
 package com.example.whattowatch.uielements
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -7,6 +10,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -15,8 +19,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.enums.UserMark
@@ -56,7 +62,7 @@ fun GenreDropdown(
     DropdownMenu(
         expanded = isExpanded, onDismissRequest = {
             isExpanded = false
-        }, modifier = Modifier.fillMaxWidth()
+        }, modifier = Modifier.border(1.dp, Color.Black).fillMaxWidth(0.7f).background(MaterialTheme.colorScheme.secondaryContainer).fillMaxHeight(0.8f)
     ) {
         DropdownMenuItem(text = {
             Text(text = Genre().name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -65,18 +71,19 @@ fun GenreDropdown(
             isExpanded = false
             getMovies(Genre())
             eventListener(MainViewEvent.SetGenre(genre))
-        }, modifier = Modifier.fillMaxWidth()
+        }, modifier = Modifier.fillMaxWidth().background(if(genre!=Genre().name)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
         )
         Divider()
         items.forEach {
-            DropdownMenuItem(text = {
+            DropdownMenuItem(
+                text = {
                 Text(text = it.name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             }, onClick = {
                 genre = it.name
                 isExpanded = false
                 getMovies(items.first { it.name == genre })
                 eventListener(MainViewEvent.SetGenre(genre))
-            }, modifier = Modifier.fillMaxWidth()
+            }, modifier = Modifier.fillMaxWidth().background(if(genre!=it.name)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
             )
             Divider()
         }
@@ -92,7 +99,7 @@ fun GenreDropdown(
                     getCustomList(it)
                     eventListener(MainViewEvent.SetGenre(it.name))
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().background(if(genre!=it.name)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer)
             )
             Divider()
         }
