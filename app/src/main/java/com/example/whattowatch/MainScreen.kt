@@ -22,9 +22,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.whattowatch.TestData.movie1
 import com.example.whattowatch.TestData.movie2
@@ -111,6 +114,23 @@ fun MainScreenContent(
                 }
 
                 else -> {}
+            }
+            if (isLoading){
+                Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(150,150,150,120))
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .width(64.dp)
+                                .align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                    }
+                }
             }
             Column(
                 modifier = Modifier

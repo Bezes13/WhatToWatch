@@ -213,6 +213,7 @@ class MainViewModel(
     }
 
     fun getCast(movieInfo: MovieInfo) {
+        _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
             val cast = apiRepository.getCast(movieInfo.id, movieInfo.isMovie)
             val video = apiRepository.getVideo(movieInfo)
@@ -221,6 +222,7 @@ class MainViewModel(
             _viewState.update { currentState ->
                 currentState.copy(dialog = MainViewDialog.DetailsDialog(newInfo, cast, video))
             }
+            _viewState.update { it.copy(isLoading = false) }
         }
     }
 
