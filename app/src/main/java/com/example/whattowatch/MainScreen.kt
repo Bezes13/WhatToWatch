@@ -30,8 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.whattowatch.TestData.movie1
-import com.example.whattowatch.TestData.movie2
+import com.example.whattowatch.TestData.genreWithMovies
 import com.example.whattowatch.TestData.testGenre
 import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.dataClasses.MovieInfo
@@ -211,20 +210,12 @@ fun PreviewMainScreen() {
     MainScreenContent(
         isLoading = false,
         selectedGenre = testGenre,
-        movies = mapOf(
-            Pair(
-                testGenre, listOf(
-                    movie1,
-                    movie1,
-                    movie2,
-                )
-            )
-        ),
+        movies = mapOf(genreWithMovies),
         genres = listOf(Genre(3, testGenre)),
         allProviders = listOf(),
         sortType = SortType.POPULARITY,
         dialog = MainViewDialog.None,
         eventListener = {},
-        true
+        loadMore = true
     )
 }

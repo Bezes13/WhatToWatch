@@ -49,5 +49,12 @@ object TestData  {
     )
 
     val testGenre = "mappa"
+    val genreWithMovies = Pair(
+        testGenre, listOf(
+            movie1,
+            movie1,
+            movie2,
+        )
+    )
 }
 
