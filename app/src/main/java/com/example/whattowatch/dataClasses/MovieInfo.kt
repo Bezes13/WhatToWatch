@@ -13,4 +13,10 @@ data class MovieInfo(
     val providerName: List<String>? = listOf(),
     val isMovie: Boolean,
     var user: String? = "",
+    var mediaType: MediaType?,
+    var knownFor: List<MovieInfo>? = listOf()
 )
+
+enum class MediaType{
+    PERSON, TV, MOVIE
+}

@@ -79,6 +79,16 @@ class MainViewModel(
                 is MainViewEvent.FetchCustomList -> getCustomList(event.mark)
                 is MainViewEvent.FetchMovies -> getMovies(event.genre)
                 is MainViewEvent.UpdateLoadedMovies -> changeLoadedMovies(event.genre)
+                is MainViewEvent.SearchFor -> fetchSearchEntries(event.searchText, event.page, event.founds)
+            }
+        }
+    }
+
+    private fun fetchSearchEntries(text: String, page: Int, alreadyFound: List<MovieInfo>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (foundObjects, lastPage) = apiRepository.getSearch(text, page)
+            _viewState.update { currentState ->
+                currentState.copy(dialog = MainViewDialog.SearchDialog(alreadyFound + foundObjects, page, !lastPage ))
             }
         }
     }
@@ -136,7 +146,7 @@ class MainViewModel(
         _viewState.update { it.copy(dialog = dialog) }
     }
 
-    fun changeLoadedMovies(genre: String) {
+    private fun changeLoadedMovies(genre: String) {
         val foundGenre = _viewState.value.genres.firstOrNull { g -> g.name == genre }
         if (foundGenre != null) {
             getMovies(foundGenre, extend = true)
@@ -145,7 +155,7 @@ class MainViewModel(
         }
     }
 
-    fun getMovies(genre: Genre, page: Int = 1, extend: Boolean = false) {
+    private fun getMovies(genre: Genre, page: Int = 1, extend: Boolean = false) {
         if (!extend && (!_viewState.value.shows[genre.name].isNullOrEmpty())) {
             return
         }
@@ -218,7 +228,7 @@ class MainViewModel(
         }
     }
 
-    fun getCast(movieInfo: MovieInfo) {
+    private fun getCast(movieInfo: MovieInfo) {
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
             val cast = apiRepository.getCast(movieInfo.id, movieInfo.isMovie)
@@ -232,7 +242,7 @@ class MainViewModel(
         }
     }
 
-    fun getCredits(castDTO: CastDTO) {
+    private fun getCredits(castDTO: CastDTO) {
         viewModelScope.launch(Dispatchers.IO) {
             val cast = apiRepository.getMovieCredits(castDTO.id)
 
@@ -306,7 +316,7 @@ class MainViewModel(
     }
 
 
-    fun getCustomList(customList: UserMark, extend: Boolean = false) {
+    private fun getCustomList(customList: UserMark, extend: Boolean = false) {
         val newList: ArrayList<MovieInfo> = arrayListOf()
         _viewState.update { it.copy(isLoading = true) }
 
@@ -359,4 +369,5 @@ sealed class MainViewEvent {
     data class UpdateLoadedMovies(val genre: String) : MainViewEvent()
     data class FetchCast(val info: MovieInfo) : MainViewEvent()
     data class FetchCredits(val cast: CastDTO) : MainViewEvent()
+    data class SearchFor(val searchText: String, val page: Int, val founds: List<MovieInfo>) : MainViewEvent()
 }

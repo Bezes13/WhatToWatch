@@ -14,6 +14,7 @@ import com.example.whattowatch.dto.MovieCreditsDTO
 import com.example.whattowatch.dto.MovieDTO
 import com.example.whattowatch.dto.MovieInfoDTO
 import com.example.whattowatch.dataClasses.Genre
+import com.example.whattowatch.dataClasses.MediaType
 import com.example.whattowatch.dto.VideoDTO
 import com.example.whattowatch.dto.VideoInfoDTO
 import com.google.gson.Gson
@@ -59,7 +60,8 @@ class ApiRepository(private val context: Context) {
                 posterPath = dto.poster_path ?: "",
                 title = dto.title ?: dto.name,
                 releaseDate = dto.release_date ?: dto.first_air_date ?: "",
-                isMovie = !dto.release_date.isNullOrBlank()
+                isMovie = !dto.release_date.isNullOrBlank(),
+                mediaType = MediaType.MOVIE
             )
         }
     }
@@ -80,7 +82,8 @@ class ApiRepository(private val context: Context) {
             posterPath = dto.poster_path ?: "",
             title = dto.title ?: dto.name,
             releaseDate = dto.release_date ?: dto.first_air_date ?: "",
-            isMovie = !dto.release_date.isNullOrBlank()
+            isMovie = !dto.release_date.isNullOrBlank(),
+            mediaType = MediaType.MOVIE
         )
     }
 
@@ -131,7 +134,8 @@ class ApiRepository(private val context: Context) {
                 posterPath = dto.poster_path ?: "",
                 title = dto.title ?: dto.name,
                 releaseDate = dto.release_date ?: dto.first_air_date ?: "",
-                isMovie = !dto.release_date.isNullOrBlank()
+                isMovie = !dto.release_date.isNullOrBlank(),
+                mediaType = MediaType.MOVIE
             )
         }
     }
@@ -141,6 +145,46 @@ class ApiRepository(private val context: Context) {
             apiCall("https://api.themoviedb.org/3/${if (movieInfo.isMovie) "movie" else "tv"}/${movieInfo.id}/videos?language=de-DE")
         val video = Gson().fromJson(videoJSON, VideoDTO::class.java)
         return video.results
+    }
+
+    suspend fun getSearch(text: String, page: Int): Pair<List<MovieInfo>, Boolean> {
+        val videoJSON =
+            apiCall("https://api.themoviedb.org/3/search/multi?query=$text&include_adult=false&language=en-US&page=$page")
+        val movieDto = Gson().fromJson(videoJSON, MovieDTO::class.java)
+        return Pair(movieDto.results.map { dto ->
+            MovieInfo(
+                id = dto.id,
+                originalLanguage = dto.original_language ?: "",
+                overview = dto.overview ?: "",
+                popularity = dto.popularity ?: 0,
+                voteAverage = dto.vote_average ?: 0,
+                voteCount = dto.vote_count ?: 0,
+                posterPath = dto.poster_path ?: dto.profile_path ?: "",
+                title = dto.title ?: dto.name,
+                releaseDate = dto.release_date ?: dto.first_air_date ?: "",
+                isMovie = !dto.release_date.isNullOrBlank(),
+                mediaType = when(dto.media_type){
+                    "person" -> MediaType.PERSON
+                    "tv" -> MediaType.TV
+                    else -> MediaType.MOVIE
+                },
+                knownFor = dto.known_for?.map {
+                    MovieInfo(
+                        id = dto.id,
+                        originalLanguage = dto.original_language ?: "",
+                        overview = dto.overview ?: "",
+                        popularity = dto.popularity ?: 0,
+                        voteAverage = dto.vote_average ?: 0,
+                        voteCount = dto.vote_count ?: 0,
+                        posterPath = dto.poster_path ?: "",
+                        title = dto.title ?: dto.name,
+                        releaseDate = dto.release_date ?: dto.first_air_date ?: "",
+                        isMovie = !dto.release_date.isNullOrBlank(),
+                        mediaType = MediaType.MOVIE
+                    )
+                }?: listOf()
+            )
+        }, movieDto.total_pages == page)
     }
 
     private suspend fun readApiKeyFromConfigFile(): String {

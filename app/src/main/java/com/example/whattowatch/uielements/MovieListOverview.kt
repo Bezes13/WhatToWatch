@@ -57,11 +57,8 @@ fun MovieListOverview(
                             Text(text = stringResource(id = R.string.load_more_movies))
                         }
                     }
-
                 }
             }
-
         }
-
     }
 }

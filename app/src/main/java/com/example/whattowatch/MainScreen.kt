@@ -44,6 +44,7 @@ import com.example.whattowatch.uielements.MovieDetailsDialog
 import com.example.whattowatch.uielements.MovieListOverview
 import com.example.whattowatch.uielements.PersonDetailsDialog
 import com.example.whattowatch.uielements.ProviderListDialog
+import com.example.whattowatch.uielements.Search
 import com.example.whattowatch.uielements.SortingChip
 import com.example.whattowatch.uielements.TopBar
 
@@ -92,6 +93,12 @@ fun MainScreenContent(
                 )
 
                 is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, eventListener) {
+                    eventListener(
+                        MainViewEvent.SetDialog(MainViewDialog.None)
+                    )
+                }
+
+                is MainViewDialog.SearchDialog -> Search(dialog.foundObjects, dialog.loadMore, dialog.page, eventListener) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
                     )
@@ -201,6 +208,7 @@ sealed class MainViewDialog {
 
     data object None : MainViewDialog()
     data class PersonDetails(val info: CastDTO) : MainViewDialog()
+    data class SearchDialog(val foundObjects: List<MovieInfo>, val page: Int, val loadMore: Boolean) : MainViewDialog()
     data object ShowProviderList : MainViewDialog()
 }
 

@@ -91,6 +91,19 @@ fun TopBar(
                     }
                 )
                 Divider()
+                NavigationDrawerItem(
+                    label = { Text(text = "Search") },
+                    selected = navigationItem.value == NavigationItem.SEARCH,
+                    onClick = {
+                        scope.launch {
+                            drawerState.apply {
+                                if (isClosed) open() else close()
+                            }
+                            eventListener(MainViewEvent.SetDialog(MainViewDialog.SearchDialog(listOf(), 1, false)))
+                        }
+                    }
+                )
+                Divider()
             }
 
         },
@@ -136,5 +149,5 @@ fun TopBar(
 }
 
 enum class NavigationItem {
-    SERIES, MOVIES
+    SERIES, MOVIES, SEARCH
 }

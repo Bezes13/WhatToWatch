@@ -1,5 +1,6 @@
 package com.example.whattowatch
 
+import com.example.whattowatch.dataClasses.MediaType
 import com.example.whattowatch.dataClasses.MovieInfo
 
 
@@ -17,7 +18,8 @@ object TestData  {
         listOf("Netflix"),
 
         false,
-        "Abba"
+        "Abba",
+        MediaType.MOVIE
     )
 
     val movie2 = MovieInfo(
@@ -31,7 +33,9 @@ object TestData  {
         123,
         123,
         listOf("Netflix"),
-        false
+        false,
+        "",
+        MediaType.MOVIE
     )
 
     val movie3 = MovieInfo(
@@ -45,7 +49,9 @@ object TestData  {
         8.3,
         6891,
         listOf("Netflix"),
-        true
+        true,
+        "",
+        MediaType.MOVIE
     )
 
     val testGenre = "mappa"
