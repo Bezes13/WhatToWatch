@@ -97,11 +97,14 @@ fun MovieDetailsDialog(
                             MovieOverview(info) { isExpanded = true }
                             Providers(info)
                             CastInfo(cast, eventListener)
-                            if (video.isNotEmpty()) {
-                                video.filter { info -> info.site == "YouTube" }.forEach {
-                                    VideoPlayer(it.key)
+                            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                if (video.isNotEmpty()) {
+                                    video.filter { info -> info.site == "YouTube" }.forEach {
+                                        VideoPlayer(it.key)
+                                    }
                                 }
                             }
+
                         }
                     }
                     TextButton(
@@ -205,12 +208,14 @@ private fun MovieOverview(
     info: MovieInfo,
     onClick: () -> Unit
 ) {
-    Row {
-        Icon(
-            imageVector = Icons.Filled.Star,
-            contentDescription = stringResource(R.string.bewertung)
-        )
-        Text(text = "${info.voteAverage} by ${info.voteCount}")
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row {
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = stringResource(R.string.bewertung)
+            )
+            Text(text = "${info.voteAverage} by ${info.voteCount}")
+        }
     }
 
     TextFlow(text = info.overview,

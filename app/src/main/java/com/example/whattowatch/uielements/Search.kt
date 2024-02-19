@@ -66,7 +66,7 @@ fun Search(
                     value = searchText,
                     onValueChange = {
                         searchText = it
-                        eventListener(MainViewEvent.SearchFor(searchText, 1, founds))
+                        eventListener(MainViewEvent.SearchFor(searchText, 1, listOf()))
                     },
                     label = { Text("Search For ...") }
                 )
