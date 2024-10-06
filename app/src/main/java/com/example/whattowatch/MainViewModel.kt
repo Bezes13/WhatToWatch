@@ -281,7 +281,6 @@ class MainViewModel(
     }
 
     private fun saveSharedList(selectedGenre: String, newItem: Int, userMark: UserMark) {
-
         val updatedMovies = _viewState.value.shows[selectedGenre]?.filter { it.id != newItem }
         _viewState.update { currentState ->
             currentState.copy(shows = currentState.shows.toMutableMap().apply {
