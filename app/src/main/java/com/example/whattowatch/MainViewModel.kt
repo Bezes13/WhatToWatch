@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class MainViewModel(
     private var sharedPreferencesManager: SharedPreferencesManager,
@@ -27,6 +26,8 @@ class MainViewModel(
     private val _event = MutableSharedFlow<MainViewEvent>()
     private val _viewState = MutableStateFlow(MainViewState())
     val viewState = _viewState.asStateFlow()
+
+    private var database = FirebaseRepository()
 
     init {
         _viewState.update { it.copy(isLoading = true) }
@@ -289,29 +290,21 @@ class MainViewModel(
         }
 
 
-        val newUserMovie =
-            UserMovie(newItem, "User", _viewState.value.showMovies, userMark)
-        if (_viewState.value.markedShows.any { userMovie -> userMovie.movieId == newItem && userMark == userMovie.userMark })
-            _viewState.update { it.copy(markedShows = it.markedShows - newUserMovie) } else
-            _viewState.update { it.copy(markedShows = it.markedShows + newUserMovie) }
+        val newUserMovie = UserMovie(newItem, "User", _viewState.value.showMovies, userMark)
 
-        val list =
-            _viewState.value.markedShows.filter { movie -> movie.name == "User" && movie.userMark == userMark }
-                .map { userMovie -> if (userMovie.isMovie) userMovie.movieId.toString() else (-userMovie.movieId).toString() }
-        sharedPreferencesManager.saveList(userMark.textID, list)
+        viewModelScope.launch {
+            database.addOrUpdateUserMovie(newUserMovie)
+        }
+
     }
 
     private fun readSharedList(userMark: UserMark) {
-        val list = sharedPreferencesManager.getList(userMark.textID).map { id ->
-            UserMovie(
-                abs(id.toInt()),
-                "user",
-                id.toInt() > 0,
-                userMark
-            )
+        viewModelScope.launch {
+            val list = database.getUserMovies()
+
+            _viewState.update { it.copy(markedShows = list) }
         }
 
-        _viewState.update { it.copy(markedShows = it.markedShows + list) }
     }
 
 
