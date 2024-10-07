@@ -9,7 +9,6 @@ import com.example.whattowatch.dataClasses.UserMovie
 import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.enums.SortType
 import com.example.whattowatch.enums.UserMark
-import com.example.whattowatch.manager.SharedPreferencesManager
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private var sharedPreferencesManager: SharedPreferencesManager,
     private val apiRepository: ApiRepository,
     private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
@@ -122,10 +120,16 @@ class MainViewModel(
 
         getMovies(viewState.value.genres.firstOrNull { it.name == _viewState.value.selectedGenre }
             ?: Genre())
+        viewModelScope.launch {
+            if (useProvider){
+                database.addProvider(providerId)
+            }else{
+                database.removeProvider(providerId)
+            }
+        }
 
-        sharedPreferencesManager.saveList(
-            R.string.provider,
-            _viewState.value.providers.filter { it.show }.map { it.providerId.toString() })
+
+
     }
 
     private fun changeIsMovie(isMovie: Boolean) {
@@ -221,8 +225,7 @@ class MainViewModel(
     }
 
     private suspend fun getCompanies() {
-        val company =
-            apiRepository.getCompanies(sharedPreferencesManager.getList(R.string.provider))
+        val company = apiRepository.getCompanies(database.getProvider())
         _viewState.update { currentState ->
             currentState.copy(providers = company.filter { provider -> provider.priority != 999 }
                 .sorted())
@@ -300,11 +303,9 @@ class MainViewModel(
 
     private fun readSharedList(userMark: UserMark) {
         viewModelScope.launch {
-            val list = database.getUserMovies()
-
+            val list = database.getUserMovies().filter { it.userMark == userMark }
             _viewState.update { it.copy(markedShows = list) }
         }
-
     }
 
 

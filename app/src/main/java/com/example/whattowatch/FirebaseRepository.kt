@@ -13,6 +13,7 @@ class FirebaseRepository {
     private val db: FirebaseFirestore = Firebase.firestore
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val movieList = db.collection("userMovie")
+    private val provider = db.collection("provider")
 
     // TODO
     // Staffel und Folgen adden
@@ -27,6 +28,34 @@ class FirebaseRepository {
         }
     }
 
+    suspend fun addProvider(provider: Int) {
+        try {
+            movieList.document(provider.toString()).set(provider).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun removeProvider(provider: Int) {
+        try {
+            movieList.document(provider.toString()).delete().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun getProvider(): List<Int> {
+        return try {
+            val snapshot = provider
+                .get()
+                .await()
+
+            snapshot.toObjects(Int::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
 
     suspend fun getUserMovies(): List<UserMovie> {
         return try {

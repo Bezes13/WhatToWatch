@@ -103,11 +103,11 @@ class ApiRepository(private val context: Context) {
         return Gson().fromJson(result, GenresDTO::class.java)
     }
 
-    suspend fun getCompanies(savedProviders: List<String>): List<Provider> {
+    suspend fun getCompanies(savedProviders: List<Int>): List<Provider> {
         val result =
             apiCall("https://api.themoviedb.org/3/watch/providers/movie?language=en-US&watch_region=DE")
         val companyDTO = Gson().fromJson(result, CompanyDTO::class.java)
-        return companyDTO.results.map {provider -> Provider(providerName = provider.provider_name, providerId = provider.provider_id, logoPath = provider.logo_path, priority = provider.display_priorities["DE"]?:999, savedProviders.contains(provider.provider_id.toString()) )}
+        return companyDTO.results.map {provider -> Provider(providerName = provider.provider_name, providerId = provider.provider_id, logoPath = provider.logo_path, priority = provider.display_priorities["DE"]?:999, savedProviders.contains(provider.provider_id) )}
     }
 
     suspend fun getMovieCredits(personId: Int): List<MovieInfo> {
