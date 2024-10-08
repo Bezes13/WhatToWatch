@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.whattowatch.TestData.genreWithMovies
 import com.example.whattowatch.TestData.testGenre
+import com.example.whattowatch.TestData.testMovies
 import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dataClasses.Provider
@@ -54,7 +54,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
     MainScreenContent(
         viewState.isLoading,
         viewState.selectedGenre,
-        viewState.shows,
+        viewState.shows[viewState.selectedGenre]?: listOf(),
         if (viewState.showMovies) viewState.genres else viewState.seriesGenres,
         viewState.providers,
         viewState.sorting,
@@ -68,7 +68,7 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
 fun MainScreenContent(
     isLoading: Boolean,
     selectedGenre: String,
-    movies: Map<String, List<MovieInfo>>,
+    movies: List<MovieInfo>,
     genres: List<Genre>,
     allProviders: List<Provider>,
     sortType: SortType,
@@ -78,8 +78,7 @@ fun MainScreenContent(
 ) {
     if (genres.isNotEmpty()) {
         var showFilter by remember { mutableStateOf(true) }
-        TopBar(eventListener, showFilter, { showFilter = !showFilter }, movies[selectedGenre]?.get(0)?.posterPath
-            ?:"") { innerPadding ->
+        TopBar(eventListener, showFilter, { showFilter = !showFilter }, if (movies.isEmpty()) "" else movies[0].posterPath) { innerPadding ->
             when (dialog) {
                 is MainViewDialog.DetailsDialog -> MovieDetailsDialog(
                     dialog.info,
@@ -168,11 +167,9 @@ fun MainScreenContent(
                     )
                 }
 
-                if (movies[selectedGenre] != null && (movies[selectedGenre]
-                        ?: listOf()).isNotEmpty()
-                ) {
+                if (movies.isNotEmpty()) {
                     MovieListOverview(
-                        movies = movies[selectedGenre]?: listOf(),
+                        movies = movies,
                         selectedGenre = selectedGenre,
                         eventListener = eventListener,
                         isLoading = isLoading,
@@ -219,7 +216,7 @@ fun PreviewMainScreen() {
     MainScreenContent(
         isLoading = false,
         selectedGenre = testGenre,
-        movies = mapOf(genreWithMovies),
+        movies = testMovies,
         genres = listOf(Genre(3, testGenre)),
         allProviders = listOf(),
         sortType = SortType.POPULARITY,

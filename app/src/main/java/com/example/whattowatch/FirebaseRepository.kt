@@ -22,7 +22,10 @@ class FirebaseRepository {
     // Alles über databse
     suspend fun addOrUpdateUserMovie(userMovie: UserMovie) {
         try {
+            println(userMovie.title)
             movieList.document("${userMovie.movieId}").set(userMovie).await()
+            println(userMovie.title)
+
         } catch (e: Exception) {
             e.printStackTrace()
         }

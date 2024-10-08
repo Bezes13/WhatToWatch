@@ -73,15 +73,17 @@ fun TopBar(
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.6f)) {
                 Box {
-                    AsyncImage(
-                        modifier = Modifier.fillMaxHeight(),
-                        model = stringResource(R.string.image_path, drawerImage),
-                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                        error = painterResource(id = R.drawable.ic_launcher_foreground),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = "Background",
-                        alpha = 0.5f
-                    )
+                    if (drawerImage.isBlank()){
+                        AsyncImage(
+                            modifier = Modifier.fillMaxHeight(),
+                            model = stringResource(R.string.image_path, drawerImage),
+                            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                            error = painterResource(id = R.drawable.ic_launcher_foreground),
+                            contentScale = ContentScale.Crop,
+                            contentDescription = stringResource(id = R.string.background),
+                            alpha = 0.5f
+                        )
+                    }
                     Column(
                         Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.SpaceEvenly

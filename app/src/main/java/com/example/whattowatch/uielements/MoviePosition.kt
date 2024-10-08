@@ -91,20 +91,17 @@ fun RowScope.MarkFilmButtons(
         horizontalAlignment = Alignment.End
     ) {
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.SEEN))},
-
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.SEEN))}
             ) {
             Icon(imageVector = Icons.Filled.Favorite, contentDescription = "")
         }
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.LATER))},
-
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.LATER))}
             ) {
             Icon(imageVector = Icons.Filled.Send, contentDescription = "")
         }
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.NO)) },
-
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.NO)) }
             ) {
             Icon(imageVector = Icons.Filled.Close, contentDescription = "")
         }
