@@ -51,6 +51,8 @@ import coil.compose.AsyncImage
 import com.example.whattowatch.MainViewDialog
 import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.R
+import com.example.whattowatch.alphaContainer
+import com.example.whattowatch.enums.UserMark
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -73,7 +75,7 @@ fun TopBar(
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.6f)) {
                 Box {
-                    if (drawerImage.isBlank()){
+                    if (drawerImage.isBlank()) {
                         AsyncImage(
                             modifier = Modifier.fillMaxHeight(),
                             model = stringResource(R.string.image_path, drawerImage),
@@ -142,6 +144,32 @@ fun TopBar(
                             eventListener = eventListener,
                             setActive = false
                         )
+                        NavigationItem(
+                            currentNavigationItem = navigationItem,
+                            navigationItem = NavigationItem.MARKED,
+                            scope = scope,
+                            text = "MARKED FILMS",
+                            drawerState = drawerState,
+                            event = MainViewEvent.ShowCustom(UserMark.SEEN),
+                            eventListener = eventListener,
+                            setActive = true
+                        )
+                        NavigationItem(
+                            currentNavigationItem = navigationItem,
+                            navigationItem = NavigationItem.SEARCH,
+                            scope = scope,
+                            text = "SEARCH",
+                            drawerState = drawerState,
+                            event = MainViewEvent.SetDialog(
+                                MainViewDialog.SearchDialog(
+                                    listOf(),
+                                    1,
+                                    false
+                                )
+                            ),
+                            eventListener = eventListener,
+                            setActive = false
+                        )
                     }
                 }
             }
@@ -153,7 +181,7 @@ fun TopBar(
             topBar = {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = alphaContainer),
                         titleContentColor = MaterialTheme.colorScheme.primary,
                     ),
                     title = {
@@ -233,7 +261,7 @@ private fun NavigationItem(
 }
 
 enum class NavigationItem {
-    SERIES, MOVIES, SEARCH, SELECTION
+    SERIES, MOVIES, SEARCH, SELECTION, MARKED
 }
 
 @Preview

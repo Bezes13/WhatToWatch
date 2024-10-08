@@ -20,12 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.dataClasses.Genre
-import com.example.whattowatch.enums.UserMark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,28 +103,6 @@ fun GenreDropdown(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(if (genre != it.name) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
-            )
-            Divider()
-        }
-        UserMark.entries.forEach {
-            val text = stringResource(id = it.textID)
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = text,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                onClick = {
-                    genre = text
-                    isExpanded = false
-                    eventListener(MainViewEvent.FetchCustomList(it))
-                    eventListener(MainViewEvent.SetGenre(it.name))
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(if (genre != it.name) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer)
             )
             Divider()
         }
