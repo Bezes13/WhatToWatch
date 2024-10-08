@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -47,28 +49,31 @@ fun MoviePosition(
     selectedGenre: String,
     eventListener: (MainViewEvent) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalAlignment = Alignment.Top
-    ) {
-        BasicInfo(movieInfo)
-        Spacer(modifier = Modifier.width(8.dp))
-        MarkFilmButtons(movieInfo, selectedGenre, eventListener)
-        Spacer(modifier = Modifier.width(8.dp))
-        AsyncImage(
+    Card (modifier = Modifier.padding(5.dp)){
+        Row(
             modifier = Modifier
-                .clickable(onClick = {
-                    eventListener(MainViewEvent.FetchCast(movieInfo))
-                })
-                .align(Alignment.CenterVertically)
-                .weight(0.5F),
-            model = stringResource(R.string.image_path, movieInfo.posterPath),
-            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-            error = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = movieInfo.title,
-        )
+                .fillMaxSize(),
+            verticalAlignment = Alignment.Top
+        ) {
+            BasicInfo(movieInfo)
+            Spacer(modifier = Modifier.width(8.dp))
+            MarkFilmButtons(movieInfo, selectedGenre, eventListener)
+            Spacer(modifier = Modifier.width(8.dp))
+            AsyncImage(
+                modifier = Modifier
+                    .clickable(onClick = {
+                        eventListener(MainViewEvent.FetchCast(movieInfo))
+                    })
+                    .align(Alignment.CenterVertically)
+                    .weight(0.5F),
+                model = stringResource(R.string.image_path, movieInfo.posterPath),
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = movieInfo.title,
+            )
+        }
     }
+
 
 }
 

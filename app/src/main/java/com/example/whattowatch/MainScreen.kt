@@ -78,7 +78,8 @@ fun MainScreenContent(
 ) {
     if (genres.isNotEmpty()) {
         var showFilter by remember { mutableStateOf(true) }
-        TopBar(eventListener, showFilter, { showFilter = !showFilter }) { innerPadding ->
+        TopBar(eventListener, showFilter, { showFilter = !showFilter }, movies[selectedGenre]?.get(0)?.posterPath
+            ?:"") { innerPadding ->
             when (dialog) {
                 is MainViewDialog.DetailsDialog -> MovieDetailsDialog(
                     dialog.info,
@@ -171,7 +172,7 @@ fun MainScreenContent(
                         ?: listOf()).isNotEmpty()
                 ) {
                     MovieListOverview(
-                        movies = movies,
+                        movies = movies[selectedGenre]?: listOf(),
                         selectedGenre = selectedGenre,
                         eventListener = eventListener,
                         isLoading = isLoading,
