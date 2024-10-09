@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import com.example.whattowatch.apiRepository.ApiRepository
 import com.example.whattowatch.manager.MainViewModelFactory
 import com.example.whattowatch.ui.theme.WhatToWatchTheme
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 
 class MainActivity : ComponentActivity() {
@@ -21,8 +23,11 @@ class MainActivity : ComponentActivity() {
         val mainViewModel: MainViewModel by viewModels {
             MainViewModelFactory(apiRepository, ioDispatcher)
         }
+        val auth: FirebaseAuth = FirebaseAuth.getInstance()
+        auth.signInAnonymously()
         setContent {
             WhatToWatchTheme {
+                FirebaseApp.initializeApp(this)
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
