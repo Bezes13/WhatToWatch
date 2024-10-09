@@ -75,7 +75,7 @@ fun TopBar(
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.6f)) {
                 Box {
-                    if (drawerImage.isBlank()) {
+                    if (!drawerImage.isBlank()) {
                         AsyncImage(
                             modifier = Modifier.fillMaxHeight(),
                             model = stringResource(R.string.image_path, drawerImage),
