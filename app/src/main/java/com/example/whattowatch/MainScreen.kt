@@ -1,6 +1,7 @@
 package com.example.whattowatch
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,50 +23,52 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.whattowatch.TestData.movie1
-import com.example.whattowatch.TestData.movie2
+import coil.compose.AsyncImage
 import com.example.whattowatch.TestData.testGenre
+import com.example.whattowatch.TestData.testMovies
+import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.dataClasses.MovieInfo
 import com.example.whattowatch.dataClasses.Provider
-import com.example.whattowatch.enums.SortType
 import com.example.whattowatch.dto.CastDTO
-import com.example.whattowatch.dataClasses.Genre
 import com.example.whattowatch.dto.VideoInfoDTO
+import com.example.whattowatch.enums.SortType
 import com.example.whattowatch.enums.UserMark
 import com.example.whattowatch.uielements.GenreDropdown
+import com.example.whattowatch.uielements.MarkingChips
 import com.example.whattowatch.uielements.MovieDetailsDialog
 import com.example.whattowatch.uielements.MovieListOverview
+import com.example.whattowatch.uielements.Orientation
 import com.example.whattowatch.uielements.PersonDetailsDialog
 import com.example.whattowatch.uielements.ProviderListDialog
+import com.example.whattowatch.uielements.Search
 import com.example.whattowatch.uielements.SortingChip
-import com.example.whattowatch.uielements.TextFieldDialog
 import com.example.whattowatch.uielements.TopBar
 
 @Composable
 fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
     val viewState: MainViewState by mainViewModel.viewState.collectAsState()
-    if (mainViewModel.readName(R.string.user_name) == "") {
-        mainViewModel.sendEvent(MainViewEvent.SetDialog(MainViewDialog.EnterName))
-    }
     MainScreenContent(
         viewState.isLoading,
         viewState.selectedGenre,
-        viewState.shows,
-        if(viewState.showMovies) viewState.genres else viewState.seriesGenres,
+        viewState.shows[viewState.selectedGenre] ?: listOf(),
+        when (viewState.category) {
+            MovieCategory.Movie -> viewState.genres
+            else -> viewState.seriesGenres
+        },
         viewState.providers,
         viewState.sorting,
-        mainViewModel::getMovies,
-        mainViewModel::getCustomList,
-        mainViewModel::saveName,
         viewState.dialog,
-        mainViewModel::changeLoadedMovies,
         mainViewModel::sendEvent,
-        mainViewModel::getCast,
-        mainViewModel::getCredits
+        viewState.loadMore
     )
 }
 
@@ -73,44 +76,28 @@ fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
 fun MainScreenContent(
     isLoading: Boolean,
     selectedGenre: String,
-    movies: Map<String, List<MovieInfo>>,
+    movies: List<MovieInfo>,
     genres: List<Genre>,
     allProviders: List<Provider>,
     sortType: SortType,
-    getMovies: (Genre) -> Unit,
-    getCustomList: (UserMark) -> Unit,
-    saveName: (String, Int) -> Unit,
     dialog: MainViewDialog,
-    changeLoadedMovies: (String) -> Unit,
     eventListener: (MainViewEvent) -> Unit,
-    getCast: (MovieInfo) -> Unit,
-    getCredits: (CastDTO) -> Unit,
+    loadMore: Boolean
 ) {
     if (genres.isNotEmpty()) {
         var showFilter by remember { mutableStateOf(true) }
-        TopBar(eventListener, showFilter, { showFilter = !showFilter } ) { innerPadding ->
+        TopBar(
+            eventListener,
+            showFilter,
+            { showFilter = !showFilter },
+            if (movies.isEmpty()) "" else movies[0].posterPath
+        ) { innerPadding ->
             when (dialog) {
-                is MainViewDialog.ShareWithFriend -> TextFieldDialog(
-                    title = stringResource(R.string.sharing_is_caring),
-                    text = stringResource(R.string.enter_friend_name),
-                    saveID = R.string.friend_name,
-                    onDismissRequest = { eventListener(MainViewEvent.SetDialog(MainViewDialog.None)) },
-                    saveName = saveName
-                )
-
-                is MainViewDialog.EnterName -> TextFieldDialog(
-                    title = stringResource(id = R.string.enter_name),
-                    text = stringResource(id = R.string.enter_name_text),
-                    saveID = R.string.user_name,
-                    onDismissRequest = { eventListener(MainViewEvent.SetDialog(MainViewDialog.None)) },
-                    saveName = saveName
-                )
-
                 is MainViewDialog.DetailsDialog -> MovieDetailsDialog(
                     dialog.info,
                     dialog.cast,
                     dialog.video,
-                    getCredits = getCredits,
+                    eventListener = eventListener,
                     onDismissRequest = {
                         eventListener(
                             MainViewEvent.SetDialog(MainViewDialog.None)
@@ -118,13 +105,27 @@ fun MainScreenContent(
                     }
                 )
 
-                is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, getCast) {
+                is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, eventListener) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
                     )
                 }
 
-                is MainViewDialog.ShowProviderList -> ProviderListDialog(allProviders, eventListener) {
+                is MainViewDialog.SearchDialog -> Search(
+                    dialog.foundObjects,
+                    dialog.loadMore,
+                    dialog.page,
+                    eventListener
+                ) {
+                    eventListener(
+                        MainViewEvent.SetDialog(MainViewDialog.None)
+                    )
+                }
+
+                is MainViewDialog.ShowProviderList -> ProviderListDialog(
+                    allProviders,
+                    eventListener
+                ) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
                     )
@@ -132,59 +133,118 @@ fun MainScreenContent(
 
                 else -> {}
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(1f)
-                    .padding(innerPadding),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if(!showFilter){
-                    Row (modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .fillMaxWidth()){
-                        SortingChip(sortType, SortType.POPULARITY, eventListener)
-                        SortingChip(sortType, SortType.VOTE_AVERAGE, eventListener)
-                        SortingChip(sortType, SortType.VOTE_COUNT, eventListener)
-                        SortingChip(sortType, SortType.REVENUE, eventListener)
+            if (isLoading) {
+                Dialog(
+                    onDismissRequest = {},
+                    properties = DialogProperties(usePlatformDefaultWidth = false)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(150, 150, 150, 120))
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .width(64.dp)
+                                .align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                    }
+                }
+            }
+            Box {
+                if (movies.isNotEmpty()) {
+                    AsyncImage(
+                        modifier = Modifier.fillMaxHeight(),
+                        model = stringResource(R.string.image_path, movies[0].posterPath),
+                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentScale = ContentScale.FillBounds,
+                        contentDescription = stringResource(R.string.background),
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(1f)
+                        .padding(innerPadding),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (UserMark.entries.map { it.name }.contains(selectedGenre)) {
+                        Row(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = alphaContainer))
+                                .fillMaxWidth()
+                        ) {
+                            UserMark.entries.forEach {
+                                MarkingChips(
+                                    userMark = it,
+                                    selectedGenre = selectedGenre,
+                                    orientation = when (it) {
+                                        UserMark.entries.first() -> Orientation.Left
+                                        UserMark.entries.last() -> Orientation.Right
+                                        else -> Orientation.Center
+                                    },
+                                    eventListener = eventListener
+                                )
+
+                            }
+                        }
+                    } else {
+                        if (!showFilter) {
+                            if (!UserMark.entries.map { it.name }.contains(selectedGenre)) {
+                                Row(
+                                    modifier = Modifier
+                                        .background(
+                                            MaterialTheme.colorScheme.primaryContainer.copy(
+                                                alpha = alphaContainer
+                                            )
+                                        )
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    SortingChip(sortType, SortType.POPULARITY, eventListener)
+                                    SortingChip(sortType, SortType.VOTE_AVERAGE, eventListener)
+                                    SortingChip(sortType, SortType.VOTE_COUNT, eventListener)
+                                    SortingChip(sortType, SortType.REVENUE, eventListener)
+                                }
+                            }
+                            GenreDropdown(genres, eventListener)
+                        }
                     }
 
-                    GenreDropdown(genres, getMovies, getCustomList, eventListener)
-                }
+                    if (selectedGenre == "") {
+                        Spacer(modifier = Modifier.size(100.dp))
+                        Text(
+                            text = stringResource(R.string.choose_genre),
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
 
-                if (selectedGenre == "") {
-                    Spacer(modifier = Modifier.size(100.dp))
-                    Text(
-                        text = stringResource(R.string.choose_genre),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                }
-
-                if (movies[selectedGenre] != null && (movies[selectedGenre]
-                        ?: listOf()).isNotEmpty()
-                ) {
-                    MovieListOverview(
-                        movies = movies,
-                        selectedGenre = selectedGenre,
-                        eventListener = eventListener,
-                        getCast = getCast,
-                        isLoading = isLoading,
-                        changeLoadedMovies = changeLoadedMovies
-                    )
-                } else {
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .align(Alignment.CenterHorizontally)
-                        ) {
-                            CircularProgressIndicator(
+                    if (movies.isNotEmpty()) {
+                        MovieListOverview(
+                            movies = movies,
+                            selectedGenre = selectedGenre,
+                            eventListener = eventListener,
+                            isLoading = isLoading,
+                            loadMore = loadMore
+                        )
+                    } else {
+                        if (isLoading) {
+                            Box(
                                 modifier = Modifier
-                                    .width(64.dp)
-                                    .align(Alignment.Center),
-                                color = MaterialTheme.colorScheme.secondary,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            )
+                                    .fillMaxSize()
+                                    .align(Alignment.CenterHorizontally)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .width(64.dp)
+                                        .align(Alignment.Center),
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
@@ -193,12 +253,21 @@ fun MainScreenContent(
     }
 }
 
-sealed class MainViewDialog() {
-    data class DetailsDialog(val info: MovieInfo, val cast: List<CastDTO>, val video: List<VideoInfoDTO>) : MainViewDialog()
+sealed class MainViewDialog {
+    data class DetailsDialog(
+        val info: MovieInfo,
+        val cast: List<CastDTO>,
+        val video: List<VideoInfoDTO>
+    ) : MainViewDialog()
+
     data object None : MainViewDialog()
-    data object ShareWithFriend : MainViewDialog()
-    data object EnterName : MainViewDialog()
     data class PersonDetails(val info: CastDTO) : MainViewDialog()
+    data class SearchDialog(
+        val foundObjects: List<MovieInfo>,
+        val page: Int,
+        val loadMore: Boolean
+    ) : MainViewDialog()
+
     data object ShowProviderList : MainViewDialog()
 }
 
@@ -208,25 +277,12 @@ fun PreviewMainScreen() {
     MainScreenContent(
         isLoading = false,
         selectedGenre = testGenre,
-        movies = mapOf(
-            Pair(
-                testGenre, listOf(
-                    movie1,
-                    movie1,
-                    movie2,
-                )
-            )
-        ),
+        movies = testMovies,
         genres = listOf(Genre(3, testGenre)),
         allProviders = listOf(),
         sortType = SortType.POPULARITY,
-        getMovies = {},
-        getCustomList = {},
-        saveName = { _, _ -> },
         dialog = MainViewDialog.None,
-        changeLoadedMovies = {},
         eventListener = {},
-        getCast = { },
-        {}
+        loadMore = true
     )
 }

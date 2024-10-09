@@ -3,17 +3,11 @@ package com.example.whattowatch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattowatch.apiRepository.ApiRepository
-import com.example.whattowatch.dataClasses.MovieInfo
-import com.example.whattowatch.enums.SortType
-import com.example.whattowatch.dataClasses.UserMovie
-import com.example.whattowatch.dto.CastDTO
 import com.example.whattowatch.dataClasses.Genre
+import com.example.whattowatch.dataClasses.MovieInfo
+import com.example.whattowatch.dto.CastDTO
+import com.example.whattowatch.enums.SortType
 import com.example.whattowatch.enums.UserMark
-import com.example.whattowatch.manager.SharedPreferencesManager
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,17 +15,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class MainViewModel(
-    private var sharedPreferencesManager: SharedPreferencesManager,
     private val apiRepository: ApiRepository,
     private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
-    private val database = Firebase.database
     private val _event = MutableSharedFlow<MainViewEvent>()
     private val _viewState = MutableStateFlow(MainViewState())
     val viewState = _viewState.asStateFlow()
+
+    private var database = FirebaseRepository()
 
     init {
         _viewState.update { it.copy(isLoading = true) }
@@ -50,8 +43,9 @@ class MainViewModel(
     }
 
     private fun readSeenMovieList() {
-        UserMark.entries.forEach {
-            readSharedList(it)
+        viewModelScope.launch {
+            val list = database.getUserMovies()
+            _viewState.update { it.copy(markedShows = list) }
         }
     }
 
@@ -77,6 +71,41 @@ class MainViewModel(
                     event.selectedGenre,
                     event.newItem,
                     event.userMark
+                )
+
+                is MainViewEvent.FetchCast -> getCast(event.info)
+                is MainViewEvent.FetchCredits -> getCredits(event.cast)
+                is MainViewEvent.FetchCustomList -> getCustomList(event.mark)
+                is MainViewEvent.FetchMovies -> getMovies(event.genre)
+                is MainViewEvent.UpdateLoadedMovies -> changeLoadedMovies(event.genre)
+                is MainViewEvent.SearchFor -> fetchSearchEntries(
+                    event.searchText,
+                    event.page,
+                    event.founds
+                )
+
+                is MainViewEvent.ShowCustom -> showMarkedFilms(event.userMark)
+            }
+        }
+    }
+
+    private fun showMarkedFilms(userMark: UserMark) {
+        _viewState.update { state ->
+            state.copy(category = MovieCategory.Marked)
+        }
+        getCustomList(userMark)
+    }
+
+    private fun fetchSearchEntries(text: String, page: Int, alreadyFound: List<MovieInfo>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (foundObjects, lastPage) = apiRepository.getSearch(text, page)
+            _viewState.update { currentState ->
+                currentState.copy(
+                    dialog = MainViewDialog.SearchDialog(
+                        alreadyFound + foundObjects,
+                        page,
+                        !lastPage
+                    )
                 )
             }
         }
@@ -110,17 +139,22 @@ class MainViewModel(
 
         getMovies(viewState.value.genres.firstOrNull { it.name == _viewState.value.selectedGenre }
             ?: Genre())
-
-        sharedPreferencesManager.saveList(
-            R.string.provider,
-            _viewState.value.providers.filter { it.show }.map { it.providerId.toString() })
+        viewModelScope.launch {
+            if (useProvider) {
+                database.addProvider(providerId)
+            } else {
+                database.removeProvider(providerId)
+            }
+        }
     }
 
     private fun changeIsMovie(isMovie: Boolean) {
         _viewState.update { state ->
             state.copy(
-                showMovies = isMovie,
-                shows = mapOf())
+                category = if (isMovie) MovieCategory.Movie else MovieCategory.Series,
+                shows = mapOf(),
+                selectedGenre = Genre().name
+            )
         }
         getMovies(viewState.value.genres.firstOrNull { it.name == _viewState.value.selectedGenre }
             ?: Genre())
@@ -134,29 +168,33 @@ class MainViewModel(
         _viewState.update { it.copy(dialog = dialog) }
     }
 
-    fun changeLoadedMovies(genre: String) {
+    private fun changeLoadedMovies(genre: String) {
         val foundGenre = _viewState.value.genres.firstOrNull { g -> g.name == genre }
         if (foundGenre != null) {
             getMovies(foundGenre, extend = true)
         } else {
-            getCustomList(UserMark.valueOf(_viewState.value.selectedGenre), extend = true)
+            getCustomList(UserMark.valueOf(_viewState.value.selectedGenre))
         }
     }
 
-    fun getMovies(genre: Genre, page: Int = 1, extend: Boolean = false) {
+    private fun getMovies(genre: Genre, page: Int = 1, extend: Boolean = false) {
         if (!extend && (!_viewState.value.shows[genre.name].isNullOrEmpty())) {
             return
         }
         _viewState.update { it.copy(isLoading = true) }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val movies = apiRepository.getMovies(
                 page,
                 genre,
                 _viewState.value.providers,
-                _viewState.value.showMovies,
+                _viewState.value.category == MovieCategory.Movie,
                 _viewState.value.sorting
             )
+            if (movies.isEmpty()) {
+                _viewState.update { it.copy(loadMore = false, isLoading = false) }
+                return@launch
+            }
             var filtered = movies.filter { movieInfo ->
                 !_viewState.value.markedShows.any { userMovie -> userMovie.movieId == movieInfo.id } && !(_viewState.value.shows[genre.name]
                     ?: listOf()).any { movie -> movie.id == movieInfo.id }
@@ -167,7 +205,7 @@ class MainViewModel(
                     page + refreshedCount,
                     genre,
                     _viewState.value.providers,
-                    _viewState.value.showMovies,
+                    _viewState.value.category == MovieCategory.Movie,
                     _viewState.value.sorting
                 )
                 refreshedCount++
@@ -204,26 +242,29 @@ class MainViewModel(
     }
 
     private suspend fun getCompanies() {
-        val company =
-            apiRepository.getCompanies(sharedPreferencesManager.getList(R.string.provider))
+        val company = apiRepository.getCompanies(database.getProvider())
         _viewState.update { currentState ->
             currentState.copy(providers = company.filter { provider -> provider.priority != 999 }
                 .sorted())
         }
     }
 
-    fun getCast(movieInfo: MovieInfo) {
+    private fun getCast(movieInfo: MovieInfo) {
+        _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
             val cast = apiRepository.getCast(movieInfo.id, movieInfo.isMovie)
             val video = apiRepository.getVideo(movieInfo)
-
+            val provider = apiRepository.getProviders(movieInfo.id, movieInfo.isMovie)
+            val newInfo =
+                movieInfo.copy(providerName = provider.results["DE"]?.flatrate?.map { it.logo_path })
             _viewState.update { currentState ->
-                currentState.copy(dialog = MainViewDialog.DetailsDialog(movieInfo, cast, video))
+                currentState.copy(dialog = MainViewDialog.DetailsDialog(newInfo, cast, video))
             }
+            _viewState.update { it.copy(isLoading = false) }
         }
     }
 
-    fun getCredits(castDTO: CastDTO) {
+    private fun getCredits(castDTO: CastDTO) {
         viewModelScope.launch(Dispatchers.IO) {
             val cast = apiRepository.getMovieCredits(castDTO.id)
 
@@ -242,10 +283,14 @@ class MainViewModel(
 
     private fun getProvider(genre: String, movieID: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            val provider = apiRepository.getProviders(movieID, _viewState.value.showMovies)
+            val provider = apiRepository.getProviders(
+                movieID,
+                _viewState.value.category == MovieCategory.Movie
+            )
             val updatedMovies = _viewState.value.shows[genre]?.map { movie ->
                 if (movie.id == movieID) {
-                    val logoPaths = provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
+                    val logoPaths =
+                        provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
                     movie.copy(providerName = logoPaths)
                 } else {
                     movie
@@ -260,115 +305,35 @@ class MainViewModel(
         }
     }
 
-    private fun saveSharedList(selectedGenre: String, newItem: Int, userMark: UserMark) {
+    private fun saveSharedList(selectedGenre: String, newItem: MovieInfo, userMark: UserMark) {
+        val updatedMovies = _viewState.value.shows[selectedGenre]?.filter { it.id != newItem.id }
+        val newUserMovie = newItem.convertToUserMovie(userMark)
 
-        val updatedMovies = _viewState.value.shows[selectedGenre]?.filter { it.id != newItem }
         _viewState.update { currentState ->
-            currentState.copy(shows = currentState.shows.toMutableMap().apply {
-                this[selectedGenre] = updatedMovies.orEmpty()
-            })
+            currentState.copy(
+                shows = currentState.shows.toMutableMap().apply {
+                    this[selectedGenre] = updatedMovies.orEmpty()
+                    this[userMark.name] = (this[userMark.name] ?: listOf()).plus(newItem)
+                },
+                markedShows = currentState.markedShows.plus(newUserMovie)
+            )
         }
 
-
-        val myRef = database.getReference(
-            readName(R.string.user_name) + sharedPreferencesManager.context.getString(userMark.textID)
-        )
-        val newUserMovie =
-            UserMovie(newItem, readName(R.string.user_name), _viewState.value.showMovies, userMark)
-        if (_viewState.value.markedShows.any { userMovie -> userMovie.movieId == newItem && userMark == userMovie.userMark })
-            _viewState.update { it.copy(markedShows = it.markedShows - newUserMovie) } else
-            _viewState.update { it.copy(markedShows = it.markedShows + newUserMovie) }
-
-
-        val gson = Gson()
-        val json =
-            gson.toJson(_viewState.value.markedShows.filter { movie -> movie.name == readName(R.string.user_name) && movie.userMark == userMark }
-                .map { userMovie -> if (userMovie.isMovie) userMovie.movieId else -userMovie.movieId })
-        myRef.setValue(json)
-    }
-
-    fun saveName(name: String, saveId: Int) {
-        sharedPreferencesManager.saveName(name, saveId)
-    }
-
-    fun readName(saveId: Int): String {
-        return sharedPreferencesManager.readName(saveId)
-    }
-
-    private fun readSharedList(userMark: UserMark) {
-        val type = object : TypeToken<List<Int>>() {}.type
-        database.getReference(
-            readName(R.string.user_name) + sharedPreferencesManager.context.getString(userMark.textID)
-        ).get().addOnSuccessListener { data ->
-            if (data.value != null) {
-                val result: List<Int> = Gson().fromJson(data.value.toString(), type)
-                val userMovies =
-                    result.map { id ->
-                        UserMovie(
-                            abs(id),
-                            readName(R.string.user_name),
-                            id > 0,
-                            userMark
-                        )
-                    }
-
-                _viewState.update { it.copy(markedShows = it.markedShows + userMovies) }
-            }
+        viewModelScope.launch {
+            database.addOrUpdateUserMovie(newUserMovie)
         }
-        database.getReference(
-            readName(R.string.friend_name) + sharedPreferencesManager.context.getString(userMark.textID)
-        ).get().addOnSuccessListener { data ->
-            if (data.value != null) {
-                val result: List<Int> = Gson().fromJson(data.value.toString(), type)
-                val userMovies =
-                    result.map { id ->
-                        UserMovie(
-                            id,
-                            readName(R.string.friend_name),
-                            id > 0,
-                            userMark
-                        )
-                    }
 
-                _viewState.update { it.copy(markedShows = it.markedShows + userMovies) }
-            }
-        }
     }
 
-    fun getCustomList(customList: UserMark, extend: Boolean = false) {
-        val newList: ArrayList<MovieInfo> = arrayListOf()
-        _viewState.update { it.copy(isLoading = true) }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            if (extend) {
-                newList.addAll((viewState.value.shows[customList.toString()] ?: listOf()))
-            }
-            var loadedMovies = 0
-            _viewState.value.markedShows.filter { userMovie -> userMovie.isMovie && userMovie.userMark == customList }
-                .forEach {
-                    if (loadedMovies <= 10 && (!extend || !(viewState.value.shows[customList.toString()]
-                            ?: listOf()).any { m -> m.id == it.movieId })
-                    ) {
-                        val movie =
-                            apiRepository.getMovieDetails(
-                                it.movieId,
-                                _viewState.value.showMovies
-                            )
-                        movie.user = it.name
-                        newList.add(movie)
-                        loadedMovies++
-                    }
-                }
-
-            _viewState.update { currentState ->
-                currentState.copy(shows = currentState.shows.toMutableMap().apply {
-                    this[customList.toString()] = newList
-                }, isLoading = false)
-            }
-        }.invokeOnCompletion {
-            _viewState.value.shows[customList.toString()]?.forEach {
-                getProvider(genre = customList.toString(), it.id)
-            }
+    private fun getCustomList(customList: UserMark) {
+        _viewState.update { state ->
+            state.copy(
+                selectedGenre = customList.name,
+                shows = state.shows.toMutableMap().apply {
+                    this[customList.name] = state.markedShows.filter { it.userMark == customList }
+                        .map { it.convertToMovieInfo() }
+                })
         }
     }
 }
@@ -379,6 +344,19 @@ sealed class MainViewEvent {
     data class ChangeIsMovie(val isMovie: Boolean) : MainViewEvent()
     data class UpdateProvider(val providerId: Int, val useProvider: Boolean) : MainViewEvent()
     data class ChangeSorting(val sortType: SortType) : MainViewEvent()
-    data class MarkFilmAs(val selectedGenre: String, val newItem: Int, val userMark: UserMark) :
+    data class MarkFilmAs(
+        val selectedGenre: String,
+        val newItem: MovieInfo,
+        val userMark: UserMark
+    ) : MainViewEvent()
+
+    data class FetchMovies(val genre: Genre) : MainViewEvent()
+    data class FetchCustomList(val mark: UserMark) : MainViewEvent()
+    data class UpdateLoadedMovies(val genre: String) : MainViewEvent()
+    data class FetchCast(val info: MovieInfo) : MainViewEvent()
+    data class FetchCredits(val cast: CastDTO) : MainViewEvent()
+    data class SearchFor(val searchText: String, val page: Int, val founds: List<MovieInfo>) :
         MainViewEvent()
+
+    data class ShowCustom(val userMark: UserMark) : MainViewEvent()
 }

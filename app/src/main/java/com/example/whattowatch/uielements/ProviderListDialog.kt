@@ -104,7 +104,8 @@ fun ProviderListDialog(providers: List<Provider>, eventListener: (MainViewEvent)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(40.dp),
+                        .height(50.dp)
+                        .padding(5.dp),
                     colors = ButtonDefaults.buttonColors()
                 ) {
                     Text("Close")

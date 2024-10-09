@@ -16,6 +16,11 @@ data class MainViewState (
     val seriesGenres: List<Genre> = listOf(),
     val markedShows: List<UserMovie> = listOf(),
     val dialog: MainViewDialog = MainViewDialog.None,
-    val showMovies: Boolean = true,
-    val sorting: SortType = SortType.POPULARITY
+    val category: MovieCategory = MovieCategory.Movie,
+    val sorting: SortType = SortType.POPULARITY,
+    val loadMore: Boolean = true
 )
+
+enum class MovieCategory {
+    Movie, Series, Marked
+}

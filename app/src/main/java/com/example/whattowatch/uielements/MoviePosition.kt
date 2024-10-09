@@ -20,14 +20,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,31 +47,33 @@ import com.example.whattowatch.extension.getJustYear
 fun MoviePosition(
     movieInfo: MovieInfo,
     selectedGenre: String,
-    eventListener: (MainViewEvent) -> Unit,
-    getCast: (MovieInfo) -> Unit
+    eventListener: (MainViewEvent) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalAlignment = Alignment.Top
-    ) {
-        BasicInfo(movieInfo)
-        Spacer(modifier = Modifier.width(8.dp))
-        MarkFilmButtons(movieInfo, selectedGenre, eventListener)
-        Spacer(modifier = Modifier.width(8.dp))
-        AsyncImage(
+    Card (modifier = Modifier.padding(5.dp)){
+        Row(
             modifier = Modifier
-                .clickable(onClick = {
-                    getCast(movieInfo)
-                })
-                .align(Alignment.CenterVertically)
-                .weight(0.5F),
-            model = stringResource(R.string.image_path, movieInfo.posterPath),
-            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-            error = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = movieInfo.title,
-        )
+                .fillMaxSize(),
+            verticalAlignment = Alignment.Top
+        ) {
+            BasicInfo(movieInfo)
+            Spacer(modifier = Modifier.width(8.dp))
+            MarkFilmButtons(movieInfo, selectedGenre, eventListener)
+            Spacer(modifier = Modifier.width(8.dp))
+            AsyncImage(
+                modifier = Modifier
+                    .clickable(onClick = {
+                        eventListener(MainViewEvent.FetchCast(movieInfo))
+                    })
+                    .align(Alignment.CenterVertically)
+                    .weight(0.5F),
+                model = stringResource(R.string.image_path, movieInfo.posterPath),
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = movieInfo.title,
+            )
+        }
     }
+
 
 }
 
@@ -91,20 +91,17 @@ fun RowScope.MarkFilmButtons(
         horizontalAlignment = Alignment.End
     ) {
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.SEEN))},
-
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.SEEN))}
             ) {
             Icon(imageVector = Icons.Filled.Favorite, contentDescription = "")
         }
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.LATER))},
-
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.LATER))}
             ) {
             Icon(imageVector = Icons.Filled.Send, contentDescription = "")
         }
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo.id, UserMark.NO)) },
-
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.NO)) }
             ) {
             Icon(imageVector = Icons.Filled.Close, contentDescription = "")
         }
@@ -121,16 +118,6 @@ fun RowScope.BasicInfo(movieInfo: MovieInfo) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        if (movieInfo.user != null && movieInfo.user != "") {
-            Card(colors = CardDefaults.cardColors(Color.Green)) {
-                Text(
-                    text = movieInfo.user ?: "",
-                    textAlign = TextAlign.Start,
-                    color = Color.Black,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                )
-            }
-        }
         Spacer(modifier = Modifier.height(8.dp))
         Column(
             modifier = Modifier
@@ -146,7 +133,7 @@ fun RowScope.BasicInfo(movieInfo: MovieInfo) {
             )
             Text(text = movieInfo.releaseDate.getJustYear(), textAlign = TextAlign.Center)
 
-            Row {
+            Row (horizontalArrangement = Arrangement.spacedBy(5.dp)){
                 if (movieInfo.providerName != null) {
                     movieInfo.providerName.forEach {
                         AsyncImage(
@@ -173,23 +160,20 @@ fun RowScope.BasicInfo(movieInfo: MovieInfo) {
 @Preview
 @Composable
 fun PreviewPosition() {
-    LazyColumn() {
+    LazyColumn {
         item {
             MoviePosition(
                 movieInfo = movie1,
                 selectedGenre = "",
-                eventListener = {},
-                getCast = {  })
+                eventListener = {})
             MoviePosition(
                 movieInfo = movie2,
                 selectedGenre = "",
-                eventListener = {},
-                getCast = {  })
+                eventListener = {})
             MoviePosition(
                 movieInfo = movie3,
                 selectedGenre = "",
-                eventListener = {},
-                getCast = {  })
+                eventListener = {})
         }
     }
 

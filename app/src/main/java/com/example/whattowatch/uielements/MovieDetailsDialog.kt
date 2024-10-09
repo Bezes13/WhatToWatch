@@ -1,6 +1,7 @@
 package com.example.whattowatch.uielements
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
+import com.example.whattowatch.MainViewEvent
 import com.example.whattowatch.R
 import com.example.whattowatch.TestData.movie3
 import com.example.whattowatch.dataClasses.MovieInfo
@@ -57,7 +59,7 @@ fun MovieDetailsDialog(
     cast: List<CastDTO>,
     video: List<VideoInfoDTO>,
     onDismissRequest: () -> Unit,
-    getCredits: (CastDTO) -> Unit,
+    eventListener: (MainViewEvent) -> Unit,
 ) {
     var isExpanded by remember {
         mutableStateOf(false)
@@ -88,14 +90,21 @@ fun MovieDetailsDialog(
                     LazyColumn(
                         Modifier
                             .weight(1F)
-                            .fillMaxHeight()
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         item {
                             MovieOverview(info) { isExpanded = true }
-                            CastInfo(cast, getCredits)
-                            if (video.isNotEmpty()){
-                                VideoPlayer(video[0].key)
+                            Providers(info)
+                            CastInfo(cast, eventListener)
+                            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                if (video.isNotEmpty()) {
+                                    video.filter { info -> info.site == "YouTube" }.forEach {
+                                        VideoPlayer(it.key)
+                                    }
+                                }
                             }
+
                         }
                     }
                     TextButton(
@@ -116,9 +125,32 @@ fun MovieDetailsDialog(
 }
 
 @Composable
+fun Providers(movieInfo: MovieInfo) {
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(5.dp)) {
+        if (movieInfo.providerName != null) {
+            movieInfo.providerName.forEach {
+                AsyncImage(
+                    model = stringResource(R.string.image_path_or, it),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = "Provider",
+                )
+            }
+            if (movieInfo.providerName.isEmpty()) {
+                Image(
+                    modifier = Modifier.size(50.dp),
+                    painter = painterResource(id = R.drawable.na),
+                    contentDescription = stringResource(id = R.string.not_available)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun CastInfo(
     cast: List<CastDTO>,
-    getCredits: (CastDTO) -> Unit
+    eventListener: (MainViewEvent) -> Unit
 ) {
     Row(
         Modifier
@@ -137,7 +169,7 @@ private fun CastInfo(
                     contentDescription = it.name,
                     modifier = Modifier
                         .size(80.dp)
-                        .clickable(onClick = { getCredits(it) })
+                        .clickable(onClick = { eventListener(MainViewEvent.FetchCredits(it)) })
                 )
                 Text(text = it.name)
                 Divider()
@@ -162,7 +194,7 @@ private fun CastInfo(
                     contentDescription = it.name,
                     modifier = Modifier
                         .size(80.dp)
-                        .clickable(onClick = { getCredits(it) })
+                        .clickable(onClick = { eventListener(MainViewEvent.FetchCredits(it)) })
                 )
                 Text(text = it.name)
                 Divider()
@@ -174,14 +206,16 @@ private fun CastInfo(
 @Composable
 private fun MovieOverview(
     info: MovieInfo,
-    onClick: ()-> Unit
+    onClick: () -> Unit
 ) {
-    Row {
-        Icon(
-            imageVector = Icons.Filled.Star,
-            contentDescription = stringResource(R.string.bewertung)
-        )
-        Text(text = "${info.voteAverage} by ${info.voteCount}")
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row {
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = stringResource(R.string.bewertung)
+            )
+            Text(text = "${info.voteAverage} by ${info.voteCount}")
+        }
     }
 
     TextFlow(text = info.overview,
