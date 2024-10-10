@@ -1,4 +1,4 @@
-package com.example.whattowatch
+package com.movies.whattowatch
 
 import org.junit.Test
 
