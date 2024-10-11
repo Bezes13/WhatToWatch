@@ -54,7 +54,7 @@ import com.movies.whattowatch.uielements.SortingChip
 import com.movies.whattowatch.uielements.TopBar
 
 @Composable
-fun MainScreen(mainViewModel: MainViewModel = viewModel()) {
+fun MainScreen(navigate: (String) -> Unit, mainViewModel: MainViewModel = viewModel()) {
     val viewState: MainViewState by mainViewModel.viewState.collectAsState()
     MainScreenContent(
         viewState.isLoading,
