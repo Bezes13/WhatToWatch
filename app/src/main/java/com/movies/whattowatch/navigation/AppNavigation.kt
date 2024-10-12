@@ -4,7 +4,8 @@ enum class Screen {
     SEARCH,
     MAIN,
     DETAILS,
-    PROVIDER
+    PROVIDER,
+    PERSON
 }
 
 sealed class NavigationItem(val route: String) {
@@ -12,4 +13,5 @@ sealed class NavigationItem(val route: String) {
     data object Search : NavigationItem(Screen.SEARCH.name)
     data object Provider : NavigationItem(Screen.PROVIDER.name)
     data object Details : NavigationItem(Screen.DETAILS.name)
+    data object Person : NavigationItem(Screen.PERSON.name)
 }

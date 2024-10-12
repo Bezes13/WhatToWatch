@@ -1,5 +1,6 @@
 package com.movies.whattowatch
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.movies.whattowatch.apiRepository.ApiRepository
@@ -18,11 +19,13 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(
     private val apiRepository: ApiRepository,
-    private val ioDispatcher: CoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _event = MutableSharedFlow<MainViewEvent>()
     private val _viewState = MutableStateFlow(MainViewState())
     val viewState = _viewState.asStateFlow()
+    private var movieId: Int = savedStateHandle.get<String>("isMovie")?.toInt() ?: 1
 
     private var database = FirebaseRepository()
 
@@ -73,7 +76,6 @@ class MainViewModel(
                     event.userMark
                 )
 
-                is MainViewEvent.FetchCast -> getCast(event.info)
                 is MainViewEvent.FetchCredits -> getCredits(event.cast)
                 is MainViewEvent.FetchCustomList -> getCustomList(event.mark)
                 is MainViewEvent.FetchMovies -> getMovies(event.genre)
@@ -173,7 +175,11 @@ class MainViewModel(
         if (foundGenre != null) {
             getMovies(foundGenre, extend = true)
         } else {
-            getCustomList(UserMark.valueOf(_viewState.value.selectedGenre))
+            if (genre == Genre().name) {
+                getMovies(Genre(), extend = true)
+            } else {
+                getCustomList(UserMark.valueOf(_viewState.value.selectedGenre))
+            }
         }
     }
 
@@ -246,21 +252,6 @@ class MainViewModel(
         _viewState.update { currentState ->
             currentState.copy(providers = company.filter { provider -> provider.priority != 999 }
                 .sorted())
-        }
-    }
-
-    private fun getCast(movieInfo: MovieInfo) {
-        _viewState.update { it.copy(isLoading = true) }
-        viewModelScope.launch(Dispatchers.IO) {
-            val cast = apiRepository.getCast(movieInfo.id, movieInfo.isMovie)
-            val video = apiRepository.getVideo(movieInfo)
-            val provider = apiRepository.getProviders(movieInfo.id, movieInfo.isMovie)
-            val newInfo =
-                movieInfo.copy(providerName = provider.results["DE"]?.flatrate?.map { it.logo_path })
-            _viewState.update { currentState ->
-                currentState.copy(dialog = MainViewDialog.DetailsDialog(newInfo, cast, video))
-            }
-            _viewState.update { it.copy(isLoading = false) }
         }
     }
 
@@ -353,7 +344,6 @@ sealed class MainViewEvent {
     data class FetchMovies(val genre: Genre) : MainViewEvent()
     data class FetchCustomList(val mark: UserMark) : MainViewEvent()
     data class UpdateLoadedMovies(val genre: String) : MainViewEvent()
-    data class FetchCast(val info: MovieInfo) : MainViewEvent()
     data class FetchCredits(val cast: CastDTO) : MainViewEvent()
     data class SearchFor(val searchText: String, val page: Int, val founds: List<MovieInfo>) :
         MainViewEvent()

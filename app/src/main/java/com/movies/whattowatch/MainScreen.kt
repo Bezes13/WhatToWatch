@@ -39,12 +39,10 @@ import com.movies.whattowatch.dataClasses.Genre
 import com.movies.whattowatch.dataClasses.MovieInfo
 import com.movies.whattowatch.dataClasses.Provider
 import com.movies.whattowatch.dto.CastDTO
-import com.movies.whattowatch.dto.VideoInfoDTO
 import com.movies.whattowatch.enums.SortType
 import com.movies.whattowatch.enums.UserMark
 import com.movies.whattowatch.uielements.GenreDropdown
 import com.movies.whattowatch.uielements.MarkingChips
-import com.movies.whattowatch.uielements.MovieDetailsDialog
 import com.movies.whattowatch.uielements.MovieListOverview
 import com.movies.whattowatch.uielements.Orientation
 import com.movies.whattowatch.uielements.PersonDetailsDialog
@@ -68,7 +66,8 @@ fun MainScreen(navigate: (String) -> Unit, mainViewModel: MainViewModel = viewMo
         viewState.sorting,
         viewState.dialog,
         mainViewModel::sendEvent,
-        viewState.loadMore
+        viewState.loadMore,
+        navigate
     )
 }
 
@@ -82,29 +81,18 @@ fun MainScreenContent(
     sortType: SortType,
     dialog: MainViewDialog,
     eventListener: (MainViewEvent) -> Unit,
-    loadMore: Boolean
+    loadMore: Boolean,
+    navigate: (String) -> Unit
 ) {
     if (genres.isNotEmpty()) {
         var showFilter by remember { mutableStateOf(true) }
         TopBar(
-            eventListener,
             showFilter,
             { showFilter = !showFilter },
-            if (movies.isEmpty()) "" else movies[0].posterPath
+            if (movies.isEmpty()) "" else movies[0].posterPath,
+            navigate
         ) { innerPadding ->
             when (dialog) {
-                is MainViewDialog.DetailsDialog -> MovieDetailsDialog(
-                    dialog.info,
-                    dialog.cast,
-                    dialog.video,
-                    eventListener = eventListener,
-                    onDismissRequest = {
-                        eventListener(
-                            MainViewEvent.SetDialog(MainViewDialog.None)
-                        )
-                    }
-                )
-
                 is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, eventListener) {
                     eventListener(
                         MainViewEvent.SetDialog(MainViewDialog.None)
@@ -228,7 +216,8 @@ fun MainScreenContent(
                             selectedGenre = selectedGenre,
                             eventListener = eventListener,
                             isLoading = isLoading,
-                            loadMore = loadMore
+                            loadMore = loadMore,
+                            navigate = navigate
                         )
                     } else {
                         if (isLoading) {
@@ -254,12 +243,6 @@ fun MainScreenContent(
 }
 
 sealed class MainViewDialog {
-    data class DetailsDialog(
-        val info: MovieInfo,
-        val cast: List<CastDTO>,
-        val video: List<VideoInfoDTO>
-    ) : MainViewDialog()
-
     data object None : MainViewDialog()
     data class PersonDetails(val info: CastDTO) : MainViewDialog()
     data class SearchDialog(
@@ -284,5 +267,5 @@ fun PreviewMainScreen() {
         dialog = MainViewDialog.None,
         eventListener = {},
         loadMore = true
-    )
+    ){}
 }

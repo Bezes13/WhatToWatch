@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     AppNavHost(
                         navController = rememberNavController(),
-                        startDestination = Screen.MAIN.name
+                        startDestination = Screen.MAIN.name + "/true"
                     )
                 }
             }

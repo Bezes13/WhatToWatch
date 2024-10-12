@@ -48,21 +48,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.movies.whattowatch.MainViewDialog
-import com.movies.whattowatch.MainViewEvent
 import com.movies.whattowatch.R
 import com.movies.whattowatch.alphaContainer
-import com.movies.whattowatch.enums.UserMark
+import com.movies.whattowatch.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    eventListener: (MainViewEvent) -> Unit,
     showFilter: Boolean,
     changeFilter: () -> Unit,
     drawerImage: String,
+    navigate: (String) -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -104,8 +102,7 @@ fun TopBar(
                             scope = scope,
                             text = "MOVIES",
                             drawerState = drawerState,
-                            event = MainViewEvent.ChangeIsMovie(true),
-                            eventListener = eventListener,
+                            navigate = { navigate(Screen.MAIN.name + "/true") },
                             setActive = true
                         )
                         NavigationItem(
@@ -114,8 +111,7 @@ fun TopBar(
                             scope = scope,
                             text = "SERIES",
                             drawerState = drawerState,
-                            event = MainViewEvent.ChangeIsMovie(false),
-                            eventListener = eventListener,
+                            navigate = { navigate(Screen.MAIN.name + "/false") },
                             setActive = true
                         )
                         NavigationItem(
@@ -124,8 +120,7 @@ fun TopBar(
                             scope = scope,
                             text = "PROVIDER SELECTION",
                             drawerState = drawerState,
-                            event = MainViewEvent.SetDialog(MainViewDialog.ShowProviderList),
-                            eventListener = eventListener,
+                            navigate = { navigate(Screen.PROVIDER.name) },
                             setActive = false
                         )
                         NavigationItem(
@@ -134,14 +129,7 @@ fun TopBar(
                             scope = scope,
                             text = "SEARCH",
                             drawerState = drawerState,
-                            event = MainViewEvent.SetDialog(
-                                MainViewDialog.SearchDialog(
-                                    listOf(),
-                                    1,
-                                    false
-                                )
-                            ),
-                            eventListener = eventListener,
+                            navigate = { navigate(Screen.SEARCH.name) },
                             setActive = false
                         )
                         NavigationItem(
@@ -150,25 +138,8 @@ fun TopBar(
                             scope = scope,
                             text = "MARKED FILMS",
                             drawerState = drawerState,
-                            event = MainViewEvent.ShowCustom(UserMark.SEEN),
-                            eventListener = eventListener,
+                            navigate = { navigate(Screen.MAIN.name + "/true") },
                             setActive = true
-                        )
-                        NavigationItem(
-                            currentNavigationItem = navigationItem,
-                            navigationItem = NavigationItem.SEARCH,
-                            scope = scope,
-                            text = "SEARCH",
-                            drawerState = drawerState,
-                            event = MainViewEvent.SetDialog(
-                                MainViewDialog.SearchDialog(
-                                    listOf(),
-                                    1,
-                                    false
-                                )
-                            ),
-                            eventListener = eventListener,
-                            setActive = false
                         )
                     }
                 }
@@ -224,8 +195,7 @@ private fun NavigationItem(
     scope: CoroutineScope,
     text: String,
     drawerState: DrawerState,
-    event: MainViewEvent,
-    eventListener: (MainViewEvent) -> Unit,
+    navigate: () -> Unit,
     setActive: Boolean
 ) {
     NavigationDrawerItem(
@@ -249,7 +219,7 @@ private fun NavigationItem(
                 drawerState.apply {
                     if (isClosed) open() else close()
                 }
-                eventListener(event)
+                navigate()
             }
         },
         colors = NavigationDrawerItemDefaults.colors(
@@ -267,5 +237,5 @@ enum class NavigationItem {
 @Preview
 @Composable
 fun TopBarPreview() {
-    TopBar({}, true, {}, "/58QT4cPJ2u2TqWZkterDq9q4yxQ.jpg", {})
+    TopBar(true, {}, "/58QT4cPJ2u2TqWZkterDq9q4yxQ.jpg", {}, {})
 }

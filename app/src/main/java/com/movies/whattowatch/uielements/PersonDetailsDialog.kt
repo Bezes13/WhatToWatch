@@ -41,7 +41,11 @@ import com.movies.whattowatch.TestData.movie3
 import com.movies.whattowatch.dto.CastDTO
 
 @Composable
-fun PersonDetailsDialog(info: CastDTO, eventListener: (MainViewEvent) -> Unit, onDismissRequest: () -> Unit) {
+fun PersonDetailsDialog(
+    info: CastDTO,
+    eventListener: (MainViewEvent) -> Unit,
+    onDismissRequest: () -> Unit
+) {
     var isExpanded by remember {
         mutableStateOf(false)
     }
@@ -69,13 +73,18 @@ fun PersonDetailsDialog(info: CastDTO, eventListener: (MainViewEvent) -> Unit, o
                         .padding(10.dp),
                     verticalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 10.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    ) {
                         AsyncImage(
                             model = stringResource(R.string.image_path, info.profile_path),
                             placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                             error = painterResource(id = R.drawable.ic_launcher_foreground),
                             contentDescription = info.name,
-                            modifier = Modifier.weight(0.3f).clickable(onClick = { isExpanded = true })
+                            modifier = Modifier
+                                .weight(0.3f)
+                                .clickable(onClick = { isExpanded = true })
                         )
                         Text(text = info.name, modifier = Modifier.weight(0.7f))
                     }
@@ -98,7 +107,9 @@ fun PersonDetailsDialog(info: CastDTO, eventListener: (MainViewEvent) -> Unit, o
                                 item {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 5.dp)
                                     ) {
                                         AsyncImage(
                                             model = stringResource(
@@ -113,7 +124,7 @@ fun PersonDetailsDialog(info: CastDTO, eventListener: (MainViewEvent) -> Unit, o
                                                 .weight(0.3f)
                                                 .clickable {
                                                     if (it.releaseDate != "") {
-                                                        eventListener(MainViewEvent.FetchCast(it))
+                                                        // TODO mavigate
                                                     }
                                                 }
                                         )
@@ -149,6 +160,5 @@ fun PreviewPersonDetails() {
             "Tom Johnson", "", 3, listOf(
                 movie3, movie2, movie1
             )
-        )
-    , {}) {}
+        ), {}) {}
 }

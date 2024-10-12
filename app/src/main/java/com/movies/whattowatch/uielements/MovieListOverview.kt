@@ -25,7 +25,8 @@ fun MovieListOverview(
     selectedGenre: String,
     eventListener: (MainViewEvent) -> Unit,
     isLoading: Boolean,
-    loadMore: Boolean
+    loadMore: Boolean,
+    navigate: (String) -> Unit,
 ) {
 
     LazyColumn {
@@ -34,7 +35,8 @@ fun MovieListOverview(
                 MoviePosition(
                     it,
                     selectedGenre,
-                    eventListener
+                    eventListener,
+                    navigate
                 )
             }
         }
@@ -79,6 +81,7 @@ fun PreviewOverview() {
         selectedGenre = "",
         eventListener = {},
         isLoading = false,
-        loadMore = false
+        loadMore = false,
+        {}
     )
 }

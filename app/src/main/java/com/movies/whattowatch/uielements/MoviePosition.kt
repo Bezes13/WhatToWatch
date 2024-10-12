@@ -41,13 +41,15 @@ import com.movies.whattowatch.TestData.movie3
 import com.movies.whattowatch.dataClasses.MovieInfo
 import com.movies.whattowatch.enums.UserMark
 import com.movies.whattowatch.extension.getJustYear
+import com.movies.whattowatch.navigation.Screen
 
 
 @Composable
 fun MoviePosition(
     movieInfo: MovieInfo,
     selectedGenre: String,
-    eventListener: (MainViewEvent) -> Unit
+    eventListener: (MainViewEvent) -> Unit,
+    navigate: (String) -> Unit,
 ) {
     Card (modifier = Modifier.padding(5.dp)){
         Row(
@@ -62,7 +64,7 @@ fun MoviePosition(
             AsyncImage(
                 modifier = Modifier
                     .clickable(onClick = {
-                        eventListener(MainViewEvent.FetchCast(movieInfo))
+                        navigate(Screen.DETAILS.name + "/${movieInfo.id}/${movieInfo.isMovie}")
                     })
                     .align(Alignment.CenterVertically)
                     .weight(0.5F),
@@ -165,15 +167,15 @@ fun PreviewPosition() {
             MoviePosition(
                 movieInfo = movie1,
                 selectedGenre = "",
-                eventListener = {})
+                eventListener = {}){}
             MoviePosition(
                 movieInfo = movie2,
                 selectedGenre = "",
-                eventListener = {})
+                eventListener = {}){}
             MoviePosition(
                 movieInfo = movie3,
                 selectedGenre = "",
-                eventListener = {})
+                eventListener = {}){}
         }
     }
 

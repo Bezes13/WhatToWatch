@@ -84,22 +84,23 @@ fun Search(
                                 modifier = Modifier
                                     .size(128.dp)
                                     .clickable(onClick = {
-                                        eventListener(
-                                            if (it.mediaType == MediaType.PERSON) MainViewEvent.FetchCredits(
+                                        if (it.mediaType == MediaType.PERSON)
+                                            eventListener(
+                                            MainViewEvent.FetchCredits(
                                                 CastDTO(
                                                     it.title,
                                                     it.posterPath,
                                                     it.id,
                                                     it.knownFor ?: listOf()
                                                 )
-                                            ) else
-                                                MainViewEvent.FetchCast(it)
+                                            ))
+                                          }//navigate
                                         )
-                                    })
-                            )
+                                    )
+                            }
                             Text(text = it.title)
                         }
-                    }
+
                     item {
                         if (loadMore)
                             Button(

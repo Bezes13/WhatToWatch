@@ -38,7 +38,11 @@ import com.movies.whattowatch.R
 import com.movies.whattowatch.dataClasses.Provider
 
 @Composable
-fun ProviderListDialog(providers: List<Provider>, eventListener: (MainViewEvent) -> Unit, onDismissRequest: () -> Unit) {
+fun ProviderListDialog(
+    providers: List<Provider>,
+    eventListener: (MainViewEvent) -> Unit,
+    onDismissRequest: () -> Unit
+) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -86,7 +90,7 @@ fun ProviderListDialog(providers: List<Provider>, eventListener: (MainViewEvent)
                                     )
                                 })
                         )
-                        if(it.show){
+                        if (it.show) {
                             Image(
                                 painter = painterResource(id = R.drawable.checked),
                                 contentDescription = stringResource(id = R.string.checked),

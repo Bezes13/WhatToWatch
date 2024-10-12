@@ -3,19 +3,19 @@ package com.movies.whattowatch.dataClasses
 import com.movies.whattowatch.enums.UserMark
 
 data class MovieInfo(
-    val id: Int,
-    val originalLanguage: String,
-    val overview: String,
-    val popularity: Double,
-    val posterPath: String,
-    val releaseDate: String,
-    val title: String,
-    val voteAverage: Double,
-    val voteCount: Int,
+    val id: Int = 0,
+    val originalLanguage: String = "",
+    val overview: String = "",
+    val popularity: Double = 0.0,
+    val posterPath: String = "",
+    val releaseDate: String = "",
+    val title: String = "",
+    val voteAverage: Double = 0.0,
+    val voteCount: Int = 0,
     val providerName: List<String>? = listOf(),
-    val isMovie: Boolean,
+    val isMovie: Boolean = true,
     var user: String? = "",
-    var mediaType: MediaType?,
+    var mediaType: MediaType? = null,
     var knownFor: List<MovieInfo>? = listOf()
 ) {
     fun convertToUserMovie(userMark: UserMark): UserMovie {

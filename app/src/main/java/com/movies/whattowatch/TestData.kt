@@ -2,9 +2,17 @@ package com.movies.whattowatch
 
 import com.movies.whattowatch.dataClasses.MediaType
 import com.movies.whattowatch.dataClasses.MovieInfo
+import com.movies.whattowatch.dto.PersonDTO
 
 
 object TestData  {
+    val testPerson = PersonDTO(
+        birthday = "1999-10-10",
+        deathday = null,
+        name = "Frederik",
+        profile_path ="/9MRVpZpW8sGrEI4KYGkDrdFLTs4.jpg",
+        id = 123465
+    )
     val movie1 = MovieInfo(
         id = 533535,
         originalLanguage = "en",
