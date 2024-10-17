@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.movies.whattowatch.R
 import com.movies.whattowatch.alphaContainer
+import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -102,7 +103,7 @@ fun TopBar(
                             scope = scope,
                             text = "MOVIES",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.MAIN.name + "/true") },
+                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Movie}") },
                             setActive = true
                         )
                         NavigationItem(
@@ -111,7 +112,7 @@ fun TopBar(
                             scope = scope,
                             text = "SERIES",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.MAIN.name + "/false") },
+                            navigate = { navigate(Screen.MAIN.name + "//${MovieCategory.Series}") },
                             setActive = true
                         )
                         NavigationItem(
@@ -138,7 +139,7 @@ fun TopBar(
                             scope = scope,
                             text = "MARKED FILMS",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.MAIN.name + "/true") },
+                            navigate = { navigate(Screen.MAIN.name + "//${MovieCategory.Marked}") },
                             setActive = true
                         )
                     }

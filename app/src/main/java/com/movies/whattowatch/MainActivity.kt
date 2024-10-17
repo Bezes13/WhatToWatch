@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.navigation.AppNavHost
 import com.movies.whattowatch.navigation.Screen
 import com.movies.whattowatch.ui.theme.WhatToWatchTheme
@@ -28,7 +29,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     AppNavHost(
                         navController = rememberNavController(),
-                        startDestination = Screen.MAIN.name + "/true"
+                        startDestination = Screen.MAIN.name + "/${MovieCategory.Movie}"
                     )
                 }
             }

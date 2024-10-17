@@ -52,8 +52,8 @@ fun AppNavHost(
             )
             DetailsScreen(navController::navigate, detailsViewModel)
         }
-        composable(NavigationItem.Main.route + "/{isMovie}",
-            arguments = listOf(navArgument("isMovie") { type = NavType.StringType })) {
+        composable(NavigationItem.Main.route + "/{category}",
+            arguments = listOf(navArgument("category") { type = NavType.StringType })) {
             MainScreen(navController::navigate, viewModel(factory = MainViewModelFactory(ioDispatcher, apiRepository)))
         }
         composable(NavigationItem.Search.route) {

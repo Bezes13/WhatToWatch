@@ -7,6 +7,7 @@ import com.movies.whattowatch.apiRepository.ApiRepository
 import com.movies.whattowatch.dataClasses.Genre
 import com.movies.whattowatch.dataClasses.MovieInfo
 import com.movies.whattowatch.dto.CastDTO
+import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.enums.SortType
 import com.movies.whattowatch.enums.UserMark
 import kotlinx.coroutines.CoroutineDispatcher
@@ -25,8 +26,7 @@ class MainViewModel(
     private val _event = MutableSharedFlow<MainViewEvent>()
     private val _viewState = MutableStateFlow(MainViewState())
     val viewState = _viewState.asStateFlow()
-    private var movieId: Int = savedStateHandle.get<String>("isMovie")?.toInt() ?: 1
-
+    private var category: MovieCategory = MovieCategory.valueOf(savedStateHandle.get<String>("category")?.toString()?: "")
     private var database = FirebaseRepository()
 
     init {
@@ -63,7 +63,6 @@ class MainViewModel(
             when (event) {
                 is MainViewEvent.SetDialog -> updateDialog(event.dialog)
                 is MainViewEvent.SetGenre -> updateGenre(event.genre)
-                is MainViewEvent.ChangeIsMovie -> changeIsMovie(event.isMovie)
                 is MainViewEvent.UpdateProvider -> updateProvider(
                     event.providerId,
                     event.useProvider
@@ -86,17 +85,12 @@ class MainViewModel(
                     event.founds
                 )
 
-                is MainViewEvent.ShowCustom -> showMarkedFilms(event.userMark)
+                is MainViewEvent.ShowCustom -> getCustomList(event.userMark)
             }
         }
     }
 
-    private fun showMarkedFilms(userMark: UserMark) {
-        _viewState.update { state ->
-            state.copy(category = MovieCategory.Marked)
-        }
-        getCustomList(userMark)
-    }
+
 
     private fun fetchSearchEntries(text: String, page: Int, alreadyFound: List<MovieInfo>) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -150,18 +144,6 @@ class MainViewModel(
         }
     }
 
-    private fun changeIsMovie(isMovie: Boolean) {
-        _viewState.update { state ->
-            state.copy(
-                category = if (isMovie) MovieCategory.Movie else MovieCategory.Series,
-                shows = mapOf(),
-                selectedGenre = Genre().name
-            )
-        }
-        getMovies(viewState.value.genres.firstOrNull { it.name == _viewState.value.selectedGenre }
-            ?: Genre())
-    }
-
     private fun updateGenre(genre: String) {
         _viewState.update { it.copy(selectedGenre = genre) }
     }
@@ -194,7 +176,7 @@ class MainViewModel(
                 page,
                 genre,
                 _viewState.value.providers,
-                _viewState.value.category == MovieCategory.Movie,
+                isMovie,
                 _viewState.value.sorting
             )
             if (movies.isEmpty()) {
@@ -211,7 +193,7 @@ class MainViewModel(
                     page + refreshedCount,
                     genre,
                     _viewState.value.providers,
-                    _viewState.value.category == MovieCategory.Movie,
+                    isMovie,
                     _viewState.value.sorting
                 )
                 refreshedCount++
@@ -276,12 +258,11 @@ class MainViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val provider = apiRepository.getProviders(
                 movieID,
-                _viewState.value.category == MovieCategory.Movie
+                isMovie
             )
             val updatedMovies = _viewState.value.shows[genre]?.map { movie ->
                 if (movie.id == movieID) {
-                    val logoPaths =
-                        provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
+                    val logoPaths = provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
                     movie.copy(providerName = logoPaths)
                 } else {
                     movie
@@ -332,7 +313,6 @@ class MainViewModel(
 sealed class MainViewEvent {
     data class SetDialog(val dialog: MainViewDialog) : MainViewEvent()
     data class SetGenre(val genre: String) : MainViewEvent()
-    data class ChangeIsMovie(val isMovie: Boolean) : MainViewEvent()
     data class UpdateProvider(val providerId: Int, val useProvider: Boolean) : MainViewEvent()
     data class ChangeSorting(val sortType: SortType) : MainViewEvent()
     data class MarkFilmAs(

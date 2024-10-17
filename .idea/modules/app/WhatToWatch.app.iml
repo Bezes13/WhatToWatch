@@ -19,4 +19,9 @@
       </configuration>
     </facet>
   </component>
+  <component name="ModuleClassLoaderOverlays">
+    <paths>
+      <option value="C:\Users\Alex\AppData\Local\Temp\overlay6932940105472796304" />
+    </paths>
+  </component>
 </module>
