@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.movies.whattowatch.R
 import com.movies.whattowatch.dataClasses.Provider
+import com.movies.whattowatch.uielements.NavigationItem
 import com.movies.whattowatch.uielements.TopBar
 
 
@@ -56,7 +57,8 @@ fun ProviderScreen(
         false,
         {},
         if (providers.isEmpty()) "" else providers[0].logoPath,
-        navigate
+        navigate,
+        NavigationItem.SELECTION
     ) { innerPadding ->
         Column(
             modifier = Modifier

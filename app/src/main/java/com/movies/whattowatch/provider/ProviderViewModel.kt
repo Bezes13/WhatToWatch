@@ -44,9 +44,17 @@ class ProviderViewModel(
 
     private fun listenToEvent() = viewModelScope.launch(ioDispatcher) {
         _event.collect { provider ->
-            database.addProvider(provider.providerId)
-            _viewState.update {
-                state -> state.copy(providers = state.providers.map { if (it.providerId == provider.providerId) it.copy(show = !it.show) else it })
+            if (provider.show) {
+                database.removeProvider(provider.providerId)
+            } else {
+                database.addProvider(provider.providerId)
+            }
+            _viewState.update { state ->
+                state.copy(providers = state.providers.map {
+                    if (it.providerId == provider.providerId) it.copy(
+                        show = !it.show
+                    ) else it
+                })
             }
         }
     }

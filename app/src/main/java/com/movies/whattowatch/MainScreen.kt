@@ -43,6 +43,7 @@ import com.movies.whattowatch.enums.UserMark
 import com.movies.whattowatch.uielements.GenreDropdown
 import com.movies.whattowatch.uielements.MarkingChips
 import com.movies.whattowatch.uielements.MovieListOverview
+import com.movies.whattowatch.uielements.NavigationItem
 import com.movies.whattowatch.uielements.Orientation
 import com.movies.whattowatch.uielements.SortingChip
 import com.movies.whattowatch.uielements.TopBar
@@ -61,6 +62,7 @@ fun MainScreen(navigate: (String) -> Unit, mainViewModel: MainViewModel = viewMo
         viewState.sorting,
         mainViewModel::sendEvent,
         viewState.loadMore,
+        viewState.category,
         navigate
     )
 }
@@ -74,6 +76,7 @@ fun MainScreenContent(
     sortType: SortType,
     eventListener: (MainViewEvent) -> Unit,
     loadMore: Boolean,
+    category: MovieCategory,
     navigate: (String) -> Unit
 ) {
     if (genres.isNotEmpty()) {
@@ -82,7 +85,12 @@ fun MainScreenContent(
             showFilter,
             { showFilter = !showFilter },
             if (movies.isEmpty()) "" else movies[0].posterPath,
-            navigate
+            navigate,
+            when(category){
+                MovieCategory.Movie -> NavigationItem.MOVIES
+                MovieCategory.Marked -> NavigationItem.MARKED
+                MovieCategory.Series -> NavigationItem.SERIES
+            }
         ) { innerPadding ->
             if (isLoading) {
                 Dialog(
@@ -215,6 +223,7 @@ fun PreviewMainScreen() {
         genres = listOf(Genre(3, testGenre)),
         sortType = SortType.POPULARITY,
         eventListener = {},
-        loadMore = true
+        loadMore = true,
+        category = MovieCategory.Movie
     ){}
 }

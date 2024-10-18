@@ -45,6 +45,7 @@ import com.movies.whattowatch.dto.CastDTO
 import com.movies.whattowatch.dto.VideoInfoDTO
 import com.movies.whattowatch.extension.getJustYear
 import com.movies.whattowatch.navigation.Screen
+import com.movies.whattowatch.uielements.NavigationItem
 import com.movies.whattowatch.uielements.TopBar
 import com.movies.whattowatch.uielements.VideoPlayer
 import eu.wewox.textflow.TextFlow
@@ -77,7 +78,8 @@ fun DetailsScreen(
         false,
         {},
         info.posterPath,
-        navigate
+        navigate,
+        NavigationItem.None
     ) { innerPadding ->
         if (isLoading) {
             Box(

@@ -62,12 +62,13 @@ fun TopBar(
     changeFilter: () -> Unit,
     drawerImage: String,
     navigate: (String) -> Unit,
+    init: NavigationItem,
     content: @Composable (PaddingValues) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navigationItem = remember {
-        mutableStateOf(NavigationItem.MOVIES)
+        mutableStateOf(init)
     }
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -224,11 +225,11 @@ private fun NavigationItem(
 }
 
 enum class NavigationItem {
-    SERIES, MOVIES, SEARCH, SELECTION, MARKED
+    SERIES, MOVIES, SEARCH, SELECTION, MARKED, None
 }
 
 @Preview
 @Composable
 fun TopBarPreview() {
-    TopBar(true, {}, "/58QT4cPJ2u2TqWZkterDq9q4yxQ.jpg", {}, {})
+    TopBar(true, {}, "/58QT4cPJ2u2TqWZkterDq9q4yxQ.jpg", {},NavigationItem.None, {})
 }

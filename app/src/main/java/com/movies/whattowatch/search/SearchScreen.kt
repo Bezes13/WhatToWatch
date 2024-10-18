@@ -29,6 +29,7 @@ import com.movies.whattowatch.R
 import com.movies.whattowatch.dataClasses.MediaType
 import com.movies.whattowatch.dataClasses.MovieInfo
 import com.movies.whattowatch.navigation.Screen
+import com.movies.whattowatch.uielements.NavigationItem
 import com.movies.whattowatch.uielements.TopBar
 
 @Composable
@@ -59,7 +60,8 @@ fun SearchScreen(
         false,
         {},
         if (founds.isEmpty()) "" else founds[0].posterPath,
-        navigate
+        navigate,
+        NavigationItem.SEARCH
     ) { innerPadding ->
         Column(
             modifier = Modifier
