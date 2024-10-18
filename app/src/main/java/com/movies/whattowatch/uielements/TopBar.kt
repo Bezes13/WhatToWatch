@@ -103,8 +103,7 @@ fun TopBar(
                             scope = scope,
                             text = "MOVIES",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Movie}") },
-                            setActive = true
+                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Movie}") }
                         )
                         NavigationItem(
                             currentNavigationItem = navigationItem,
@@ -112,8 +111,7 @@ fun TopBar(
                             scope = scope,
                             text = "SERIES",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Series}") },
-                            setActive = true
+                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Series}") }
                         )
                         NavigationItem(
                             currentNavigationItem = navigationItem,
@@ -121,8 +119,7 @@ fun TopBar(
                             scope = scope,
                             text = "PROVIDER SELECTION",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.PROVIDER.name) },
-                            setActive = false
+                            navigate = { navigate(Screen.PROVIDER.name) }
                         )
                         NavigationItem(
                             currentNavigationItem = navigationItem,
@@ -130,8 +127,7 @@ fun TopBar(
                             scope = scope,
                             text = "SEARCH",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.SEARCH.name) },
-                            setActive = false
+                            navigate = { navigate(Screen.SEARCH.name) }
                         )
                         NavigationItem(
                             currentNavigationItem = navigationItem,
@@ -139,8 +135,7 @@ fun TopBar(
                             scope = scope,
                             text = "MARKED FILMS",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Marked}") },
-                            setActive = true
+                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Marked}") }
                         )
                     }
                 }
@@ -196,8 +191,7 @@ private fun NavigationItem(
     scope: CoroutineScope,
     text: String,
     drawerState: DrawerState,
-    navigate: () -> Unit,
-    setActive: Boolean
+    navigate: () -> Unit
 ) {
     NavigationDrawerItem(
         label = {
@@ -213,9 +207,7 @@ private fun NavigationItem(
         shape = RectangleShape,
         selected = currentNavigationItem.value == navigationItem,
         onClick = {
-            if (setActive) {
-                currentNavigationItem.apply { value = navigationItem }
-            }
+            currentNavigationItem.apply { value = navigationItem }
             scope.launch {
                 drawerState.apply {
                     if (isClosed) open() else close()

@@ -36,14 +36,14 @@ class ApiRepository(private val context: Context) {
         getMovies: Boolean,
         sortType: SortType
     ): List<MovieInfo> {
-        val sorting = when(sortType){
+        val sorting = when (sortType) {
             SortType.POPULARITY -> "popularity"
             SortType.VOTE_COUNT -> "vote_count"
             SortType.VOTE_AVERAGE -> "vote_average"
             SortType.REVENUE -> "revenue"
         }
         val result =
-            apiCall("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=en-US&page=$page&sort_by=$sorting.desc&watch_region=DE${if (genre.id != -1)"&with_genres=${genre.id}" else ""}&with_watch_providers=${
+            apiCall("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=en-US&page=$page&sort_by=$sorting.desc&watch_region=DE${if (genre.id != -1) "&with_genres=${genre.id}" else ""}&with_watch_providers=${
                 companies.filter { it.show }.joinToString("|") { it.providerId.toString() }
             }")
 
@@ -66,9 +66,10 @@ class ApiRepository(private val context: Context) {
     }
 
     suspend fun getMovieDetails(movieId: Int, isMovie: Boolean): MovieInfo {
-        val result = apiCall("https://api.themoviedb.org/3/${if (isMovie) "movie" else "tv"}/$movieId?language=en-US")
+        val result =
+            apiCall("https://api.themoviedb.org/3/${if (isMovie) "movie" else "tv"}/$movieId?language=en-US")
         val dto = Gson().fromJson(result, MovieInfoDTO::class.java)
-        if(dto.title == null){
+        if (dto.title == null) {
             println("Movie: " + movieId)
         }
         return MovieInfo(
@@ -87,20 +88,23 @@ class ApiRepository(private val context: Context) {
     }
 
     suspend fun getCast(movieId: Int, isMovie: Boolean): List<CastDTO> {
-        val result = apiCall("https://api.themoviedb.org/3/${if (isMovie) "movie" else "tv"}/$movieId/credits?language=en-US")
+        val result =
+            apiCall("https://api.themoviedb.org/3/${if (isMovie) "movie" else "tv"}/$movieId/credits?language=en-US")
 
         val credits = Gson().fromJson(result, CreditsDTO::class.java)
         return credits.cast.filterIndexed { index, _ -> index < 10 }
     }
 
     suspend fun getProviders(movieId: Int, isMovie: Boolean): MovieAvailability {
-        val result = apiCall("https://api.themoviedb.org/3/${if (isMovie) "movie" else "tv"}/$movieId/watch/providers")
+        val result =
+            apiCall("https://api.themoviedb.org/3/${if (isMovie) "movie" else "tv"}/$movieId/watch/providers")
 
         return Gson().fromJson(result, MovieAvailability::class.java)
     }
 
     suspend fun getGenres(isMovie: Boolean): GenresDTO {
-        val result = apiCall("https://api.themoviedb.org/3/genre/${if (isMovie) "movie" else "tv"}/list?language=de")
+        val result =
+            apiCall("https://api.themoviedb.org/3/genre/${if (isMovie) "movie" else "tv"}/list?language=de")
         return Gson().fromJson(result, GenresDTO::class.java)
     }
 
@@ -108,7 +112,15 @@ class ApiRepository(private val context: Context) {
         val result =
             apiCall("https://api.themoviedb.org/3/watch/providers/movie?language=en-US&watch_region=DE")
         val companyDTO = Gson().fromJson(result, CompanyDTO::class.java)
-        return companyDTO.results.map {provider -> Provider(providerName = provider.provider_name, providerId = provider.provider_id, logoPath = provider.logo_path, priority = provider.display_priorities["DE"]?:999, savedProviders.contains(provider.provider_id) )}
+        return companyDTO.results.map { provider ->
+            Provider(
+                providerName = provider.provider_name,
+                providerId = provider.provider_id,
+                logoPath = provider.logo_path,
+                priority = provider.display_priorities["DE"] ?: 999,
+                savedProviders.contains(provider.provider_id)
+            )
+        }
     }
 
     suspend fun getPersonDetails(personId: Int): PersonDTO {
@@ -152,7 +164,8 @@ class ApiRepository(private val context: Context) {
     }
 
     suspend fun getSearch(text: String, page: Int): Pair<List<MovieInfo>, Boolean> {
-        val json = apiCall("https://api.themoviedb.org/3/search/multi?query=$text&include_adult=false&language=en-US&page=$page")
+        val json =
+            apiCall("https://api.themoviedb.org/3/search/multi?query=$text&include_adult=false&language=en-US&page=$page")
         val movieDto = Gson().fromJson(json, MovieDTO::class.java)
         return Pair(movieDto.results.map { dto ->
             MovieInfo(
@@ -166,7 +179,7 @@ class ApiRepository(private val context: Context) {
                 title = dto.title ?: dto.name,
                 releaseDate = dto.release_date ?: dto.first_air_date ?: "",
                 isMovie = !dto.release_date.isNullOrBlank(),
-                mediaType = when(dto.media_type){
+                mediaType = when (dto.media_type) {
                     "person" -> MediaType.PERSON
                     "tv" -> MediaType.TV
                     else -> MediaType.MOVIE
@@ -185,7 +198,7 @@ class ApiRepository(private val context: Context) {
                         isMovie = !dto.release_date.isNullOrBlank(),
                         mediaType = MediaType.MOVIE
                     )
-                }?: listOf()
+                } ?: listOf()
             )
         }, movieDto.total_pages == page)
     }

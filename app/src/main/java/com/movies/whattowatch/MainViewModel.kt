@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.movies.whattowatch.apiRepository.ApiRepository
 import com.movies.whattowatch.dataClasses.Genre
 import com.movies.whattowatch.dataClasses.MovieInfo
-import com.movies.whattowatch.dto.CastDTO
+import com.movies.whattowatch.dataClasses.Provider
 import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.enums.SortType
 import com.movies.whattowatch.enums.UserMark
@@ -28,6 +28,7 @@ class MainViewModel(
     val viewState = _viewState.asStateFlow()
     private var category: MovieCategory = MovieCategory.valueOf(savedStateHandle.get<String>("category")?.toString()?: "")
     private var database = FirebaseRepository()
+    private var providers = listOf<Provider>()
 
     init {
         _viewState.update { it.copy(isLoading = true) }
@@ -61,48 +62,16 @@ class MainViewModel(
     private fun listenToEvent() = viewModelScope.launch(ioDispatcher) {
         _event.collect { event ->
             when (event) {
-                is MainViewEvent.SetDialog -> updateDialog(event.dialog)
                 is MainViewEvent.SetGenre -> updateGenre(event.genre)
-                is MainViewEvent.UpdateProvider -> updateProvider(
-                    event.providerId,
-                    event.useProvider
-                )
-
                 is MainViewEvent.ChangeSorting -> changeSorting(event.sortType)
                 is MainViewEvent.MarkFilmAs -> saveSharedList(
                     event.selectedGenre,
                     event.newItem,
                     event.userMark
                 )
-
-                is MainViewEvent.FetchCredits -> getCredits(event.cast)
-                is MainViewEvent.FetchCustomList -> getCustomList(event.mark)
                 is MainViewEvent.FetchMovies -> getMovies(event.genre)
                 is MainViewEvent.UpdateLoadedMovies -> changeLoadedMovies(event.genre)
-                is MainViewEvent.SearchFor -> fetchSearchEntries(
-                    event.searchText,
-                    event.page,
-                    event.founds
-                )
-
                 is MainViewEvent.ShowCustom -> getCustomList(event.userMark)
-            }
-        }
-    }
-
-
-
-    private fun fetchSearchEntries(text: String, page: Int, alreadyFound: List<MovieInfo>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val (foundObjects, lastPage) = apiRepository.getSearch(text, page)
-            _viewState.update { currentState ->
-                currentState.copy(
-                    dialog = MainViewDialog.SearchDialog(
-                        alreadyFound + foundObjects,
-                        page,
-                        !lastPage
-                    )
-                )
             }
         }
     }
@@ -122,34 +91,8 @@ class MainViewModel(
             ?: Genre())
     }
 
-    private fun updateProvider(providerId: Int, useProvider: Boolean) {
-        _viewState.update { currentState ->
-            currentState.copy(
-                providers = currentState.providers.toMutableList().map { provider ->
-                    if (provider.providerId == providerId) provider.copy(show = useProvider) else provider
-                },
-                shows = currentState.shows.filter {
-                    UserMark.entries.map { mark -> mark.name }.contains(it.key)
-                })
-        }
-
-        getMovies(viewState.value.genres.firstOrNull { it.name == _viewState.value.selectedGenre }
-            ?: Genre())
-        viewModelScope.launch {
-            if (useProvider) {
-                database.addProvider(providerId)
-            } else {
-                database.removeProvider(providerId)
-            }
-        }
-    }
-
     private fun updateGenre(genre: String) {
         _viewState.update { it.copy(selectedGenre = genre) }
-    }
-
-    private fun updateDialog(dialog: MainViewDialog) {
-        _viewState.update { it.copy(dialog = dialog) }
     }
 
     private fun changeLoadedMovies(genre: String) {
@@ -175,7 +118,7 @@ class MainViewModel(
             val movies = apiRepository.getMovies(
                 page,
                 genre,
-                _viewState.value.providers,
+                providers,
                 category == MovieCategory.Movie,
                 _viewState.value.sorting
             )
@@ -192,7 +135,7 @@ class MainViewModel(
                 val newMovies = apiRepository.getMovies(
                     page + refreshedCount,
                     genre,
-                    _viewState.value.providers,
+                    providers,
                     category == MovieCategory.Movie,
                     _viewState.value.sorting
                 )
@@ -231,20 +174,7 @@ class MainViewModel(
 
     private suspend fun getCompanies() {
         val company = apiRepository.getCompanies(database.getProvider())
-        _viewState.update { currentState ->
-            currentState.copy(providers = company.filter { provider -> provider.priority != 999 }
-                .sorted())
-        }
-    }
-
-    private fun getCredits(castDTO: CastDTO) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val cast = apiRepository.getMovieCredits(castDTO.id)
-
-            _viewState.update { currentState ->
-                currentState.copy(dialog = MainViewDialog.PersonDetails(castDTO.copy(credits = cast)))
-            }
-        }
+        providers = company.filter { provider -> provider.priority != 999 }.sorted()
     }
 
     private suspend fun getGenres() {
@@ -311,22 +241,14 @@ class MainViewModel(
 }
 
 sealed class MainViewEvent {
-    data class SetDialog(val dialog: MainViewDialog) : MainViewEvent()
     data class SetGenre(val genre: String) : MainViewEvent()
-    data class UpdateProvider(val providerId: Int, val useProvider: Boolean) : MainViewEvent()
     data class ChangeSorting(val sortType: SortType) : MainViewEvent()
     data class MarkFilmAs(
         val selectedGenre: String,
         val newItem: MovieInfo,
         val userMark: UserMark
     ) : MainViewEvent()
-
     data class FetchMovies(val genre: Genre) : MainViewEvent()
-    data class FetchCustomList(val mark: UserMark) : MainViewEvent()
     data class UpdateLoadedMovies(val genre: String) : MainViewEvent()
-    data class FetchCredits(val cast: CastDTO) : MainViewEvent()
-    data class SearchFor(val searchText: String, val page: Int, val founds: List<MovieInfo>) :
-        MainViewEvent()
-
     data class ShowCustom(val userMark: UserMark) : MainViewEvent()
 }

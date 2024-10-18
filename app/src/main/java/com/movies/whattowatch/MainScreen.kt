@@ -37,8 +37,6 @@ import com.movies.whattowatch.TestData.testGenre
 import com.movies.whattowatch.TestData.testMovies
 import com.movies.whattowatch.dataClasses.Genre
 import com.movies.whattowatch.dataClasses.MovieInfo
-import com.movies.whattowatch.dataClasses.Provider
-import com.movies.whattowatch.dto.CastDTO
 import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.enums.SortType
 import com.movies.whattowatch.enums.UserMark
@@ -46,9 +44,6 @@ import com.movies.whattowatch.uielements.GenreDropdown
 import com.movies.whattowatch.uielements.MarkingChips
 import com.movies.whattowatch.uielements.MovieListOverview
 import com.movies.whattowatch.uielements.Orientation
-import com.movies.whattowatch.uielements.PersonDetailsDialog
-import com.movies.whattowatch.uielements.ProviderListDialog
-import com.movies.whattowatch.uielements.Search
 import com.movies.whattowatch.uielements.SortingChip
 import com.movies.whattowatch.uielements.TopBar
 
@@ -63,9 +58,7 @@ fun MainScreen(navigate: (String) -> Unit, mainViewModel: MainViewModel = viewMo
             MovieCategory.Movie -> viewState.genres
             else -> viewState.seriesGenres
         },
-        viewState.providers,
         viewState.sorting,
-        viewState.dialog,
         mainViewModel::sendEvent,
         viewState.loadMore,
         navigate
@@ -78,9 +71,7 @@ fun MainScreenContent(
     selectedGenre: String,
     movies: List<MovieInfo>,
     genres: List<Genre>,
-    allProviders: List<Provider>,
     sortType: SortType,
-    dialog: MainViewDialog,
     eventListener: (MainViewEvent) -> Unit,
     loadMore: Boolean,
     navigate: (String) -> Unit
@@ -93,35 +84,6 @@ fun MainScreenContent(
             if (movies.isEmpty()) "" else movies[0].posterPath,
             navigate
         ) { innerPadding ->
-            when (dialog) {
-                is MainViewDialog.PersonDetails -> PersonDetailsDialog(dialog.info, eventListener) {
-                    eventListener(
-                        MainViewEvent.SetDialog(MainViewDialog.None)
-                    )
-                }
-
-                is MainViewDialog.SearchDialog -> Search(
-                    dialog.foundObjects,
-                    dialog.loadMore,
-                    dialog.page,
-                    eventListener
-                ) {
-                    eventListener(
-                        MainViewEvent.SetDialog(MainViewDialog.None)
-                    )
-                }
-
-                is MainViewDialog.ShowProviderList -> ProviderListDialog(
-                    allProviders,
-                    eventListener
-                ) {
-                    eventListener(
-                        MainViewEvent.SetDialog(MainViewDialog.None)
-                    )
-                }
-
-                else -> {}
-            }
             if (isLoading) {
                 Dialog(
                     onDismissRequest = {},
@@ -243,18 +205,6 @@ fun MainScreenContent(
     }
 }
 
-sealed class MainViewDialog {
-    data object None : MainViewDialog()
-    data class PersonDetails(val info: CastDTO) : MainViewDialog()
-    data class SearchDialog(
-        val foundObjects: List<MovieInfo>,
-        val page: Int,
-        val loadMore: Boolean
-    ) : MainViewDialog()
-
-    data object ShowProviderList : MainViewDialog()
-}
-
 @Composable
 @Preview
 fun PreviewMainScreen() {
@@ -263,9 +213,7 @@ fun PreviewMainScreen() {
         selectedGenre = testGenre,
         movies = testMovies,
         genres = listOf(Genre(3, testGenre)),
-        allProviders = listOf(),
         sortType = SortType.POPULARITY,
-        dialog = MainViewDialog.None,
         eventListener = {},
         loadMore = true
     ){}
