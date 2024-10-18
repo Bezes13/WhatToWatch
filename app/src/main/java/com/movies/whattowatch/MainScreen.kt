@@ -39,6 +39,7 @@ import com.movies.whattowatch.dataClasses.Genre
 import com.movies.whattowatch.dataClasses.MovieInfo
 import com.movies.whattowatch.dataClasses.Provider
 import com.movies.whattowatch.dto.CastDTO
+import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.enums.SortType
 import com.movies.whattowatch.enums.UserMark
 import com.movies.whattowatch.uielements.GenreDropdown

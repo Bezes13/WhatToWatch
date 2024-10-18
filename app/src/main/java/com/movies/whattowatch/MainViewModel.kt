@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val apiRepository: ApiRepository,
     private val ioDispatcher: CoroutineDispatcher,
-    private val savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _event = MutableSharedFlow<MainViewEvent>()
     private val _viewState = MutableStateFlow(MainViewState())
@@ -176,7 +176,7 @@ class MainViewModel(
                 page,
                 genre,
                 _viewState.value.providers,
-                isMovie,
+                category == MovieCategory.Movie,
                 _viewState.value.sorting
             )
             if (movies.isEmpty()) {
@@ -193,7 +193,7 @@ class MainViewModel(
                     page + refreshedCount,
                     genre,
                     _viewState.value.providers,
-                    isMovie,
+                    category == MovieCategory.Movie,
                     _viewState.value.sorting
                 )
                 refreshedCount++
@@ -258,7 +258,7 @@ class MainViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val provider = apiRepository.getProviders(
                 movieID,
-                isMovie
+                category == MovieCategory.Movie
             )
             val updatedMovies = _viewState.value.shows[genre]?.map { movie ->
                 if (movie.id == movieID) {

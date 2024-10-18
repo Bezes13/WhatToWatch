@@ -4,6 +4,7 @@ import com.movies.whattowatch.dataClasses.Genre
 import com.movies.whattowatch.dataClasses.MovieInfo
 import com.movies.whattowatch.dataClasses.Provider
 import com.movies.whattowatch.dataClasses.UserMovie
+import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.enums.SortType
 
 data class MainViewState (
@@ -17,5 +18,6 @@ data class MainViewState (
     val markedShows: List<UserMovie> = listOf(),
     val dialog: MainViewDialog = MainViewDialog.None,
     val sorting: SortType = SortType.POPULARITY,
-    val loadMore: Boolean = true
+    val loadMore: Boolean = true,
+    val category: MovieCategory = MovieCategory.Movie
 )

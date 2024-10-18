@@ -112,7 +112,7 @@ fun TopBar(
                             scope = scope,
                             text = "SERIES",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.MAIN.name + "//${MovieCategory.Series}") },
+                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Series}") },
                             setActive = true
                         )
                         NavigationItem(
@@ -139,7 +139,7 @@ fun TopBar(
                             scope = scope,
                             text = "MARKED FILMS",
                             drawerState = drawerState,
-                            navigate = { navigate(Screen.MAIN.name + "//${MovieCategory.Marked}") },
+                            navigate = { navigate(Screen.MAIN.name + "/${MovieCategory.Marked}") },
                             setActive = true
                         )
                     }
