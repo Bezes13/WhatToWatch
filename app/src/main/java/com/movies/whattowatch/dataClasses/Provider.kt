@@ -5,7 +5,8 @@ data class Provider (
     val providerId: Int,
     val logoPath: String,
     val priority: Int,
-    val show: Boolean
+    val show: Boolean,
+    val isUpdating: Boolean
 ): Comparable<Provider> {
     override fun compareTo(other: Provider): Int {
         return priority - other.priority

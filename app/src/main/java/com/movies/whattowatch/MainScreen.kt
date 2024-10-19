@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,6 +40,7 @@ import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.enums.SortType
 import com.movies.whattowatch.enums.UserMark
 import com.movies.whattowatch.uielements.GenreDropdown
+import com.movies.whattowatch.uielements.LoadingBox
 import com.movies.whattowatch.uielements.MarkingChips
 import com.movies.whattowatch.uielements.MovieListOverview
 import com.movies.whattowatch.uielements.NavigationItem
@@ -97,19 +97,7 @@ fun MainScreenContent(
                     onDismissRequest = {},
                     properties = DialogProperties(usePlatformDefaultWidth = false)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(150, 150, 150, 120))
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .width(64.dp)
-                                .align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        )
-                    }
+                    LoadingBox()
                 }
             }
             Box {

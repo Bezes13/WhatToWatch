@@ -118,7 +118,8 @@ class ApiRepository(private val context: Context) {
                 providerId = provider.provider_id,
                 logoPath = provider.logo_path,
                 priority = provider.display_priorities["DE"] ?: 999,
-                savedProviders.contains(provider.provider_id)
+                savedProviders.contains(provider.provider_id),
+                false
             )
         }
     }
