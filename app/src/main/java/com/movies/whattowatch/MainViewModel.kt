@@ -31,7 +31,8 @@ class MainViewModel(
     private var providers = listOf<Provider>()
 
     init {
-        _viewState.update { it.copy(isLoading = true) }
+        _viewState.update { it.copy(isLoading = true, category = category) }
+
         initViewModel()
         listenToEvent()
         _viewState.update { it.copy(isLoading = false) }
