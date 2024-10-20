@@ -11,7 +11,6 @@ import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.enums.SortType
 import com.movies.whattowatch.enums.UserMark
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,13 +25,13 @@ class MainViewModel(
     private val _event = MutableSharedFlow<MainViewEvent>()
     private val _viewState = MutableStateFlow(MainViewState())
     val viewState = _viewState.asStateFlow()
-    private var category: MovieCategory = MovieCategory.valueOf(savedStateHandle.get<String>("category")?.toString()?: "")
+    private var category: MovieCategory =
+        MovieCategory.valueOf(savedStateHandle.get<String>("category")?.toString() ?: "")
     private var database = FirebaseRepository()
     private var providers = listOf<Provider>()
 
     init {
         _viewState.update { it.copy(isLoading = true, category = category) }
-
         initViewModel()
         listenToEvent()
         _viewState.update { it.copy(isLoading = false) }
@@ -40,19 +39,15 @@ class MainViewModel(
 
     private fun initViewModel() {
         viewModelScope.launch {
-            getCompanies()
-            getGenres()
-            readSeenMovieList()
+            fetchData()
+        }.invokeOnCompletion {
             getMovies(Genre())
+            if (category == MovieCategory.Marked) {
+                getCustomList(UserMark.SEEN)
+            }
         }
     }
 
-    private fun readSeenMovieList() {
-        viewModelScope.launch {
-            val list = database.getUserMovies()
-            _viewState.update { it.copy(markedShows = list) }
-        }
-    }
 
     fun sendEvent(event: MainViewEvent) {
         viewModelScope.launch(ioDispatcher) {
@@ -70,8 +65,9 @@ class MainViewModel(
                     event.newItem,
                     event.userMark
                 )
+
                 is MainViewEvent.FetchMovies -> getMovies(event.genre)
-                is MainViewEvent.UpdateLoadedMovies -> changeLoadedMovies(event.genre)
+                is MainViewEvent.UpdateLoadedMovies -> changeGenre(event.genre)
                 is MainViewEvent.ShowCustom -> getCustomList(event.userMark)
             }
         }
@@ -96,7 +92,7 @@ class MainViewModel(
         _viewState.update { it.copy(selectedGenre = genre) }
     }
 
-    private fun changeLoadedMovies(genre: String) {
+    private fun changeGenre(genre: String) {
         val foundGenre = _viewState.value.genres.firstOrNull { g -> g.name == genre }
         if (foundGenre != null) {
             getMovies(foundGenre, extend = true)
@@ -113,7 +109,6 @@ class MainViewModel(
         if (!extend && (!_viewState.value.shows[genre.name].isNullOrEmpty())) {
             return
         }
-        _viewState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
             val movies = apiRepository.getMovies(
@@ -157,7 +152,7 @@ class MainViewModel(
                 _viewState.update { currentState ->
                     currentState.copy(shows = currentState.shows.toMutableMap().apply {
                         this[genre.name] = filtered
-                    }, isLoading = false)
+                    })
                 }
             }
 
@@ -173,27 +168,29 @@ class MainViewModel(
         }
     }
 
-    private suspend fun getCompanies() {
+
+    private suspend fun fetchData() {
         val company = apiRepository.getCompanies(database.getProvider())
         providers = company.filter { provider -> provider.priority != 999 }.sorted()
-    }
-
-    private suspend fun getGenres() {
-        val genres = apiRepository.getGenres(true)
-        _viewState.update { currentState -> currentState.copy(genres = genres.genres) }
-        val tvGenres = apiRepository.getGenres(false)
-        _viewState.update { currentState -> currentState.copy(seriesGenres = tvGenres.genres) }
+        _viewState.update { currentState ->
+            currentState.copy(
+                seriesGenres = apiRepository.getGenres(false).genres,
+                genres = apiRepository.getGenres(true).genres,
+                markedShows = database.getUserMovies()
+            )
+        }
     }
 
     private fun getProvider(genre: String, movieID: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val provider = apiRepository.getProviders(
                 movieID,
                 category == MovieCategory.Movie
             )
             val updatedMovies = _viewState.value.shows[genre]?.map { movie ->
                 if (movie.id == movieID) {
-                    val logoPaths = provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
+                    val logoPaths =
+                        provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
                     movie.copy(providerName = logoPaths)
                 } else {
                     movie
@@ -225,9 +222,7 @@ class MainViewModel(
         viewModelScope.launch {
             database.addOrUpdateUserMovie(newUserMovie)
         }
-
     }
-
 
     private fun getCustomList(customList: UserMark) {
         _viewState.update { state ->
@@ -249,6 +244,7 @@ sealed class MainViewEvent {
         val newItem: MovieInfo,
         val userMark: UserMark
     ) : MainViewEvent()
+
     data class FetchMovies(val genre: Genre) : MainViewEvent()
     data class UpdateLoadedMovies(val genre: String) : MainViewEvent()
     data class ShowCustom(val userMark: UserMark) : MainViewEvent()
