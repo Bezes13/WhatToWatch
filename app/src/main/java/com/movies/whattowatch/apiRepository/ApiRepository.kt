@@ -69,9 +69,6 @@ class ApiRepository(private val context: Context) {
         val result =
             apiCall("https://api.themoviedb.org/3/${if (isMovie) "movie" else "tv"}/$movieId?language=en-US")
         val dto = Gson().fromJson(result, MovieInfoDTO::class.java)
-        if (dto.title == null) {
-            println("Movie: " + movieId)
-        }
         return MovieInfo(
             id = dto.id,
             originalLanguage = dto.original_language ?: "",

@@ -31,9 +31,9 @@ class MainViewModel(
     private var providers = listOf<Provider>()
 
     init {
+        listenToEvent()
         _viewState.update { it.copy(isLoading = true, category = category) }
         initViewModel()
-        listenToEvent()
         _viewState.update { it.copy(isLoading = false) }
     }
 
@@ -191,7 +191,7 @@ class MainViewModel(
                 if (movie.id == movieID) {
                     val logoPaths =
                         provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
-                    movie.copy(providerName = logoPaths)
+                    movie.copy(providerName = logoPaths, link = provider.results["DE"]?.link?:"" )
                 } else {
                     movie
                 }

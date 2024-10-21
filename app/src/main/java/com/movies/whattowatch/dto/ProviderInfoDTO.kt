@@ -7,7 +7,8 @@ data class MovieAvailability(
 
 data class RegionDetails(
     val link: String,
-    val flatrate: List<FlatrateProvider>
+    val flatrate: List<FlatrateProvider>,
+    val buy: List<FlatrateProvider>
 )
 
 data class FlatrateProvider(

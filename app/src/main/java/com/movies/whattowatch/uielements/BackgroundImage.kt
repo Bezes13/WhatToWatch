@@ -10,7 +10,7 @@ import coil.compose.AsyncImage
 import com.movies.whattowatch.R
 
 @Composable
-fun BackgroundImage(image: String) {
+fun BackgroundImage(image: String, alpha: Float = 1f) {
     AsyncImage(
         modifier = Modifier.fillMaxHeight(),
         model = stringResource(R.string.image_path, image),
@@ -18,5 +18,6 @@ fun BackgroundImage(image: String) {
         error = painterResource(id = R.drawable.ic_launcher_foreground),
         contentScale = ContentScale.FillBounds,
         contentDescription = stringResource(R.string.background),
+        alpha = alpha
     )
 }

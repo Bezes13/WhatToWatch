@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.movies.whattowatch.R
-import com.movies.whattowatch.alphaContainer
 import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
@@ -149,7 +148,7 @@ fun TopBar(
             topBar = {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = alphaContainer),
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
                         titleContentColor = MaterialTheme.colorScheme.primary,
                     ),
                     title = {
