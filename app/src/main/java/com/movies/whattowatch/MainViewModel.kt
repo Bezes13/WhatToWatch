@@ -191,7 +191,7 @@ class MainViewModel(
                 if (movie.id == movieID) {
                     val logoPaths =
                         provider.results["DE"]?.flatrate?.map { it.logo_path } ?: listOf()
-                    movie.copy(providerName = logoPaths, link = provider.results["DE"]?.link?:"" )
+                    movie.copy(providerName = logoPaths)
                 } else {
                     movie
                 }

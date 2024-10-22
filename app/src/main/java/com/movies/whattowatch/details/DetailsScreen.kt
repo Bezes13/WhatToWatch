@@ -1,7 +1,6 @@
 package com.movies.whattowatch.details
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +32,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -129,11 +127,16 @@ fun DetailsScreen(
                                     Row (
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         modifier = Modifier.fillMaxWidth()){
-                                        PosterCard(info) { isExpanded = true }
+                                        Row (
+                                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                            verticalAlignment = Alignment.Top
+                                        ){
+                                            PosterCard(info) { isExpanded = true }
+                                            Providers(info)
+                                        }
                                         VoteCard(info)
                                     }
                                     OverviewCard(info)
-                                    Providers(info)
                                 }
                             }
 
@@ -164,32 +167,22 @@ fun DetailsScreen(
 
 @Composable
 fun Providers(movieInfo: MovieInfo) {
-    val uriHandler = LocalUriHandler.current
-    Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.padding(10.dp)) {
-        if (movieInfo.providerName != null) {
-            movieInfo.providerName.forEach {
-                AsyncImage(
-                    model = stringResource(R.string.image_path_or, it),
-                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                    error = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Provider",
-                    modifier = Modifier
-                        .clickable {
-                            uriHandler.openUri(movieInfo.link)
-                        }
-                        .clip(ProviderShape)
-                )
-            }
-            if (movieInfo.providerName.isEmpty()) {
-                Image(
-                    modifier = Modifier.size(50.dp),
-                    painter = painterResource(id = R.drawable.na),
-                    contentDescription = stringResource(id = R.string.not_available)
-                )
+    Column (modifier = Modifier.padding(top = 10.dp)){
+        movieInfo.providerName?.chunked(3)?.forEach {
+            Row(horizontalArrangement = Arrangement.Start) {
+                it.forEach {
+                    AsyncImage(
+                        model = stringResource(R.string.image_path_or, it),
+                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = "Provider",
+                        modifier = Modifier.clip(ProviderShape)
+                    )
+                }
             }
         }
-
     }
+
 }
 
 @Composable
@@ -250,7 +243,8 @@ private fun PosterCard(
         contentDescription = info.title,
         modifier = Modifier
             .clickable(onClick = onClick)
-            .padding(10.dp).clip(RoundedCornerShape(10))
+            .padding(10.dp)
+            .clip(RoundedCornerShape(10))
     )
 
 }
@@ -285,8 +279,9 @@ private fun VoteCard(info: MovieInfo) {
 }
 
 @Composable
-fun MyCard(content: @Composable () -> Unit) {
+fun MyCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Card(
+        modifier = modifier,
         elevation = CardDefaults.elevatedCardElevation(),
         border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary),
         colors = CardDefaults.cardColors(

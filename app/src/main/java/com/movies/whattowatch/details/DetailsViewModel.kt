@@ -3,18 +3,14 @@ package com.movies.whattowatch.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.movies.whattowatch.MainViewEvent
 import com.movies.whattowatch.apiRepository.ApiRepository
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DetailsViewModel(
-    private val ioDispatcher: CoroutineDispatcher,
     private val apiRepository: ApiRepository,
     savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
@@ -30,6 +26,7 @@ class DetailsViewModel(
             val cast = apiRepository.getCast(movieId, isMovie)
             val video = apiRepository.getVideo(movieId, isMovie)
             val provider = apiRepository.getProviders(movieId, isMovie)
+
             val newInfo = apiRepository.getMovieDetails(movieId, isMovie).copy(providerName = provider.results["DE"]?.flatrate?.map { it.logo_path })
 
             _viewState.update { currentState ->

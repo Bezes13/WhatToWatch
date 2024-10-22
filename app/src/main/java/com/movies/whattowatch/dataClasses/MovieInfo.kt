@@ -13,7 +13,6 @@ data class MovieInfo(
     val voteAverage: Double = 0.0,
     val voteCount: Int = 0,
     val providerName: List<String>? = listOf(),
-    val link: String = "",
     val isMovie: Boolean = true,
     var user: String? = "",
     var mediaType: MediaType? = null,

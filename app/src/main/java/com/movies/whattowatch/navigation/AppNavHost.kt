@@ -48,7 +48,7 @@ fun AppNavHost(
             arguments = listOf(navArgument("movieId") { type = NavType.StringType },navArgument("isMovie") { type = NavType.StringType })
         ) {
             val detailsViewModel: DetailsViewModel = viewModel(
-                factory = DetailsViewModelFactory(ioDispatcher, apiRepository)
+                factory = DetailsViewModelFactory(apiRepository)
             )
             DetailsScreen(navController::navigate, detailsViewModel)
         }
@@ -74,13 +74,12 @@ fun AppNavHost(
 
 
 class DetailsViewModelFactory(
-    private val ioDispatcher: CoroutineDispatcher,
     private val apiRepository: ApiRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val savedStateHandle = extras.createSavedStateHandle() // Retrieves SavedStateHandle from the creation extras
         if (modelClass.isAssignableFrom(DetailsViewModel::class.java)) {
-            return DetailsViewModel(ioDispatcher, apiRepository, savedStateHandle) as T
+            return DetailsViewModel(apiRepository, savedStateHandle) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

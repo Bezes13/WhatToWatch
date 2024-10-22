@@ -95,7 +95,6 @@ class ApiRepository(private val context: Context) {
     suspend fun getProviders(movieId: Int, isMovie: Boolean): MovieAvailability {
         val result =
             apiCall("https://api.themoviedb.org/3/${if (isMovie) "movie" else "tv"}/$movieId/watch/providers")
-
         return Gson().fromJson(result, MovieAvailability::class.java)
     }
 
