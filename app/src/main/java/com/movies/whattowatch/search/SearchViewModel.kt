@@ -3,8 +3,9 @@ package com.movies.whattowatch.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.movies.whattowatch.apiRepository.ApiRepository
+import com.movies.whattowatch.dataClasses.Genre
+import com.movies.whattowatch.enums.SortType
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,11 +24,11 @@ class SearchViewModel(
         listenToEvent()
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch{
-            val (foundObjects, _) = apiRepository.getSearch("", 1)
+            val foundObjects = apiRepository.getMovies(1, Genre(), listOf(),true,SortType.POPULARITY)
             _viewState.update { currentState ->
                 currentState.copy(founds = foundObjects)
             }
-            _viewState.update { it.copy(isLoading = true) }
+            _viewState.update { it.copy(isLoading = false) }
         }
 
     }
@@ -44,10 +45,11 @@ class SearchViewModel(
     }
 
     private fun fetchSearchEntries(text: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val (foundObjects, _) = apiRepository.getSearch(text, 1)
+        _viewState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            val foundObjects = apiRepository.getSearch(text, 1)
             _viewState.update { currentState ->
-                currentState.copy(founds = foundObjects)
+                currentState.copy(founds = foundObjects, isLoading = false)
             }
         }
     }

@@ -160,11 +160,11 @@ class ApiRepository(private val context: Context) {
         return video.results
     }
 
-    suspend fun getSearch(text: String, page: Int): Pair<List<MovieInfo>, Boolean> {
+    suspend fun getSearch(text: String, page: Int): List<MovieInfo> {
         val json =
             apiCall("https://api.themoviedb.org/3/search/multi?query=$text&include_adult=false&language=en-US&page=$page")
         val movieDto = Gson().fromJson(json, MovieDTO::class.java)
-        return Pair(movieDto.results.map { dto ->
+        return movieDto.results.map { dto ->
             MovieInfo(
                 id = dto.id,
                 originalLanguage = dto.original_language ?: "",
@@ -197,7 +197,7 @@ class ApiRepository(private val context: Context) {
                     )
                 } ?: listOf()
             )
-        }, movieDto.total_pages == page)
+        }
     }
 
     private suspend fun readApiKeyFromConfigFile(): String {

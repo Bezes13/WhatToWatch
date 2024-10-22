@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -25,6 +24,7 @@ import coil.compose.AsyncImage
 import com.movies.whattowatch.ProviderShape
 import com.movies.whattowatch.R
 import com.movies.whattowatch.dataClasses.Provider
+import com.movies.whattowatch.details.MyCard
 import com.movies.whattowatch.uielements.LoadingBox
 import com.movies.whattowatch.uielements.NavigationItem
 import com.movies.whattowatch.uielements.TopBar
@@ -58,15 +58,11 @@ fun ProviderScreen(
         navigate,
         NavigationItem.SELECTION
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(innerPadding),
-        ) {
+       MyCard {
             if (!isLoading) {
                 Column(
                     modifier = Modifier
-                        .padding(10.dp),
+                        .padding(innerPadding),
                     verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     LazyVerticalGrid(
@@ -104,6 +100,6 @@ fun ProviderScreen(
             } else {
                 LoadingBox()
             }
-        }
-    }
+
+    }}
 }

@@ -35,8 +35,7 @@ fun LoadingBox() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clip(ProviderShape)
-            .background(Color(150, 150, 150, 120)),
+            .clip(ProviderShape),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
