@@ -31,7 +31,7 @@ class ApiRepository(private val context: Context) {
 
     suspend fun getMovies(
         page: Int,
-        genre: Genre,
+        genre: List<Genre>,
         companies: List<Provider>,
         getMovies: Boolean,
         sortType: SortType
@@ -43,7 +43,13 @@ class ApiRepository(private val context: Context) {
             SortType.REVENUE -> "revenue"
         }
         val result =
-            apiCall("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=en-US&page=$page&sort_by=$sorting.desc&watch_region=DE${if (genre.id != -1) "&with_genres=${genre.id}" else ""}&with_watch_providers=${
+            apiCall("https://api.themoviedb.org/3/discover/${if (getMovies) "movie" else "tv"}?include_adult=true&include_video=false&language=en-US&page=$page&sort_by=$sorting.desc&watch_region=DE${
+                if (genre.isNotEmpty()) "&with_genres=${
+                    genre.joinToString(
+                        "|"
+                    ) { it.id.toString() }
+                }" else ""
+            }&with_watch_providers=${
                 companies.filter { it.show }.joinToString("|") { it.providerId.toString() }
             }")
 

@@ -21,7 +21,6 @@ import com.movies.whattowatch.dataClasses.Genre
 import com.movies.whattowatch.dataClasses.MovieInfo
 import com.movies.whattowatch.enums.MovieCategory
 import com.movies.whattowatch.enums.SortType
-import com.movies.whattowatch.enums.UserMark
 import com.movies.whattowatch.uielements.BackgroundImage
 import com.movies.whattowatch.uielements.LoadingBox
 import com.movies.whattowatch.uielements.MarkedFilmsHeader
@@ -37,14 +36,13 @@ fun MainScreen(navigate: (String) -> Unit, mainViewModel: MainViewModel = viewMo
     MainScreenContent(
         viewState.isLoading,
         viewState.selectedGenre,
-        viewState.shows[viewState.selectedGenre] ?: listOf(),
+        viewState.shows,
         when (viewState.category) {
             MovieCategory.Movie -> viewState.genres
             else -> viewState.seriesGenres
         },
         viewState.sorting,
         mainViewModel::sendEvent,
-        viewState.loadMore,
         viewState.category,
         navigate
     )
@@ -53,12 +51,11 @@ fun MainScreen(navigate: (String) -> Unit, mainViewModel: MainViewModel = viewMo
 @Composable
 fun MainScreenContent(
     isLoading: Boolean,
-    selectedGenre: String,
+    selectedGenre: List<Genre>,
     movies: List<MovieInfo>,
     genres: List<Genre>,
     sortType: SortType,
     eventListener: (MainViewEvent) -> Unit,
-    loadMore: Boolean,
     category: MovieCategory,
     navigate: (String) -> Unit
 ) {
@@ -87,20 +84,18 @@ fun MainScreenContent(
                             .padding(innerPadding),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (UserMark.entries.map { it.name }.contains(selectedGenre)) {
-                            MarkedFilmsHeader(selectedGenre, eventListener)
+                        if (category == MovieCategory.Marked) {
+                            MarkedFilmsHeader(selectedGenre[0].name, eventListener)
                         } else {
                             if (showFilter) {
-                                MovieFilter(sortType, eventListener, genres)
+                                MovieFilter(sortType, eventListener, genres, selectedGenre)
                             }
                         }
 
                         if (movies.isNotEmpty()) {
                             MovieListOverview(
                                 movies = movies,
-                                selectedGenre = selectedGenre,
                                 eventListener = eventListener,
-                                loadMore = loadMore,
                                 navigate = navigate
                             )
                         }
@@ -118,12 +113,11 @@ fun MainScreenContent(
 fun PreviewMainScreen() {
     MainScreenContent(
         isLoading = false,
-        selectedGenre = testGenre,
+        selectedGenre = listOf(),
         movies = testMovies,
         genres = listOf(Genre(3, testGenre)),
         sortType = SortType.POPULARITY,
         eventListener = {},
-        loadMore = true,
         category = MovieCategory.Movie
     ) {}
 }

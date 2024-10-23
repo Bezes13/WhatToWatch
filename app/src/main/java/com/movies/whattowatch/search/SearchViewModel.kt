@@ -3,7 +3,6 @@ package com.movies.whattowatch.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.movies.whattowatch.apiRepository.ApiRepository
-import com.movies.whattowatch.dataClasses.Genre
 import com.movies.whattowatch.enums.SortType
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,7 +23,7 @@ class SearchViewModel(
         listenToEvent()
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch{
-            val foundObjects = apiRepository.getMovies(1, Genre(), listOf(),true,SortType.POPULARITY)
+            val foundObjects = apiRepository.getMovies(1, listOf(), listOf(),true,SortType.POPULARITY)
             _viewState.update { currentState ->
                 currentState.copy(founds = foundObjects)
             }

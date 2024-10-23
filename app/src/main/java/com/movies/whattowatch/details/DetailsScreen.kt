@@ -279,14 +279,14 @@ private fun VoteCard(info: MovieInfo) {
 }
 
 @Composable
-fun MyCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun MyCard(modifier: Modifier = Modifier, border: BorderStroke = BorderStroke(3.dp, MaterialTheme.colorScheme.primary), alpha: Float = 0.7f, content: @Composable () -> Unit) {
     Card(
         modifier = modifier,
         elevation = CardDefaults.elevatedCardElevation(),
-        border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary),
+        border = border,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
-                0.7f
+                alpha
             )
         )
     ) {

@@ -8,8 +8,8 @@ import com.movies.whattowatch.enums.SortType
 
 data class MainViewState (
     val isLoading: Boolean= false,
-    val selectedGenre: String = Genre().name,
-    val shows: Map<String, List<MovieInfo>> = mapOf(),
+    val selectedGenre: List<Genre> = listOf(),
+    val shows: List<MovieInfo> = listOf(),
     val moviesToLoad: Int = 15,
     val genres: List<Genre> = listOf(),
     val seriesGenres: List<Genre> = listOf(),

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import com.movies.whattowatch.MainViewEvent
 import com.movies.whattowatch.alphaContainer
 import com.movies.whattowatch.dataClasses.Genre
@@ -16,7 +17,8 @@ import com.movies.whattowatch.enums.SortType
 fun MovieFilter(
     sortType: SortType,
     eventListener: (MainViewEvent) -> Unit,
-    genres: List<Genre>
+    genres: List<Genre>,
+    selectedGenre: List<Genre>
 ) {
     Row(
         modifier = Modifier
@@ -28,11 +30,18 @@ fun MovieFilter(
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        SortingChip(sortType, SortType.POPULARITY, eventListener)
-        SortingChip(sortType, SortType.VOTE_AVERAGE, eventListener)
-        SortingChip(sortType, SortType.VOTE_COUNT, eventListener)
-        SortingChip(sortType, SortType.REVENUE, eventListener)
+        SortType.entries.forEach {
+            SortingChip(
+                isSelected = sortType == it,
+                onClick = { eventListener(MainViewEvent.ChangeSorting(it)) },
+                text = stringResource(
+                    id = it.textID
+                )
+            )
+        }
+
+
     }
 
-    GenreDropdown(genres, eventListener)
+    GenreDropdown(genres, selectedGenre, eventListener)
 }

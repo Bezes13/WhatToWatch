@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,24 +18,23 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.movies.whattowatch.MainViewEvent
-import com.movies.whattowatch.enums.SortType
 import com.movies.whattowatch.enums.UserMark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SortingChip(
-    currentSortType: SortType,
-    sortType: SortType,
-    eventListener: (MainViewEvent) -> Unit
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    text: String,
 ) {
-    val selected = currentSortType == sortType
     FilterChip(
-        onClick = { eventListener(MainViewEvent.ChangeSorting(sortType)) },
+        onClick = { onClick() },
         label = {
-            Text(stringResource(id = sortType.textID))
+            Text(text)
         },
-        selected = selected,
-        leadingIcon = if (selected) {
+        selected = isSelected,
+        colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)),
+        leadingIcon = if (isSelected) {
             {
                 Icon(
                     imageVector = Icons.Filled.Done,

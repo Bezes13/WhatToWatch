@@ -1,110 +1,93 @@
 package com.movies.whattowatch.uielements
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.movies.whattowatch.MainViewEvent
+import com.movies.whattowatch.R
 import com.movies.whattowatch.dataClasses.Genre
+import com.movies.whattowatch.details.MyCard
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GenreDropdown(
     items: List<Genre>,
+    selectedGenres: List<Genre>,
     eventListener: (MainViewEvent) -> Unit
 ) {
-    var isExpanded by remember {
-        mutableStateOf(false)
-    }
-    var genre by remember { mutableStateOf(Genre().name) }
 
-    ExposedDropdownMenuBox(
-        expanded = isExpanded,
-        onExpandedChange = { newValue ->
-            isExpanded = newValue
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        TextField(
-            value = genre,
-            onValueChange = {},
-            readOnly = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
-            placeholder = { Text(text = "Select Genre") },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-    }
-    DropdownMenu(
-        expanded = isExpanded,
-        onDismissRequest = {
-            isExpanded = false
-        },
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
         modifier = Modifier
-            .border(1.dp, Color.Black)
-            .fillMaxWidth(0.7f)
-            .background(MaterialTheme.colorScheme.secondaryContainer)
-            .fillMaxHeight(0.8f)
+            .background(MaterialTheme.colorScheme.secondaryContainer.copy(0.8f))
+            .fillMaxWidth()
     ) {
-        DropdownMenuItem(
-            text = {
-                Text(
-                    text = Genre().name,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            onClick = {
-                genre = Genre().name
-                isExpanded = false
-                eventListener(MainViewEvent.FetchMovies(Genre()))
-                eventListener(MainViewEvent.SetGenre(genre))
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(if (genre != Genre().name) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
-        )
-        Divider()
         items.forEach {
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = it.name,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+            val selected = selectedGenres.contains(it)
+            if (selected) {
+                MyCard(
+                    modifier = Modifier.clickable { eventListener(MainViewEvent.SetGenre(it)) },
+                    alpha = 1f
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.Check, contentDescription = stringResource(
+                                R.string.selected_label
+                            )
+                        )
+                        Text(text = it.name, modifier = Modifier.padding(5.dp))
+                    }
+
+                }
+            } else {
+                MyCard(
+                    modifier = Modifier.clickable { eventListener(MainViewEvent.SetGenre(it)) },
+                    border = BorderStroke(
+                        0.dp,
+                        Color.Black
                     )
-                },
-                onClick = {
-                    genre = it.name
-                    isExpanded = false
-                    eventListener(MainViewEvent.FetchMovies(items.first { it.name == genre }))
-                    eventListener(MainViewEvent.SetGenre(genre))
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(if (genre != it.name) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer),
-            )
-            Divider()
+                ) {
+                    Text(text = it.name, modifier = Modifier.padding(5.dp))
+                }
+            }
+
+
         }
     }
+
+
+}
+
+@Composable
+@Preview
+fun GenrePreview() {
+    GenreDropdown(
+        items = listOf(
+            Genre(1, "Peter"),
+            Genre(2, "Fridoline"),
+            Genre(4, "Abenteuer"),
+            Genre(3, "Scy-Fy"),
+            Genre(5, "Romatnitk"),
+            Genre(6, "Max Kruse")
+        ), selectedGenres = listOf(), eventListener = {})
 }

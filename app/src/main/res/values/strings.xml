@@ -27,4 +27,5 @@
     <string name="vote">Vote Avg.</string>
     <string name="revenue">Revenue</string>
     <string name="background">Background</string>
+    <string name="selected_label">Selected</string>
 </resources>

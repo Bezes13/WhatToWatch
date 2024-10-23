@@ -46,7 +46,6 @@ import com.movies.whattowatch.navigation.Screen
 @Composable
 fun MoviePosition(
     movieInfo: MovieInfo,
-    selectedGenre: String,
     eventListener: (MainViewEvent) -> Unit,
     navigate: (String) -> Unit,
 ) {
@@ -58,7 +57,7 @@ fun MoviePosition(
         ) {
             BasicInfo(movieInfo)
             Spacer(modifier = Modifier.width(8.dp))
-            MarkFilmButtons(movieInfo, selectedGenre, eventListener)
+            MarkFilmButtons(movieInfo, eventListener)
             Spacer(modifier = Modifier.width(8.dp))
             AsyncImage(
                 modifier = Modifier
@@ -81,7 +80,6 @@ fun MoviePosition(
 @Composable
 fun RowScope.MarkFilmButtons(
     movieInfo: MovieInfo,
-    selectedGenre: String,
     eventListener: (MainViewEvent) -> Unit
 ) {
     Column(
@@ -92,17 +90,17 @@ fun RowScope.MarkFilmButtons(
         horizontalAlignment = Alignment.End
     ) {
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.SEEN))}
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(movieInfo, UserMark.SEEN))}
             ) {
             Icon(imageVector = Icons.Filled.Favorite, contentDescription = "")
         }
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.LATER))}
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(movieInfo, UserMark.LATER))}
             ) {
             Icon(imageVector = Icons.Filled.Send, contentDescription = "")
         }
         IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(selectedGenre,movieInfo, UserMark.NO)) }
+            onClick = { eventListener(MainViewEvent.MarkFilmAs(movieInfo, UserMark.NO)) }
             ) {
             Icon(imageVector = Icons.Filled.Close, contentDescription = "")
         }
@@ -147,15 +145,12 @@ fun PreviewPosition() {
         item {
             MoviePosition(
                 movieInfo = movie1,
-                selectedGenre = "",
                 eventListener = {}){}
             MoviePosition(
                 movieInfo = movie2,
-                selectedGenre = "",
                 eventListener = {}){}
             MoviePosition(
                 movieInfo = movie3,
-                selectedGenre = "",
                 eventListener = {}){}
         }
     }
