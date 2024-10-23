@@ -124,13 +124,14 @@ fun DetailsScreen(
                             item {
                                 MyCard {
                                     Header(info)
-                                    Row (
+                                    Row(
                                         horizontalArrangement = Arrangement.SpaceBetween,
-                                        modifier = Modifier.fillMaxWidth()){
-                                        Row (
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
                                             horizontalArrangement = Arrangement.spacedBy(5.dp),
                                             verticalAlignment = Alignment.Top
-                                        ){
+                                        ) {
                                             PosterCard(info) { isExpanded = true }
                                             Providers(info)
                                         }
@@ -167,7 +168,7 @@ fun DetailsScreen(
 
 @Composable
 fun Providers(movieInfo: MovieInfo) {
-    Column (modifier = Modifier.padding(top = 10.dp)){
+    Column(modifier = Modifier.padding(top = 10.dp)) {
         movieInfo.providerName?.chunked(3)?.forEach {
             Row(horizontalArrangement = Arrangement.Start) {
                 it.forEach {
@@ -279,7 +280,12 @@ private fun VoteCard(info: MovieInfo) {
 }
 
 @Composable
-fun MyCard(modifier: Modifier = Modifier, border: BorderStroke = BorderStroke(3.dp, MaterialTheme.colorScheme.primary), alpha: Float = 0.7f, content: @Composable () -> Unit) {
+fun MyCard(
+    modifier: Modifier = Modifier,
+    border: BorderStroke = BorderStroke(3.dp, MaterialTheme.colorScheme.primary),
+    alpha: Float = 0.7f,
+    content: @Composable () -> Unit
+) {
     Card(
         modifier = modifier,
         elevation = CardDefaults.elevatedCardElevation(),

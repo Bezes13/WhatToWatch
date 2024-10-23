@@ -16,17 +16,19 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 fun VideoPlayer(videoId: String) {
     val width = LocalConfiguration.current.screenWidthDp.dp
     AndroidView(
-        modifier = Modifier.width(width*0.8f).clip(RoundedCornerShape(10)),
+        modifier = Modifier
+            .width(width * 0.8f)
+            .clip(RoundedCornerShape(10)),
         factory = {
-        val view = YouTubePlayerView(it)
-        view.addYouTubePlayerListener(
-            object : AbstractYouTubePlayerListener() {
-                override fun onReady(youTubePlayer: YouTubePlayer) {
-                    super.onReady(youTubePlayer)
-                    youTubePlayer.cueVideo(videoId,0f)
+            val view = YouTubePlayerView(it)
+            view.addYouTubePlayerListener(
+                object : AbstractYouTubePlayerListener() {
+                    override fun onReady(youTubePlayer: YouTubePlayer) {
+                        super.onReady(youTubePlayer)
+                        youTubePlayer.cueVideo(videoId, 0f)
+                    }
                 }
-            }
-        )
-        view
-    })
+            )
+            view
+        })
 }
