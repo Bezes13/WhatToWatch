@@ -4,7 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -58,48 +58,45 @@ fun ProviderScreen(
         navigate,
         NavigationItem.SELECTION
     ) { innerPadding ->
-       MyCard {
+        MyCard(modifier = Modifier.padding(innerPadding)) {
             if (!isLoading) {
-                Column(
-                    modifier = Modifier
-                        .padding(innerPadding),
-                    verticalArrangement = Arrangement.SpaceEvenly
+                LazyVerticalGrid(
+                    contentPadding = PaddingValues(top = 10.dp),
+                    columns = GridCells.Adaptive(minSize = 128.dp),
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 128.dp),
-                    ) {
-                        items(providers) {
-                            Box(contentAlignment = Alignment.Center) {
-                                AsyncImage(
-                                    model = stringResource(R.string.image_path, it.logoPath),
-                                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                                    error = painterResource(id = R.drawable.ic_launcher_foreground),
-                                    contentDescription = it.providerName,
-                                    modifier = Modifier
-                                        .size(providerSize)
-                                        .clip(ProviderShape)
-                                        .clickable(onClick = {
-                                            eventListener(it)
-                                        })
+                    items(providers) {
+                        Box(contentAlignment = Alignment.Center) {
+                            AsyncImage(
+                                model = stringResource(R.string.image_path, it.logoPath),
+                                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                                contentDescription = it.providerName,
+                                modifier = Modifier
+                                    .size(providerSize)
+                                    .clip(ProviderShape)
+                                    .clickable(onClick = {
+                                        eventListener(it)
+                                    })
+                            )
+                            if (it.show) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.checked),
+                                    contentDescription = stringResource(id = R.string.checked),
+                                    alpha = 1f,
+                                    modifier = Modifier.size(providerSize / 2)
                                 )
-                                if (it.show) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.checked),
-                                        contentDescription = stringResource(id = R.string.checked),
-                                        alpha = 1f,
-                                        modifier = Modifier.size(providerSize / 2)
-                                    )
-                                }
-                                if (it.isUpdating) {
-                                    LoadingBox(providerSize)
-                                }
+                            }
+                            if (it.isUpdating) {
+                                LoadingBox(providerSize)
                             }
                         }
                     }
                 }
+
             } else {
                 LoadingBox()
             }
-
-    }}
+        }
+    }
 }
