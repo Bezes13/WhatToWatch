@@ -48,6 +48,7 @@ import com.movies.whattowatch.dataClasses.MovieInfo
 import com.movies.whattowatch.dto.CastDTO
 import com.movies.whattowatch.dto.VideoInfoDTO
 import com.movies.whattowatch.extension.getJustYear
+import com.movies.whattowatch.getRevenue
 import com.movies.whattowatch.navigation.Screen
 import com.movies.whattowatch.uielements.BackgroundImage
 import com.movies.whattowatch.uielements.NavigationItem
@@ -134,7 +135,18 @@ fun DetailsScreen(
                                             verticalAlignment = Alignment.Top
                                         ) {
                                             PosterCard(info) { isExpanded = true }
-                                            Providers(info)
+                                            Column {
+                                                if(info.isMovie){
+                                                    Text(text = "${info.runtime} min.")
+                                                    Text(text = info.revenue.getRevenue())
+                                                } else {
+                                                    val season = if (info.numberSeasons == 1) "Season" else "Seasons"
+                                                    val episodes = if (info.numberEpisodes == 1) "Episode" else "Episodes"
+                                                    Text(text = "${info.numberSeasons} $season")
+                                                    Text(text = "${info.numberEpisodes} $episodes")
+                                                }
+                                                Providers(info)
+                                            }
                                         }
                                         VoteCard(info)
                                     }
@@ -217,8 +229,8 @@ private fun CastInfo(
                                 }),
 
                             )
-                        Text(text = it.name, fontWeight = FontWeight.Bold)
-                        Text(text = it.character)
+                        Text(text = it.name, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 5.dp))
+                        Text(text = it.character, modifier = Modifier.padding(bottom = 5.dp, start = 5.dp, end = 5.dp))
                     }
                 }
             }

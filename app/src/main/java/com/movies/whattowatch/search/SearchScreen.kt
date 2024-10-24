@@ -132,7 +132,7 @@ fun SearchScreen(
                                     )
                                     Text(
                                         text = it.title,
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp),
                                         textAlign = TextAlign.Center,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -140,7 +140,7 @@ fun SearchScreen(
                                         text = it.releaseDate.getJustYear(),
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(bottom = 5.dp),
+                                            .padding(bottom = 5.dp, start = 5.dp, end = 5.dp),
                                         textAlign = TextAlign.Center
                                     )
                                 }

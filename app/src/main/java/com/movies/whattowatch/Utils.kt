@@ -38,3 +38,19 @@ fun formatDateString(dateString: String): String {
     return date.format(outputFormatter)
 }
 
+fun Int.getRevenue(): String{
+    val billion = 1000000000
+    if(this >= billion){
+        return "${this.div(billion)} Billion $"
+    }
+    val million = 1000000
+    if(this >= million){
+        return "${this.div(million)} Million $"
+    }
+    val thousand = 1000
+    if(this >= thousand){
+        return "${this.div(thousand)} K $"
+    }
+    return "$this$"
+}
+

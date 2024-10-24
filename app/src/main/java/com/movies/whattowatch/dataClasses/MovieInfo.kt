@@ -16,7 +16,11 @@ data class MovieInfo(
     val isMovie: Boolean = true,
     var user: String? = "",
     var mediaType: MediaType? = null,
-    var knownFor: List<MovieInfo>? = listOf()
+    var knownFor: List<MovieInfo>? = listOf(),
+    var runtime: Int = 0,
+    var revenue: Int = 0,
+    var numberEpisodes: Int = 0,
+    var numberSeasons: Int = 0,
 ) {
     fun convertToUserMovie(userMark: UserMark): UserMovie {
         return UserMovie(

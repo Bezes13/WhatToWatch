@@ -86,7 +86,11 @@ class ApiRepository(private val context: Context) {
             title = dto.title ?: dto.name,
             releaseDate = dto.release_date ?: dto.first_air_date ?: "",
             isMovie = !dto.release_date.isNullOrBlank(),
-            mediaType = MediaType.MOVIE
+            mediaType = MediaType.MOVIE,
+            revenue = dto.revenue?: 0,
+            runtime = dto.runtime?: 0,
+            numberEpisodes = dto.number_of_episodes?: 0,
+            numberSeasons = dto.number_of_seasons?: 0
         )
     }
 

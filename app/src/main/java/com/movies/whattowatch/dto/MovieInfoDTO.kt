@@ -17,7 +17,11 @@ data class MovieInfoDTO(
     val vote_count: Int?,
     val media_type: String?,
     val known_for: List<MovieInfoDTO>?,
-    val profile_path: String?
+    val profile_path: String?,
+    var runtime: Int?,
+    var revenue: Int?,
+    var number_of_episodes: Int?,
+    var number_of_seasons: Int?,
 ):Comparable<MovieInfoDTO> {
     override fun compareTo(other: MovieInfoDTO): Int {
         if(popularity== null){
