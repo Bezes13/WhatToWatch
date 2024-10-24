@@ -1,7 +1,6 @@
 package com.movies.whattowatch.uielements
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,10 +35,9 @@ fun GenreDropdown(
 
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(3.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondaryContainer.copy(0.8f))
-            .fillMaxWidth()
+            .fillMaxWidth().padding(10.dp)
     ) {
         items.forEach {
             val selected = selectedGenres.contains(it)

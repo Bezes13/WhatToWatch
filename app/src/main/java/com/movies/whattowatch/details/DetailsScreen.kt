@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -284,9 +285,11 @@ fun MyCard(
     modifier: Modifier = Modifier,
     border: BorderStroke = BorderStroke(3.dp, MaterialTheme.colorScheme.primary),
     alpha: Float = 0.7f,
+    shape: Shape = CardDefaults.shape,
     content: @Composable () -> Unit
 ) {
     Card(
+        shape = shape,
         modifier = modifier,
         elevation = CardDefaults.elevatedCardElevation(),
         border = border,
