@@ -137,15 +137,17 @@ fun SearchScreen(
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = it.releaseDate.getJustYear(), modifier = Modifier
+                                        text = it.releaseDate.getJustYear(),
+                                        modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(bottom = 5.dp), textAlign = TextAlign.Center
+                                            .padding(bottom = 5.dp),
+                                        textAlign = TextAlign.Center
                                     )
                                 }
                             }
                         }
                     }
-                }else{
+                } else {
                     LoadingBox()
                 }
             }

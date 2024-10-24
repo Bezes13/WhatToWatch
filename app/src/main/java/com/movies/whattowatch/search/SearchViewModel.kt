@@ -25,9 +25,8 @@ class SearchViewModel(
         viewModelScope.launch{
             val foundObjects = apiRepository.getMovies(1, listOf(), listOf(),true,SortType.POPULARITY)
             _viewState.update { currentState ->
-                currentState.copy(founds = foundObjects)
+                currentState.copy(founds = foundObjects, isLoading = false)
             }
-            _viewState.update { it.copy(isLoading = false) }
         }
 
     }
