@@ -62,7 +62,7 @@ fun SearchScreen(
 ) {
     var searchText by remember { mutableStateOf("") }
     TopBar(
-        false,
+        null,
         {},
         if (founds.isEmpty()) "" else founds[0].posterPath,
         navigate,

@@ -74,7 +74,7 @@ fun PersonScreen(
         mutableStateOf(false)
     }
     TopBar(
-        false,
+        null,
         {},
         if (movies.isEmpty()) "" else movies[0].posterPath,
         navigate,

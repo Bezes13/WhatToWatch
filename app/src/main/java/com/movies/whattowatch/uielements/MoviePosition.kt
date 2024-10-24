@@ -13,10 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -89,20 +85,12 @@ fun RowScope.MarkFilmButtons(
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.End
     ) {
-        IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(movieInfo, UserMark.SEEN))}
+        UserMark.entries.forEach {
+            IconButton(
+                onClick = { eventListener(MainViewEvent.MarkFilmAs(movieInfo, it))}
             ) {
-            Icon(imageVector = Icons.Filled.Favorite, contentDescription = "")
-        }
-        IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(movieInfo, UserMark.LATER))}
-            ) {
-            Icon(imageVector = Icons.Filled.Send, contentDescription = "")
-        }
-        IconButton(
-            onClick = { eventListener(MainViewEvent.MarkFilmAs(movieInfo, UserMark.NO)) }
-            ) {
-            Icon(imageVector = Icons.Filled.Close, contentDescription = "")
+                Icon(imageVector = it.icon, contentDescription = "")
+            }
         }
     }
 }

@@ -78,7 +78,7 @@ fun DetailsScreen(
         mutableStateOf(false)
     }
     TopBar(
-        false,
+        null,
         {},
         info.posterPath,
         navigate,

@@ -60,7 +60,7 @@ fun MainScreenContent(
     navigate: (String) -> Unit
 ) {
     if (genres.isNotEmpty()) {
-        var showFilter by remember { mutableStateOf(true) }
+        var showFilter by remember { mutableStateOf(false) }
         TopBar(
             showFilter,
             { showFilter = !showFilter },

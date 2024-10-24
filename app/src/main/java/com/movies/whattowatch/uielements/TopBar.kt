@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    showFilter: Boolean,
+    showFilter: Boolean?,
     changeFilter: () -> Unit,
     drawerImage: String,
     navigate: (String) -> Unit,
@@ -155,11 +155,13 @@ fun TopBar(
                         Text("What to watch")
                     },
                     actions = {
-                        IconButton(onClick = { changeFilter() }) {
-                            Icon(
-                                imageVector = if (showFilter) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
-                                contentDescription = "Filter"
-                            )
+                        if (showFilter != null) {
+                            IconButton(onClick = { changeFilter() }) {
+                                Icon(
+                                    imageVector = if (showFilter) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
+                                    contentDescription = "Filter"
+                                )
+                            }
                         }
                     },
                     navigationIcon = {

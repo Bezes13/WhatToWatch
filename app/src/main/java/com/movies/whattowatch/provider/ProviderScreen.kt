@@ -52,7 +52,7 @@ fun ProviderScreen(
 
     val providerSize = width.div(3.5f)
     TopBar(
-        false,
+        null,
         {},
         if (providers.isEmpty()) "" else providers[0].logoPath,
         navigate,
