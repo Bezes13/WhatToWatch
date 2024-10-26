@@ -1,5 +1,6 @@
 package com.movies.whattowatch.uielements
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -45,28 +50,32 @@ fun MoviePosition(
     eventListener: (MainViewEvent) -> Unit,
     navigate: (String) -> Unit,
 ) {
-    MyCard (modifier = Modifier.padding(5.dp)){
-        Row(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalAlignment = Alignment.Top
-        ) {
-            BasicInfo(movieInfo)
-            Spacer(modifier = Modifier.width(8.dp))
-            MarkFilmButtons(movieInfo, eventListener)
-            Spacer(modifier = Modifier.width(8.dp))
-            AsyncImage(
+    var isMarked by remember { mutableStateOf(false) }
+
+    AnimatedVisibility(!isMarked) {
+        MyCard(modifier = Modifier.padding(5.dp)) {
+            Row(
                 modifier = Modifier
-                    .clickable(onClick = {
-                        navigate(Screen.DETAILS.name + "/${movieInfo.id}/${movieInfo.isMovie}")
-                    })
-                    .align(Alignment.CenterVertically)
-                    .weight(0.5F),
-                model = stringResource(R.string.image_path, movieInfo.posterPath),
-                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                error = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = movieInfo.title,
-            )
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.Top
+            ) {
+                BasicInfo(movieInfo)
+                Spacer(modifier = Modifier.width(8.dp))
+                MarkFilmButtons(movieInfo, { isMarked = true },eventListener)
+                Spacer(modifier = Modifier.width(8.dp))
+                AsyncImage(
+                    modifier = Modifier
+                        .clickable(onClick = {
+                            navigate(Screen.DETAILS.name + "/${movieInfo.id}/${movieInfo.isMovie}")
+                        })
+                        .align(Alignment.CenterVertically)
+                        .weight(0.5F),
+                    model = stringResource(R.string.image_path, movieInfo.posterPath),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = movieInfo.title,
+                )
+            }
         }
     }
 
@@ -76,6 +85,7 @@ fun MoviePosition(
 @Composable
 fun RowScope.MarkFilmButtons(
     movieInfo: MovieInfo,
+    onClick: () -> Unit,
     eventListener: (MainViewEvent) -> Unit
 ) {
     Column(
@@ -87,7 +97,10 @@ fun RowScope.MarkFilmButtons(
     ) {
         UserMark.entries.forEach {
             IconButton(
-                onClick = { eventListener(MainViewEvent.MarkFilmAs(movieInfo, it))}
+                onClick = {
+                    onClick()
+                    eventListener(MainViewEvent.MarkFilmAs(movieInfo, it))
+                }
             ) {
                 Icon(imageVector = it.icon, contentDescription = "")
             }

@@ -1,5 +1,6 @@
 package com.movies.whattowatch
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -87,7 +88,9 @@ fun MainScreenContent(
                         if (category == MovieCategory.Marked) {
                             MarkedFilmsHeader(selectedGenre[0].name, eventListener)
                         } else {
-                            if (showFilter) {
+                            AnimatedVisibility(
+                                showFilter
+                            ) {
                                 MovieFilter(sortType, eventListener, genres, selectedGenre)
                             }
                         }
