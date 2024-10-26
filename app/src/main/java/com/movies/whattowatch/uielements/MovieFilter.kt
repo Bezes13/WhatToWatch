@@ -9,10 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.movies.whattowatch.MainViewEvent
-import com.movies.whattowatch.dataClasses.Genre
-import com.movies.whattowatch.details.MyCard
-import com.movies.whattowatch.enums.SortType
+import com.movies.whattowatch.screens.main.MainViewEvent
+import com.movies.whattowatch.model.dataClasses.Genre
+import com.movies.whattowatch.screens.details.MyCard
+import com.movies.whattowatch.model.enums.SortType
 
 @Composable
 fun MovieFilter(

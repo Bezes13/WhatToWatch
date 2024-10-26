@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import com.movies.whattowatch.MainViewEvent
-import com.movies.whattowatch.enums.UserMark
+import com.movies.whattowatch.screens.main.MainViewEvent
+import com.movies.whattowatch.model.enums.UserMark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

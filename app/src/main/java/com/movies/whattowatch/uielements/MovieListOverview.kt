@@ -3,9 +3,9 @@ package com.movies.whattowatch.uielements
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.movies.whattowatch.MainViewEvent
+import com.movies.whattowatch.screens.main.MainViewEvent
 import com.movies.whattowatch.TestData
-import com.movies.whattowatch.dataClasses.MovieInfo
+import com.movies.whattowatch.model.dataClasses.MovieInfo
 
 @Composable
 fun MovieListOverview(

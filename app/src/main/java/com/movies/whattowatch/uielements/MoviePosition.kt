@@ -31,15 +31,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.movies.whattowatch.MainViewEvent
+import com.movies.whattowatch.screens.main.MainViewEvent
 import com.movies.whattowatch.R
 import com.movies.whattowatch.TestData.movie1
 import com.movies.whattowatch.TestData.movie2
 import com.movies.whattowatch.TestData.movie3
-import com.movies.whattowatch.dataClasses.MovieInfo
-import com.movies.whattowatch.details.MyCard
-import com.movies.whattowatch.details.Providers
-import com.movies.whattowatch.enums.UserMark
+import com.movies.whattowatch.model.dataClasses.MovieInfo
+import com.movies.whattowatch.screens.details.MyCard
+import com.movies.whattowatch.screens.details.Providers
+import com.movies.whattowatch.model.enums.UserMark
 import com.movies.whattowatch.extension.getJustYear
 import com.movies.whattowatch.navigation.Screen
 

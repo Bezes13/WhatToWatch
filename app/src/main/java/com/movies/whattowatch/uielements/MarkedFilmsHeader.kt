@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.movies.whattowatch.MainViewEvent
+import com.movies.whattowatch.screens.main.MainViewEvent
 import com.movies.whattowatch.alphaContainer
-import com.movies.whattowatch.enums.UserMark
+import com.movies.whattowatch.model.enums.UserMark
 
 @Composable
 fun MarkedFilmsHeader(

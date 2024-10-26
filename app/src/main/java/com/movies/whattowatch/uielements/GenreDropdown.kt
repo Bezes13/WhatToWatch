@@ -19,10 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.movies.whattowatch.MainViewEvent
+import com.movies.whattowatch.screens.main.MainViewEvent
 import com.movies.whattowatch.R
-import com.movies.whattowatch.dataClasses.Genre
-import com.movies.whattowatch.details.MyCard
+import com.movies.whattowatch.model.dataClasses.Genre
+import com.movies.whattowatch.screens.details.MyCard
 
 
 @OptIn(ExperimentalLayoutApi::class)

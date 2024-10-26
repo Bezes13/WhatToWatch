@@ -1,8 +1,8 @@
 package com.movies.whattowatch
 
-import com.movies.whattowatch.dataClasses.MediaType
-import com.movies.whattowatch.dataClasses.MovieInfo
-import com.movies.whattowatch.dto.PersonDTO
+import com.movies.whattowatch.model.dataClasses.MediaType
+import com.movies.whattowatch.model.dataClasses.MovieInfo
+import com.movies.whattowatch.model.dto.PersonDTO
 
 
 object TestData  {
